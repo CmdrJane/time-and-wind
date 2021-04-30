@@ -24,6 +24,7 @@ public class DimensionTypeMixin implements IDimType {
 	protected double dayDuration = 12000;
 	protected double nightDuration = 12000;
 	protected double cycleTime = dayDuration + nightDuration;
+	protected double prevTime = 0;
 
 	public DimensionTypeMixin(OptionalLong fixedTime) {
 		this.fixedTime = fixedTime;
@@ -54,7 +55,7 @@ public class DimensionTypeMixin implements IDimType {
 		d -= 0.25D;
 		if(d < 0)
 			++d;
-
+		this.prevTime = d;
 		return d;
 	}
 
@@ -78,6 +79,11 @@ public class DimensionTypeMixin implements IDimType {
 	@Override
 	public double getCycleDuration() {
 		return this.cycleTime;
+	}
+
+	@Override
+	public float getPrevTime() {
+		return (float) this.prevTime;
 	}
 
 }

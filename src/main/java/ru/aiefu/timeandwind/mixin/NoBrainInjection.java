@@ -9,6 +9,6 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 public class NoBrainInjection {
     @ModifyConstant(method = "refreshActivities", constant = @Constant(longValue = 24000L))
     private long refreshActivitiesPatchTAW(long l){
-        return 72000L;
+        return 24000L;
     }
 }

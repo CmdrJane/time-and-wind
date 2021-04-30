@@ -9,7 +9,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Map;
 
 public class IOManager {
     private HashMap<String, TimeDataStorage> timeData = new HashMapOf<>("minecraft:overworld",new TimeDataStorage(), "minecraft:the_nether", new TimeDataStorage(), "minecraft:the_end", new TimeDataStorage());

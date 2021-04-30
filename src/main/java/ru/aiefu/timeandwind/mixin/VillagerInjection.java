@@ -9,6 +9,6 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 public class VillagerInjection {
     @ModifyConstant(method = "hasRecentlyWorkedAndSlept", constant = @Constant(longValue = 24000L))
     private long hasRecentlyWorkedAndSleptPatchTAW(long l){
-        return 72000L;
+        return 24000L;
     }
 }

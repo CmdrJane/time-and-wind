@@ -1,7 +1,6 @@
 package ru.aiefu.timeandwind.mixin;
 
 import net.minecraft.server.world.ServerWorld;
-
 import net.minecraft.util.profiler.Profiler;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.MutableWorldProperties;

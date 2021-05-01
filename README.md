@@ -1,3 +1,4 @@
 # Time & Wind 
 
-Licensed uder GPL3
+Minecraft mod that allows to change duration of day and night
+

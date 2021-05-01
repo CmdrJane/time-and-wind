@@ -8,10 +8,10 @@
     "DimensionTypeMixin",
     "NoBrainInjection",
     "ServerWorldInjection",
-    "VillagerInjection",
-    "WorldRendererMixins"
+    "VillagerInjection"
   ],
   "client": [
+    "WorldRendererMixins"
   ],
   "injectors": {
     "defaultRequire": 1

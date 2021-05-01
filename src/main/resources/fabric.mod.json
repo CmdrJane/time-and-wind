@@ -20,7 +20,8 @@
   "entrypoints": {
     "main": [
       "ru.aiefu.timeandwind.TimeAndWind"
-    ]
+    ],
+    "client": ["ru.aiefu.timeandwind.TimeAndWindClient"]
   },
   "mixins": [
     "taw.mixins.json"

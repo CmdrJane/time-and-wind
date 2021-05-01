@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.util.HashMap;
 
 public class IOManager {
-    private HashMap<String, TimeDataStorage> timeData = new HashMapOf<>("minecraft:overworld",new TimeDataStorage(), "minecraft:the_nether", new TimeDataStorage(), "minecraft:the_end", new TimeDataStorage());
+    private HashMap<String, TimeDataStorage> timeData = new HashMapOf<>("minecraft:overworld", new TimeDataStorage());
 
     public void genTimeData(){
         String gson = new GsonBuilder().setPrettyPrinting().create().toJson(this.timeData);
@@ -19,13 +19,13 @@ public class IOManager {
         fileWriter(file, gson);
     }
 
-    public void readTimeData(){
+    public static void readTimeData(){
         HashMap<String, TimeDataStorage> timeDataMap;
         try {
             timeDataMap = new Gson().fromJson(new FileReader("./config/time-and-wind/time-data.json"), new TypeToken<HashMap<String, TimeDataStorage>>(){}.getType());
         } catch (Exception e){
             e.printStackTrace();
-            timeDataMap = this.timeData;
+            timeDataMap = new HashMapOf<>("minecraft:overworld", new TimeDataStorage());
         }
         TimeAndWind.timeDataMap = timeDataMap;
     }

@@ -5,5 +5,5 @@ public interface IDimType {
     double getDayDuration();
     double getNightDuration();
     double getCycleDuration();
-    float getPrevTime();
+    float getPrevAngle();
 }

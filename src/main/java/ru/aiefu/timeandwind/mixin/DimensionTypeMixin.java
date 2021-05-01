@@ -6,9 +6,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import ru.aiefu.timeandwind.IDimType;
 
@@ -24,15 +22,15 @@ public class DimensionTypeMixin implements IDimType {
 	protected double dayDuration = 12000;
 	protected double nightDuration = 12000;
 	protected double cycleTime = dayDuration + nightDuration;
-	protected double prevTime = 0;
+	protected double prevAngle = 0;
 
 	public DimensionTypeMixin(OptionalLong fixedTime) {
 		this.fixedTime = fixedTime;
 	}
 
-	@ModifyConstant(method = "getMoonPhase(J)I", constant = @Constant(longValue = 24000L))
-	public long patchMoonTime(long time){
-		return (long) this.cycleTime;
+	@Inject(method = "getMoonPhase", at =@At("HEAD"), cancellable = true)
+	private void patchMoonPhase(long time, CallbackInfoReturnable<Integer> cir){
+		cir.setReturnValue((int)(time / this.cycleTime % 8L + 8L) % 8);
 	}
 
 	@Inject(method = "getSkyAngle", at = @At("HEAD"), cancellable = true)
@@ -55,7 +53,7 @@ public class DimensionTypeMixin implements IDimType {
 		d -= 0.25D;
 		if(d < 0)
 			++d;
-		this.prevTime = d;
+		this.prevAngle = d;
 		return d;
 	}
 
@@ -82,8 +80,8 @@ public class DimensionTypeMixin implements IDimType {
 	}
 
 	@Override
-	public float getPrevTime() {
-		return (float) this.prevTime;
+	public float getPrevAngle() {
+		return (float) this.prevAngle;
 	}
 
 }

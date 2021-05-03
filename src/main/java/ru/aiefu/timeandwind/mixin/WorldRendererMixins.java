@@ -27,7 +27,7 @@ public class WorldRendererMixins {
 
     @Redirect(method = "renderSky", at =@At(value = "INVOKE", target = "net/minecraft/client/util/math/MatrixStack.multiply(Lnet/minecraft/util/math/Quaternion;)V", ordinal = 4))
     private void lerpSky(MatrixStack matrixStack, Quaternion quaternion){
-        matrixStack.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(MathHelper.lerp(this.deltaTime, ((IDimType)this.world.getDimension()).getPrevAngle() * 360.0F ,this.world.getSkyAngle(deltaTime) * 360.0F)));
+        matrixStack.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(MathHelper.lerpAngleDegrees(deltaTime, ((IDimType)this.world.getDimension()).getPrevAngle() * 360.0F ,this.world.getSkyAngle(deltaTime) * 360.0F)));
     }
 
 }

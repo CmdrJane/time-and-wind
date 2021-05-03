@@ -13,6 +13,6 @@ import svenhjol.charm.module.SleepImprovements;
 public class CharmNightSkipInjection {
     @ModifyConstant(method = "tryEndNight", constant = @Constant(longValue = 24000L), remap = false)
     private long patchCharmNightSkip(long l, ServerWorld world){
-        return (long) ((IDimType)world).getCycleDuration();
+        return ((IDimType)world).getCycleDuration();
     }
 }

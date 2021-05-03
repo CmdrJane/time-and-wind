@@ -9,6 +9,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
+import net.minecraft.world.World;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -30,6 +31,7 @@ public class TimeAndWind implements ModInitializer {
 		}));
 		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
 			TAWCommands.reloadCfgReg(dispatcher);
+
 		});
 	}
 
@@ -53,11 +55,47 @@ public class TimeAndWind implements ModInitializer {
 		}
 	}
 
-	public static void sendTimeSyncPacket(ServerPlayerEntity player, double dayDuration, double nightDuration){
+	public static void sendTimeSyncPacket(ServerPlayerEntity player, long dayDuration, long nightDuration){
 		CompoundTag tag = new CompoundTag();
-		tag.putDouble("dayD", dayDuration);
-		tag.putDouble("nightD", nightDuration);
+		tag.putLong("dayD", dayDuration);
+		tag.putLong("nightD", nightDuration);
 		ServerPlayNetworking.send(player, new Identifier(MOD_ID, "sync_cycle"), new PacketByteBuf(Unpooled.buffer()).writeCompoundTag(tag));
+	}
+
+	public static String get24TimeFormat(long time, World world){
+		if(world != null){
+			double duration = ((IDimType) world.getDimension()).getCycleDuration();
+			double currentTime = time % duration;
+			double tickInHours = duration / 24;
+			double ticksInMinute = tickInHours / 60;
+			int hours = (int) Math.floor(currentTime / tickInHours);
+			int minutes = (int) Math.floor((currentTime - tickInHours * hours) / ticksInMinute);
+			String mm = "0" + minutes;
+			mm = mm.substring(mm.length() - 2);
+			hours += 6;
+			if(hours > 23){
+				hours -= 24;
+			}
+			return hours + ":" + mm;
+		}
+		return "NaN";
+	}
+
+	public static int [] get24TimeFormatRaw(long time, World world){
+		if(world != null){
+			double duration = ((IDimType) world.getDimension()).getCycleDuration();
+			double currentTime = time % duration;
+			double tickInHours = duration / 24;
+			double ticksInMinute = tickInHours / 60;
+			int hours = (int) Math.floor(currentTime / tickInHours);
+			int minutes = (int) Math.floor((currentTime - tickInHours * hours) / ticksInMinute);
+			hours += 6;
+			if(hours > 23){
+				hours -= 24;
+			}
+			return new int[]{hours, minutes};
+		}
+		return new int[]{0,0};
 	}
 
 }

@@ -4,10 +4,13 @@ plugins {
 }
 
 repositories {
-	maven { url "https://jitpack.io" }
 	maven { url "https://maven.shedaniel.me/" }
 	maven { url "https://repo.maven.apache.org"}
 	mavenCentral()
+	maven { url "https://jitpack.io" }
+	flatDir {
+		dirs 'libs'
+	}
 }
 
 
@@ -26,10 +29,7 @@ dependencies {
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	modImplementation "com.github.svenhjol:charm:master"
-	modImplementation "me.shedaniel:RoughlyEnoughItems:5.11.202"
-	modApi("me.shedaniel.cloth:cloth-config-fabric:4.10.11") {
-		exclude(group: "net.fabricmc.fabric-api")
-	}
+	modImplementation "com.github.johnvictorfs:simple-utilities-mod:master"
 	implementation "com.moandjiezana.toml:toml4j:0.7.2"
 	implementation "com.electronwill.night-config:core:3.6.2"
 	implementation "com.electronwill.night-config:toml:3.6.2"

@@ -19,7 +19,7 @@ public class TimeAndWindClient implements ClientModInitializer {
             ClientWorld world = MinecraftClient.getInstance().world;
             if(tag != null && world != null){
                 IDimType dim = (IDimType) world.getDimension();
-                dim.setCycleDuration(tag.getDouble("dayD"), tag.getDouble("nightD"));
+                dim.setCycleDuration(tag.getLong("dayD"), tag.getLong("nightD"));
             }
         });
     }

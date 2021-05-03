@@ -19,9 +19,9 @@ public class DimensionTypeMixin implements IDimType {
 	@Shadow
 	private final OptionalLong fixedTime;
 
-	protected double dayDuration = 12000;
-	protected double nightDuration = 12000;
-	protected double cycleTime = dayDuration + nightDuration;
+	protected long dayDuration = 12000;
+	protected long nightDuration = 12000;
+	protected long cycleTime = dayDuration + nightDuration;
 	protected double prevAngle = 0;
 
 	public DimensionTypeMixin(OptionalLong fixedTime) {
@@ -45,39 +45,44 @@ public class DimensionTypeMixin implements IDimType {
 	private double syncTime(double dayD, double nightD, double time){
 		double mod = time % (dayD + nightD);
 		double d;
+		double f;
 		if(mod > dayD){
 			mod -= dayD;
-			d = 0.5D / nightD * mod + 0.5D;
+			f = 0.5D / nightD;
+			d = f * mod + 0.5D;
 		}
 		else {
-			d = 0.5 / dayD * mod;
+			f = 0.5D / dayD;
+			d = f * mod;
 		}
 		d -= 0.25D;
 		if(d < 0)
 			++d;
-		this.prevAngle = d;
+		this.prevAngle = d - f;
+		if(this.prevAngle < 0)
+			this.prevAngle = 1.0D - f;
 		return d;
 	}
 
 	@Override
-	public void setCycleDuration(double day, double night) {
+	public void setCycleDuration(long day, long night) {
 		this.dayDuration = day;
 		this.nightDuration = night;
 		this.cycleTime = day + night;
 	}
 
 	@Override
-	public double getDayDuration() {
+	public long getDayDuration() {
 		return this.dayDuration;
 	}
 
 	@Override
-	public double getNightDuration() {
+	public long getNightDuration() {
 		return this.nightDuration;
 	}
 
 	@Override
-	public double getCycleDuration() {
+	public long getCycleDuration() {
 		return this.cycleTime;
 	}
 

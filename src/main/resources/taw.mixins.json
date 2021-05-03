@@ -13,6 +13,8 @@
     "VillagerInjection"
   ],
   "client": [
+    "DebugHudMixins",
+    "SimpleUtilsGIHMixins",
     "WorldRendererMixins"
   ],
   "injectors": {

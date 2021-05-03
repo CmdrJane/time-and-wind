@@ -22,7 +22,7 @@ public abstract class ServerWorldInjection extends World {
 
     @ModifyConstant(method = "tick(Ljava/util/function/BooleanSupplier;)V", constant = @Constant(longValue = 24000L))
     private long patchNightSkip(long l){
-        return (long) ((IDimType)this).getCycleDuration();
+        return ((IDimType)this).getCycleDuration();
     }
 
 }

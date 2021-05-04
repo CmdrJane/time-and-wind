@@ -6,7 +6,6 @@ import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
@@ -16,7 +15,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.Map;
 
 public class TimeAndWind implements ModInitializer {
 	public static final String MOD_ID = "timeandwind";
@@ -25,9 +23,12 @@ public class TimeAndWind implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		craftPaths();
-		ServerLifecycleEvents.SERVER_STARTING.register(server -> {
-			IOManager.readTimeData();
-		});
+		ServerLifecycleEvents.SERVER_STARTED.register(server -> server.getWorlds().forEach(serverWorld -> {
+			String id = serverWorld.getRegistryKey().getValue().toString();
+			if(timeDataMap.containsKey(id)){
+				((IDimType)serverWorld.getDimension()).setCycleDuration(timeDataMap.get(id).dayDuration, timeDataMap.get(id).nightDuration);
+			}
+		}));
 		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
 			TAWCommands.reloadCfgReg(dispatcher);
 		});
@@ -45,30 +46,24 @@ public class TimeAndWind implements ModInitializer {
 			if(!Files.exists(Paths.get("./config/time-and-wind/time-data.json"))){
 				ioManager.genTimeData();
 			}
+			IOManager.readTimeData();
+
 		}
 		catch (IOException e){
 			e.printStackTrace();
 		}
 	}
 
-	public static void sendConfigSyncPacket(ServerPlayerEntity player){
-		if(!player.getServer().isHost(player.getGameProfile())) {
-			ListTag listTag = new ListTag();
-			int i = 0;
-			for (Map.Entry<String, TimeDataStorage> e : timeDataMap.entrySet()) {
-				CompoundTag tag = new CompoundTag();
-				tag.putString("id", e.getKey());
-				TimeDataStorage storage = e.getValue();
-				tag.putLong("dayD", storage.dayDuration);
-				tag.putLong("nightD", storage.nightDuration);
-				listTag.add(i, tag);
-				++i;
-			}
-			CompoundTag tag = new CompoundTag();
-			tag.put("tawConfig", listTag);
-			ServerPlayNetworking.send(player, new Identifier(MOD_ID, "sync_config"), new PacketByteBuf(Unpooled.buffer()).writeCompoundTag(tag));
-		}
+	public static void sendTimeSyncPacket(ServerPlayerEntity player, long dayDuration, long nightDuration){
+		CompoundTag tag = new CompoundTag();
+		tag.putLong("dayD", dayDuration);
+		tag.putLong("nightD", nightDuration);
+		ServerPlayNetworking.send(player, new Identifier(MOD_ID, "sync_cycle"), new PacketByteBuf(Unpooled.buffer()).writeCompoundTag(tag));
 	}
+	public static void sendConfigSyncPacket(ServerPlayerEntity player){
+		
+	}
+
 	public static String get24TimeFormat(long time, World world){
 		if(world != null){
 			double duration = ((IDimType) world.getDimension()).getCycleDuration();

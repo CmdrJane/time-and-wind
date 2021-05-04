@@ -5,7 +5,10 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.util.Identifier;
+
+import java.util.HashMap;
 
 public class TimeAndWindClient implements ClientModInitializer {
 
@@ -20,6 +23,24 @@ public class TimeAndWindClient implements ClientModInitializer {
             if(tag != null && world != null){
                 IDimType dim = (IDimType) world.getDimension();
                 dim.setCycleDuration(tag.getLong("dayD"), tag.getLong("nightD"));
+            }
+        });
+        ClientPlayNetworking.registerGlobalReceiver(new Identifier(TimeAndWind.MOD_ID, "sync_config"), (client, handler, buf, responseSender) -> {
+            ListTag list = buf.readCompoundTag().getList("tawConfig", 10);
+            TimeAndWind.timeDataMap = new HashMap<>();
+            for (int i = 0; i < list.size(); ++i) {
+                CompoundTag tag = list.getCompound(i);
+                String id = tag.getString("id");
+                long dayD = tag.getLong("dayD");
+                long nightD = tag.getLong("nightD");
+                TimeDataStorage storage = new TimeDataStorage(dayD, nightD);
+                TimeAndWind.timeDataMap.put(id, storage);
+            }
+            ClientWorld clientWorld = MinecraftClient.getInstance().world;
+            if(clientWorld != null) {
+                IDimType dim = (IDimType) clientWorld.getDimension();
+                TimeDataStorage storage = TimeAndWind.timeDataMap.get(clientWorld.getRegistryKey().getValue().toString());
+                dim.setCycleDuration(storage.dayDuration, storage.nightDuration);
             }
         });
     }

@@ -6,12 +6,11 @@
   "mixins": [
     "CharmNightSkipInjection",
     "DimensionTypeMixin",
-    "EntityMixins",
     "NoBrainInjection",
     "PlayerManagerMixins",
+    "ServerPlayerEntityMixins",
     "ServerWorldInjection",
-    "VillagerInjection",
-    "WorldMixins"
+    "VillagerInjection"
   ],
   "client": [
     "DebugHudMixins",

@@ -4,20 +4,11 @@ import net.minecraft.entity.ai.brain.Brain;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
-import ru.aiefu.timeandwind.IBrain;
 
 @Mixin(Brain.class)
-public class NoBrainInjection implements IBrain {
-
-    private long cycleDuration = 24000L;
-
+public class NoBrainInjection {
     @ModifyConstant(method = "refreshActivities", constant = @Constant(longValue = 24000L))
     private long refreshActivitiesPatchTAW(long l){
-        return this.cycleDuration;
-    }
-
-    @Override
-    public void setCycleDuration(long cycleDuration) {
-        this.cycleDuration = cycleDuration;
+        return 24000L;
     }
 }

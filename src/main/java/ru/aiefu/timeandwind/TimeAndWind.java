@@ -11,6 +11,7 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
+import net.minecraft.world.dimension.DimensionType;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -69,10 +70,10 @@ public class TimeAndWind implements ModInitializer {
 			ServerPlayNetworking.send(player, new Identifier(MOD_ID, "sync_config"), new PacketByteBuf(Unpooled.buffer()).writeCompoundTag(tag));
 		}
 	}
-	public static String get24TimeFormat(long time, World world){
+	public static String get24TimeFormat(World world){
 		if(world != null){
 			double duration = ((IDimType) world.getDimension()).getCycleDuration();
-			double currentTime = time % duration;
+			double currentTime =  world.getTimeOfDay() % duration;
 			double tickInHours = duration / 24;
 			double ticksInMinute = tickInHours / 60;
 			int hours = (int) Math.floor(currentTime / tickInHours);
@@ -88,10 +89,10 @@ public class TimeAndWind implements ModInitializer {
 		return "NaN";
 	}
 
-	public static int [] get24TimeFormatRaw(long time, World world){
+	public static int [] get24TimeFormatRaw(World world){
 		if(world != null){
 			double duration = ((IDimType) world.getDimension()).getCycleDuration();
-			double currentTime = time % duration;
+			double currentTime =  world.getTimeOfDay() % duration;
 			double tickInHours = duration / 24;
 			double ticksInMinute = tickInHours / 60;
 			int hours = (int) Math.floor(currentTime / tickInHours);

@@ -14,7 +14,7 @@ import ru.aiefu.timeandwind.TimeAndWind;
 public class SimpleUtilsGIHMixins {
     @Inject(method = "parseTime", at =@At("HEAD"), cancellable = true, remap = false)
     private static void patchTimeParserTAW(long time, CallbackInfoReturnable<String> cir){
-        cir.setReturnValue(TimeAndWind.get24TimeFormat(time, MinecraftClient.getInstance().world));
+        cir.setReturnValue(TimeAndWind.get24TimeFormat(MinecraftClient.getInstance().world));
         return;
     }
 }

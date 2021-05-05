@@ -15,6 +15,7 @@
   ],
   "client": [
     "DebugHudMixins",
+    "MinecraftClientMixin",
     "SimpleUtilsGIHMixins",
     "WorldRendererMixins"
   ],

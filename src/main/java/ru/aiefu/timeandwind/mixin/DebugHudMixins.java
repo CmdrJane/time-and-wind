@@ -13,7 +13,7 @@ import ru.aiefu.timeandwind.IDimType;
 public class DebugHudMixins {
     @Shadow @Final private MinecraftClient client;
 
-    @ModifyConstant(method = "getLeftText", constant =  @Constant(longValue = 24000L))
+    @ModifyConstant(method = "getLeftText", constant =  @Constant(longValue = 24000L), require = 0)
     private long patchDayCounterTAW (long l){
         return ((IDimType) this.client.world.getDimension()).getCycleDuration();
     }

@@ -7,9 +7,8 @@ repositories {
 	maven { url "https://maven.shedaniel.me/" }
 	maven { url "https://repo.maven.apache.org"}
 	mavenCentral()
-	maven { url "https://jitpack.io" }
-	flatDir {
-		dirs 'libs'
+	maven {
+		url "https://www.cursemaven.com"
 	}
 }
 
@@ -28,8 +27,8 @@ dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-	modImplementation "com.github.svenhjol:charm:master"
-	modImplementation "com.github.johnvictorfs:simple-utilities-mod:master"
+	modImplementation "curse.maven:charm-318872:3358030"
+	modImplementation "curse.maven:simple-utilities-356722:3349846"
 	implementation "com.moandjiezana.toml:toml4j:0.7.2"
 	implementation "com.electronwill.night-config:core:3.6.2"
 	implementation "com.electronwill.night-config:toml:3.6.2"

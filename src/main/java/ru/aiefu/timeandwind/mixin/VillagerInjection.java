@@ -48,7 +48,7 @@ public abstract class VillagerInjection extends MerchantEntity implements Villag
     }
 
 
-    @ModifyConstant(method = "hasRecentlyWorkedAndSlept", constant = @Constant(longValue = 24000L))
+    @ModifyConstant(method = "hasRecentlySlept", constant = @Constant(longValue = 24000L))
     private long hasRecentlyWorkedAndSleptPatchTAW(long l){
         return 24000L;
     }

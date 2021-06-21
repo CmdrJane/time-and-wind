@@ -4,8 +4,8 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.util.Identifier;
 
 import java.util.HashMap;
@@ -18,7 +18,7 @@ public class TimeAndWindClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         ClientPlayNetworking.registerGlobalReceiver(new Identifier(TimeAndWind.MOD_ID, "sync_cycle"), (client, handler, buf, responseSender) -> {
-            CompoundTag tag = buf.readCompoundTag();
+            NbtCompound tag = buf.readNbt();
             ClientWorld world = MinecraftClient.getInstance().world;
             if(tag != null && world != null){
                 IDimType dim = (IDimType) world.getDimension();
@@ -26,10 +26,10 @@ public class TimeAndWindClient implements ClientModInitializer {
             }
         });
         ClientPlayNetworking.registerGlobalReceiver(new Identifier(TimeAndWind.MOD_ID, "sync_config"), (client, handler, buf, responseSender) -> {
-            ListTag list = buf.readCompoundTag().getList("tawConfig", 10);
+            NbtList list = buf.readNbt().getList("tawConfig", 10);
             TimeAndWind.timeDataMap = new HashMap<>();
             for (int i = 0; i < list.size(); ++i) {
-                CompoundTag tag = list.getCompound(i);
+                NbtCompound tag = list.getCompound(i);
                 String id = tag.getString("id");
                 long dayD = tag.getLong("dayD");
                 long nightD = tag.getLong("nightD");

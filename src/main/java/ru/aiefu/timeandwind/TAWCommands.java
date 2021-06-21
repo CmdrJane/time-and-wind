@@ -29,9 +29,9 @@ public class TAWCommands {
                 }
                 TAWScheduler.createTAWSchedule(serverWorld.getDimension(), serverWorld.getRegistryKey().getValue().getPath(), "_villager_taw", false);
                 TAWScheduler.createTAWSchedule(serverWorld.getDimension(), serverWorld.getRegistryKey().getValue().getPath(), "_villager_baby_taw", true);
-                List<Entity> villagers  = serverWorld.getEntitiesByType(EntityType.VILLAGER, entity -> true);
-                for(Entity e : villagers){
-                    ((VillagerEntity)e).reinitializeBrain(serverWorld);
+                List<? extends VillagerEntity> villagers  = serverWorld.getEntitiesByType(EntityType.VILLAGER, entity -> true);
+                for(VillagerEntity e : villagers){
+                    e.reinitializeBrain(serverWorld);
                 }
             });
             for(ServerPlayerEntity player : server.getPlayerManager().getPlayerList()){

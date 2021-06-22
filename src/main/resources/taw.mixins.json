@@ -10,6 +10,7 @@
     "NoBrainInjection",
     "PlayerManagerMixins",
     "ServerWorldInjection",
+    "TimeCommandMixins",
     "VillagerInjection",
     "WorldMixins"
   ],

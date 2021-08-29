@@ -7,3 +7,8 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+sourceControl{
+    gitRepository(uri("https://github.com/svenhjol/Charm")) {
+        producesModule("org.gradle.svenhjol:charm")
+    }
+}

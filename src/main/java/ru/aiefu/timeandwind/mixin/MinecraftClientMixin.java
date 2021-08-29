@@ -17,7 +17,7 @@ import ru.aiefu.timeandwind.TimeDataStorage;
 @Mixin(MinecraftClient.class)
 public class MinecraftClientMixin {
     @Shadow @Nullable public ClientWorld world;
-
+    /*
     @Inject(method = "joinWorld", at =@At(value = "INVOKE", target = "net/minecraft/client/MinecraftClient.setWorld(Lnet/minecraft/client/world/ClientWorld;)V"))
     private void attachTimeData(ClientWorld world, CallbackInfo ci){
         String worldId = this.world.getRegistryKey().getValue().toString();
@@ -30,4 +30,6 @@ public class MinecraftClientMixin {
         TAWScheduler.createTAWSchedule(dimension, this.world.getRegistryKey().getValue().getPath(), "_villager_taw", false);
         TAWScheduler.createTAWSchedule(dimension, this.world.getRegistryKey().getValue().getPath(), "_villager_baby_taw", true);
     }
+
+     */
 }

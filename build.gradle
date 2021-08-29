@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '0.6-SNAPSHOT'
+	id 'fabric-loom' version '0.7-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -8,6 +8,10 @@ repositories {
 	maven { url "https://repo.maven.apache.org"}
 	mavenCentral()
 	maven { url "https://jitpack.io" }
+	maven {
+		url "https://cursemaven.com"
+	}
+	maven {url "https://maven.terraformersmc.com/releases/com/terraformersmc"}
 	flatDir {
 		dirs 'libs'
 	}
@@ -28,15 +32,16 @@ dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-	modImplementation "com.github.svenhjol:charm:master"
-	modImplementation "com.github.johnvictorfs:simple-utilities-mod:master"
-	implementation "com.moandjiezana.toml:toml4j:0.7.2"
-	implementation "com.electronwill.night-config:core:3.6.2"
-	implementation "com.electronwill.night-config:toml:3.6.2"
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
+	modImplementation "com.github.svenhjol:Charm:2.3.2"
+	modImplementation "curse.maven:litematica-308892:3349118"
+
+	implementation "com.moandjiezana.toml:toml4j:0.7.2"
+	implementation "com.electronwill.night-config:core:3.6.2"
+	implementation "com.electronwill.night-config:toml:3.6.2"
 
 	// PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
 	// You may need to force-disable transitiveness on them.

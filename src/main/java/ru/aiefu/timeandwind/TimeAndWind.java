@@ -11,7 +11,6 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
-import net.minecraft.world.dimension.DimensionType;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -26,12 +25,8 @@ public class TimeAndWind implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		craftPaths();
-		ServerLifecycleEvents.SERVER_STARTING.register(server -> {
-			IOManager.readTimeData();
-		});
-		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
-			TAWCommands.reloadCfgReg(dispatcher);
-		});
+		ServerLifecycleEvents.SERVER_STARTING.register(server -> IOManager.readTimeData());
+		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> TAWCommands.registerCommands(dispatcher));
 	}
 
 	public void craftPaths(){

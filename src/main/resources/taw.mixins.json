@@ -16,7 +16,6 @@
   ],
   "client": [
     "DebugHudMixins",
-    "MinecraftClientMixin",
     "WorldRendererMixins"
   ],
   "injectors": {

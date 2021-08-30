@@ -49,9 +49,11 @@ public class TimeAndWindClient implements ClientModInitializer {
                         TimeDataStorage storage = TimeAndWind.timeDataMap.get(clientWorld.getRegistryKey().getValue().toString());
                         dim.setCycleDuration(storage.dayDuration, storage.nightDuration);
                     }
+                    TimeAndWind.LOGGER.info("[Time & Wind] Configuration synchronized");
                     return;
                 }
             }
+            TimeAndWind.LOGGER.warn("[Time & Wind] Sync failed, requesting resync");
             ClientPlayNetworking.send(new Identifier(TimeAndWind.MOD_ID, "request_resync"), new PacketByteBuf(Unpooled.buffer()));
         });
         ClientPlayNetworking.registerGlobalReceiver(new Identifier(TimeAndWind.MOD_ID, "cfg_debug_info"), (client, handler, buf, responseSender) -> {

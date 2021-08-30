@@ -16,6 +16,7 @@
   ],
   "client": [
     "DebugHudMixins",
+    "SimpleUtilsMixins",
     "WorldRendererMixins"
   ],
   "injectors": {

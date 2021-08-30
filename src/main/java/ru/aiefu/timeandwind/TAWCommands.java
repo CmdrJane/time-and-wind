@@ -3,14 +3,18 @@ package ru.aiefu.timeandwind;
 import com.google.gson.GsonBuilder;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import io.netty.buffer.Unpooled;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.passive.VillagerEntity;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
+import net.minecraft.util.Identifier;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -25,6 +29,8 @@ public class TAWCommands {
 
         dispatcher.register(CommandManager.literal("taw").then(CommandManager.literal("get-ambient-darkness").executes(context -> printAmbientDarkness(context.getSource()))));
         dispatcher.register(CommandManager.literal("taw").then(CommandManager.literal("get-light-level").executes(context -> getLightLevel(context.getSource()))));
+
+        dispatcher.register(CommandManager.literal("taw").then(CommandManager.literal("get-time-data").executes(context -> getTimeConfig(context.getSource()))));
     }
 
     public static int reloadCfg(ServerCommandSource source) throws CommandSyntaxException {
@@ -71,6 +77,17 @@ public class TAWCommands {
     }
     public static int getLightLevel(ServerCommandSource source) throws CommandSyntaxException {
         source.sendFeedback(new LiteralText(source.getPlayer().world.getLightLevel(source.getPlayer().getBlockPos()) + ""), false);
+        return 0;
+    }
+
+    public static int getTimeConfig(ServerCommandSource source) throws CommandSyntaxException {
+        ServerPlayerEntity player = source.getPlayer();
+        String worldId = player.world.getRegistryKey().getValue().toString();
+        if(TimeAndWind.timeDataMap.containsKey(worldId)) {
+            TimeDataStorage storage = TimeAndWind.timeDataMap.get(worldId);
+            source.sendFeedback(new LiteralText("Server config for current world: Day Duration: " + storage.dayDuration + " Night Duration: " + storage.nightDuration), true);
+            ServerPlayNetworking.send(player, new Identifier(TimeAndWind.MOD_ID, "cfg_debug_info"), new PacketByteBuf(Unpooled.buffer()));
+        } else source.sendError(new LiteralText("No Data found for current world on server side"));
         return 0;
     }
 }

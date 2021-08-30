@@ -11,6 +11,9 @@ repositories {
 	maven {
 		url "https://cursemaven.com"
 	}
+	maven {
+		url 'https://masa.dy.fi/maven'
+	}
 	maven {url "https://maven.terraformersmc.com/releases/com/terraformersmc"}
 	flatDir {
 		dirs 'libs'
@@ -36,8 +39,15 @@ dependencies {
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
+
+	modApi("me.sargunvohra.mcmods:autoconfig1u:3.3.1") {
+		exclude(group: "net.fabricmc.fabric-api")
+	}
+
 	modImplementation "com.github.svenhjol:Charm:2.3.2"
-	modImplementation "curse.maven:litematica-308892:3349118"
+	modImplementation "curse.maven:litematica-308892:3171813"
+	modImplementation "curse.maven:simple-356722:3347170"
+	modImplementation "curse.maven:malilib-303119:3113699"
 
 	implementation "com.moandjiezana.toml:toml4j:0.7.2"
 	implementation "com.electronwill.night-config:core:3.6.2"

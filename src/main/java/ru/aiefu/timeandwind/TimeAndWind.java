@@ -11,6 +11,8 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -20,13 +22,17 @@ import java.util.Map;
 
 public class TimeAndWind implements ModInitializer {
 	public static final String MOD_ID = "timeandwind";
+	public static final Logger LOGGER = LogManager.getLogger();
 	public static HashMap<String, TimeDataStorage> timeDataMap;
 
 	@Override
 	public void onInitialize() {
+		LOGGER.info("[Time & Wind] Initializing...");
 		craftPaths();
+		registerReceivers();
 		ServerLifecycleEvents.SERVER_STARTING.register(server -> IOManager.readTimeData());
 		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> TAWCommands.registerCommands(dispatcher));
+		LOGGER.info("[Time & Wind] I'm in time control now!");
 	}
 
 	public void craftPaths(){
@@ -63,6 +69,7 @@ public class TimeAndWind implements ModInitializer {
 			NbtCompound tag = new NbtCompound();
 			tag.put("tawConfig", listTag);
 			ServerPlayNetworking.send(player, new Identifier(MOD_ID, "sync_config"), new PacketByteBuf(Unpooled.buffer()).writeNbt(tag));
+			LOGGER.info("[Time & Wind] Sending config to player");
 		}
 	}
 	public static String get24TimeFormat(World world){
@@ -100,5 +107,11 @@ public class TimeAndWind implements ModInitializer {
 		}
 		return new int[]{0,0};
 	}
-
+	private void registerReceivers(){
+		ServerPlayNetworking.registerGlobalReceiver(new Identifier(TimeAndWind.MOD_ID, "request_resync"), (server, player, handler, buf, responseSender) -> {
+			sendConfigSyncPacket(player);
+			LOGGER.warn("[Time & Wind] Player requested config resync, this shouldn't happen");
+			LOGGER.info("[Time & Wind] Sending resync packet");
+		});
+	}
 }

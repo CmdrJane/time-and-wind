@@ -4,7 +4,6 @@
   "package": "ru.aiefu.timeandwind.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "CharmPlayerStateMixins",
     "DimensionTypeMixin",
     "EntityMixins",
     "NoBrainInjection",
@@ -16,8 +15,7 @@
   ],
   "client": [
     "DebugHudMixins",
-    "MinecraftClientMixin",
-    "SimpleUtilsGIHMixins",
+    "SimpleUtilsMixins",
     "WorldRendererMixins"
   ],
   "injectors": {

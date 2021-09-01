@@ -10,8 +10,13 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.merchant.villager.VillagerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.StringTextComponent;
+import ru.aiefu.timeandwind.network.NetworkHandler;
+import ru.aiefu.timeandwind.network.messages.ConfigDebugInfo;
+import ru.aiefu.timeandwind.network.messages.SyncConfig;
+import ru.aiefu.timeandwind.network.messages.WorldKeyToClipboard;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -47,7 +52,7 @@ public class TAWCommands {
                 }
             });
             for(ServerPlayerEntity player : server.getPlayerList().getPlayers()){
-               TimeAndWind.sendConfigSyncPacket(player);
+                NetworkHandler.sendTo(new SyncConfig(new PacketBuffer(Unpooled.buffer())), player);
             }
             source.sendSuccess(new StringTextComponent("[Time & Wind] Config reloaded"), true);
         }
@@ -59,7 +64,7 @@ public class TAWCommands {
     public static int printCurrentWorldId(CommandSource source) throws CommandSyntaxException {
         String id = source.getPlayerOrException().level.dimension().location().toString();
         source.sendSuccess(new StringTextComponent(id), false);
-        ServerPlayNetworking.send(source.getPlayerOrException(), new ResourceLocation(TimeAndWind.MOD_ID, "world_id_clipboard"), new FriendlyByteBuf(Unpooled.buffer()).writeUtf(id));
+        NetworkHandler.sendTo(new WorldKeyToClipboard(id), source.getPlayerOrException());
         return 0;
     }
     public static int printAmbientDarkness(CommandSource source) throws CommandSyntaxException {
@@ -90,7 +95,7 @@ public class TAWCommands {
         if(TimeAndWind.timeDataMap.containsKey(worldId)) {
             TimeDataStorage storage = TimeAndWind.timeDataMap.get(worldId);
             source.sendSuccess(new StringTextComponent("Server config for current world: Day Duration: " + storage.dayDuration + " Night Duration: " + storage.nightDuration), true);
-            ServerPlayNetworking.send(player, new ResourceLocation(TimeAndWind.MOD_ID, "cfg_debug_info"), new FriendlyByteBuf(Unpooled.buffer()));
+            NetworkHandler.sendTo(new ConfigDebugInfo(), player);
         } else source.sendFailure(new StringTextComponent("No Data found for current world on server side"));
         return 0;
     }

@@ -1,0 +1,25 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "ru.aiefu.timeandwind.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "CharmNightSkipInjection",
+    "DimensionTypeMixin",
+    "EntityMixins",
+    "NoBrainInjection",
+    "PlayerManagerMixins",
+    "ServerWorldInjection",
+    "TimeCommandMixins",
+    "VillagerInjection",
+    "WorldMixins"
+  ],
+  "client": [
+    "DebugHudMixins",
+    "SimpleUtilsMixins",
+    "WorldRendererMixins"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

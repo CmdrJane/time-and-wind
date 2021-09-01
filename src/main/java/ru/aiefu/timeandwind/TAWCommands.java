@@ -3,14 +3,12 @@ package ru.aiefu.timeandwind;
 import com.google.gson.GsonBuilder;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import io.netty.buffer.Unpooled;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.merchant.villager.VillagerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.StringTextComponent;
 import ru.aiefu.timeandwind.network.NetworkHandler;
@@ -52,7 +50,7 @@ public class TAWCommands {
                 }
             });
             for(ServerPlayerEntity player : server.getPlayerList().getPlayers()){
-                NetworkHandler.sendTo(new SyncConfig(new PacketBuffer(Unpooled.buffer())), player);
+                NetworkHandler.sendTo(new SyncConfig(), player);
             }
             source.sendSuccess(new StringTextComponent("[Time & Wind] Config reloaded"), true);
         }

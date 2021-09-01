@@ -37,7 +37,7 @@ public class NetworkHandler{
     }
     public static void sendTo(Object msg, ServerPlayerEntity player) {
         if (!(player instanceof FakePlayer)) {
-            network.sendTo(msg, player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+            network.sendTo(msg, player.connection.getConnection(), NetworkDirection.PLAY_TO_CLIENT);
         }
     }
     public static void sendToServer(Object msg) {

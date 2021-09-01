@@ -3,6 +3,7 @@ package ru.aiefu.timeandwind.network.messages;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 import java.util.function.Supplier;
@@ -25,7 +26,7 @@ public class WorldKeyToClipboard implements ITAWPacket{
 
     @Override
     public void handle(Supplier<NetworkEvent.Context> context) {
-        if(context.get().getSender().level.isClientSide) {
+        if(FMLEnvironment.dist.isClient()) {
             Minecraft client = Minecraft.getInstance();
             client.keyboardHandler.setClipboard(worldId);
             client.player.displayClientMessage(new StringTextComponent("Also copied this to clipboard"), false);

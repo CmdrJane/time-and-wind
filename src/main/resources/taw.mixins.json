@@ -16,7 +16,9 @@
   "client": [
     "DebugHudMixins",
     "SimpleUtilsMixins",
-    "WorldRendererMixins"
+    "WorldRendererMixins",
+    "WorldTimeUniformMixins",
+    "HardcodedCustomUniformsMixins"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -1,13 +1,11 @@
 package ru.aiefu.timeandwind;
 
-import io.netty.buffer.Unpooled;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
@@ -29,7 +27,7 @@ public class TimeAndWindClient implements ClientModInitializer {
                 dim.setCycleDuration(tag.getLong("dayD"), tag.getLong("nightD"));
             }
         });
-        ClientPlayNetworking.registerGlobalReceiver(new Identifier(TimeAndWind.MOD_ID, "sync_config"), (client, handler, buf, responseSender) -> {
+        ClientPlayNetworking.registerGlobalReceiver(NetworkPacketsID.SYNC_CONFIG, (client, handler, buf, responseSender) -> {
             if(buf.readableBytes() > 0 ){
                 NbtCompound nbtCMP = buf.readNbt();
                 if(nbtCMP != null) {
@@ -50,13 +48,10 @@ public class TimeAndWindClient implements ClientModInitializer {
                         dim.setCycleDuration(storage.dayDuration, storage.nightDuration);
                     }
                     TimeAndWind.LOGGER.info("[Time & Wind] Configuration synchronized");
-                    return;
                 }
             }
-            TimeAndWind.LOGGER.warn("[Time & Wind] Sync failed, requesting resync");
-            ClientPlayNetworking.send(new Identifier(TimeAndWind.MOD_ID, "request_resync"), new PacketByteBuf(Unpooled.buffer()));
         });
-        ClientPlayNetworking.registerGlobalReceiver(new Identifier(TimeAndWind.MOD_ID, "cfg_debug_info"), (client, handler, buf, responseSender) -> {
+        ClientPlayNetworking.registerGlobalReceiver(NetworkPacketsID.CFG_DEBUG_INFO, (client, handler, buf, responseSender) -> {
             try {
                 String worldId = client.world.getRegistryKey().getValue().toString();
                 if (TimeAndWind.timeDataMap.containsKey(worldId)) {
@@ -68,7 +63,7 @@ public class TimeAndWindClient implements ClientModInitializer {
                 e.printStackTrace();
             }
         });
-        ClientPlayNetworking.registerGlobalReceiver(new Identifier(TimeAndWind.MOD_ID, "world_id_clipboard"), (client, handler, buf, responseSender) -> {
+        ClientPlayNetworking.registerGlobalReceiver(NetworkPacketsID.WORLD_ID_CLIPBOARD, (client, handler, buf, responseSender) -> {
             try{
                 if(buf.readableBytes() > 0) {
                     String string = buf.readString();

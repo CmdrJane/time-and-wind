@@ -33,7 +33,9 @@ dependencies {
 
 	modImplementation "curse.maven:charm-318872:3393290"
 	modImplementation "curse.maven:simple-utilities-356722:3349846"
-	modImplementation "curse.maven:litematica-308892:3387062"
+	modApi "curse.maven:malilib-303119:3387061"
+	modImplementation "curse.maven:litematica-308892:3379278"
+	modImplementation "curse.maven:iris-455508:3404785"
 	implementation "com.moandjiezana.toml:toml4j:0.7.2"
 	implementation "com.electronwill.night-config:core:3.6.2"
 	implementation "com.electronwill.night-config:toml:3.6.2"

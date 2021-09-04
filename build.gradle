@@ -46,6 +46,7 @@ dependencies {
 
 	modImplementation "com.github.svenhjol:Charm:2.3.2"
 	modImplementation "curse.maven:litematica-308892:3171813"
+	modImplementation "curse.maven:iris-455508:3404784"
 	modImplementation "curse.maven:simple-356722:3347170"
 	modImplementation "curse.maven:malilib-303119:3113699"
 

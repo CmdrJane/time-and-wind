@@ -8,6 +8,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
@@ -53,6 +54,10 @@ public class TimeAndWind implements ModInitializer {
 		}
 	}
 
+	public static void checkConfig(MinecraftServer server){
+
+	}
+
 	public static void sendConfigSyncPacket(ServerPlayerEntity player){
 		if(!player.getServer().isHost(player.getGameProfile())) {
 			NbtList listTag = new NbtList();
@@ -68,7 +73,7 @@ public class TimeAndWind implements ModInitializer {
 			}
 			NbtCompound tag = new NbtCompound();
 			tag.put("tawConfig", listTag);
-			ServerPlayNetworking.send(player, new Identifier(MOD_ID, "sync_config"), new PacketByteBuf(Unpooled.buffer()).writeNbt(tag));
+			ServerPlayNetworking.send(player, NetworkPacketsID.SYNC_CONFIG, new PacketByteBuf(Unpooled.buffer()).writeNbt(tag));
 			LOGGER.info("[Time & Wind] Sending config to player");
 		}
 	}

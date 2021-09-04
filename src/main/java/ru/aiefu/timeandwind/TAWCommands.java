@@ -14,7 +14,6 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
-import net.minecraft.util.Identifier;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -62,7 +61,7 @@ public class TAWCommands {
     public static int printCurrentWorldId(ServerCommandSource source) throws CommandSyntaxException {
         String id = source.getPlayer().world.getRegistryKey().getValue().toString();
         source.sendFeedback(new LiteralText(id), false);
-        ServerPlayNetworking.send(source.getPlayer(), new Identifier(TimeAndWind.MOD_ID, "world_id_clipboard"), new PacketByteBuf(Unpooled.buffer()).writeString(id));
+        ServerPlayNetworking.send(source.getPlayer(), NetworkPacketsID.WORLD_ID_CLIPBOARD, new PacketByteBuf(Unpooled.buffer()).writeString(id));
         return 0;
     }
     public static int printAmbientDarkness(ServerCommandSource source) throws CommandSyntaxException {
@@ -93,7 +92,7 @@ public class TAWCommands {
         if(TimeAndWind.timeDataMap.containsKey(worldId)) {
             TimeDataStorage storage = TimeAndWind.timeDataMap.get(worldId);
             source.sendFeedback(new LiteralText("Server config for current world: Day Duration: " + storage.dayDuration + " Night Duration: " + storage.nightDuration), true);
-            ServerPlayNetworking.send(player, new Identifier(TimeAndWind.MOD_ID, "cfg_debug_info"), new PacketByteBuf(Unpooled.buffer()));
+            ServerPlayNetworking.send(player, NetworkPacketsID.CFG_DEBUG_INFO, new PacketByteBuf(Unpooled.buffer()));
         } else source.sendError(new LiteralText("No Data found for current world on server side"));
         return 0;
     }

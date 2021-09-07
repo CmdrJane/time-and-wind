@@ -59,7 +59,7 @@ public class TimeAndWind implements ModInitializer {
 	}
 
 	public static void sendConfigSyncPacket(ServerPlayerEntity player){
-		if(true/*!player.getServer().isHost(player.getGameProfile())*/) {
+		if(!player.getServer().isHost(player.getGameProfile())) {
 			NbtList listTag = new NbtList();
 			int i = 0;
 			for (Map.Entry<String, TimeDataStorage> e : timeDataMap.entrySet()) {

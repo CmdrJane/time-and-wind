@@ -31,15 +31,18 @@ public class DimensionTypeMixin implements IDimType {
 
 	@Inject(method = "getMoonPhase", at =@At("HEAD"), cancellable = true)
 	private void patchMoonPhase(long time, CallbackInfoReturnable<Integer> cir){
-		cir.setReturnValue((int)(time / this.cycleTime % 8L + 8L) % 8);
-		return;
+		float modifier = (float) dayDuration / cycleTime / 2;
+		float value = (float) ((time / this.cycleTime % 8L + 8L) % 8) - modifier;
+		if(value < 0){
+			cir.setReturnValue((int) (8.0F - modifier));
+		}
+		cir.setReturnValue((int) value);
 	}
 
 	@Inject(method = "getSkyAngle", at = @At("HEAD"), cancellable = true)
 	private void calculateCelestialAngle(long time, CallbackInfoReturnable<Float> cir){
 		if(!this.fixedTime.isPresent()){
 			cir.setReturnValue((float) syncTime(dayDuration, nightDuration, time));
-			return;
 		}
 	}
 

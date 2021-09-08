@@ -23,6 +23,7 @@ public class DimensionTypeMixin implements IDimType {
 	protected long nightDuration = 12000;
 	protected long cycleTime = dayDuration + nightDuration;
 	protected double prevAngle = 0;
+	protected double unTweakedAngle;
 
 	public DimensionTypeMixin(OptionalLong fixedTime) {
 		this.fixedTime = fixedTime;
@@ -55,6 +56,7 @@ public class DimensionTypeMixin implements IDimType {
 			f = 0.5D / dayD;
 			d = f * mod;
 		}
+		this.unTweakedAngle = d;
 		d -= 0.25D;
 		if(d < 0)
 			++d;
@@ -62,6 +64,20 @@ public class DimensionTypeMixin implements IDimType {
 		if(this.prevAngle < 0)
 			this.prevAngle = 1.0D - f;
 		return d;
+	}
+
+	public int calculateIrisWorldDayTime(long time){
+		long dayD = this.dayDuration;
+		long nightD = this.nightDuration;
+		float timeOfDay = time % (dayD + nightD);
+		if(timeOfDay > dayD){
+			timeOfDay -= dayD;
+			float r = timeOfDay / nightD * 100;
+			return Math.round(12000.0F / 100 * r);
+		} else {
+			float r = timeOfDay / dayD * 100;
+			return Math.round(12000.0F / 100 * r);
+		}
 	}
 
 	@Override
@@ -89,5 +105,10 @@ public class DimensionTypeMixin implements IDimType {
 	@Override
 	public float getPrevAngle() {
 		return (float) this.prevAngle;
+	}
+
+	@Override
+	public float untweakedAngle() {
+		return (float) this.unTweakedAngle;
 	}
 }

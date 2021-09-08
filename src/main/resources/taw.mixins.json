@@ -4,7 +4,7 @@
   "package": "ru.aiefu.timeandwind.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "CharmNightSkipInjection",
+    "CharmNightSkipMixins",
     "DimensionTypeMixin",
     "EntityMixins",
     "NoBrainInjection",
@@ -16,9 +16,9 @@
   ],
   "client": [
     "DebugHudMixins",
+    "HardcodedCustomUniformsMixins",
     "SimpleUtilsMixins",
     "WorldRendererMixins",
-    "HardcodedCustomUniformsMixins",
     "WorldTimeUniformMixins"
   ],
   "injectors": {

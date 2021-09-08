@@ -12,7 +12,7 @@ import ru.aiefu.timeandwind.TimeAndWind;
 
 @Mixin(PlayerManager.class)
 public class PlayerManagerMixins {
-    @Inject(method = "onPlayerConnect", at = @At("HEAD"))
+    @Inject(method = "onPlayerConnect", at = @At(value = "INVOKE", target = "net/minecraft/server/world/ServerWorld.getGameRules()Lnet/minecraft/world/GameRules;", shift = At.Shift.BEFORE))
     private void syncTimeDurationOnJoin(ClientConnection connection, ServerPlayerEntity player, CallbackInfo ci){
         TimeAndWind.sendConfigSyncPacket(player);
     }

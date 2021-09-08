@@ -10,7 +10,7 @@ import svenhjol.charm.module.SleepImprovements;
 
 @Pseudo
 @Mixin(SleepImprovements.class)
-public class CharmNightSkipInjection {
+public class CharmNightSkipMixins {
     @ModifyConstant(method = "tryEndNight", constant = @Constant(longValue = 24000L), remap = false)
     private long patchCharmNightSkip(long l, ServerWorld world){
         return ((IDimType)world.getDimension()).getCycleDuration();

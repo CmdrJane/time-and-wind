@@ -73,7 +73,7 @@ public class DimensionTypeMixin implements IDimType {
 		if(timeOfDay > dayD){
 			timeOfDay -= dayD;
 			float r = timeOfDay / nightD * 100;
-			return Math.round(12000.0F / 100 * r);
+			return 12000 + Math.round(12000.0F / 100 * r);
 		} else {
 			float r = timeOfDay / dayD * 100;
 			return Math.round(12000.0F / 100 * r);

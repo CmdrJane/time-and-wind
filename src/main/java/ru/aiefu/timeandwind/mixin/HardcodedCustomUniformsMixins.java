@@ -19,23 +19,8 @@ public class HardcodedCustomUniformsMixins {
         if(world.getDimension().hasFixedTime()){
             return;
         }
-        long timeOfDay = world.getTimeOfDay();
         IDimType iDimType = ((IDimType) world.getDimension());
-        long dayD = iDimType.getDayDuration();
-        long nightD = iDimType.getNightDuration();
-        double mod = timeOfDay % (dayD + nightD);
-        double d;
-        double f;
-        if(mod > dayD){
-            mod -= dayD;
-            f = 0.5D / nightD;
-            d = f * mod + 0.5D;
-        }
-        else {
-            f = 0.5D / dayD;
-            d = f * mod;
-        }
-        cir.setReturnValue((float) d);
+        cir.setReturnValue(iDimType.untweakedAngle());
         cir.cancel();
     }
 }

@@ -6,4 +6,6 @@ public interface IDimType {
     long getNightDuration();
     long getCycleDuration();
     float getPrevAngle();
+    float untweakedAngle();
+    int calculateIrisWorldDayTime(long time);
 }

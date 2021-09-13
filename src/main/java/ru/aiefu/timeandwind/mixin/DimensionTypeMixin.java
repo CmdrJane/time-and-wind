@@ -23,7 +23,7 @@ public class DimensionTypeMixin implements IDimType {
 	protected long nightDuration = 12000;
 	protected long cycleTime = dayDuration + nightDuration;
 	protected double prevAngle = 0;
-	protected double unTweakedAngle;
+	protected double unTweakedAngle = 0;
 
 	public DimensionTypeMixin(OptionalLong fixedTime) {
 		this.fixedTime = fixedTime;

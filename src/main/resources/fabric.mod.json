@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "id": "modid",
+  "id": "tawct",
   "version": "${version}",
 
-  "name": "Example Mod",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "name": "Time & Wind Custom Ticker",
+  "description": "Control duration of day and night with this mod!",
   "authors": [
     "Me!"
   ],
@@ -14,16 +14,19 @@
   },
 
   "license": "CC0-1.0",
-  "icon": "assets/modid/icon.png",
+  "icon": "assets/tawct/icon.png",
 
   "environment": "*",
   "entrypoints": {
     "main": [
-      "net.fabricmc.example.ExampleMod"
+      "ru.aiefu.timeandwindct.TimeAndWindCT"
+    ],
+    "client": [
+      "ru.aiefu.timeandwindct.TimeAndWindCTClient"
     ]
   },
   "mixins": [
-    "modid.mixins.json"
+    "tawct.mixins.json"
   ],
 
   "depends": {

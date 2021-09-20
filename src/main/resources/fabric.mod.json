@@ -10,7 +10,7 @@
   ],
   "contact": {
     "homepage": "https://www.curseforge.com/minecraft/mc-mods/time-wind/files",
-    "sources": "https://github.com/CmdrJane/time-and-wind"
+    "sources": "https://github.com/CmdrJane/time-and-wind/tree/custom-ticker-1.16.5"
   },
 
   "license": "CC0-1.0",

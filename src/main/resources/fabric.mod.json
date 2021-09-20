@@ -6,11 +6,11 @@
   "name": "Time & Wind Custom Ticker",
   "description": "Control duration of day and night with this mod!",
   "authors": [
-    "Me!"
+    "Aiefu"
   ],
   "contact": {
-    "homepage": "https://fabricmc.net/",
-    "sources": "https://github.com/FabricMC/fabric-example-mod"
+    "homepage": "https://www.curseforge.com/minecraft/mc-mods/time-wind",
+    "sources": "https://github.com/CmdrJane/time-and-wind/tree/custom-ticker-1.17.1"
   },
 
   "license": "CC0-1.0",

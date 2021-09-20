@@ -35,11 +35,11 @@ public class TimeAndWindCT implements ModInitializer {
 			if(!Files.isDirectory(Paths.get("./config"))){
 				Files.createDirectory(Paths.get("./config"));
 			}
-			if(!Files.isDirectory(Paths.get("./config/time-and-wind-ct"))){
-				Files.createDirectory(Paths.get("./config/time-and-wind-ct"));
+			if(!Files.isDirectory(Paths.get("./config/time-and-wind"))){
+				Files.createDirectory(Paths.get("./config/time-and-wind"));
 			}
 			IOManager ioManager = new IOManager();
-			if(!Files.exists(Paths.get("./config/time-and-wind-ct/time-data.json"))){
+			if(!Files.exists(Paths.get("./config/time-and-wind/time-data.json"))){
 				ioManager.genTimeData();
 			}
 		}

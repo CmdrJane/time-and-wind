@@ -15,19 +15,23 @@ public class IOManager {
 
     public void genTimeData(){
         String gson = new GsonBuilder().setPrettyPrinting().create().toJson(this.timeData);
-        File file = new File("./config/time-and-wind-ct/time-data.json");
+        File file = new File("./config/time-and-wind/time-data.json");
         fileWriter(file, gson);
     }
 
-    public static void readTimeData(){
+    public static int readTimeData(){
         HashMap<String, TimeDataStorage> timeDataMap;
+        int result;
         try {
-            timeDataMap = new Gson().fromJson(new FileReader("./config/time-and-wind-ct/time-data.json"), new TypeToken<HashMap<String, TimeDataStorage>>(){}.getType());
-        } catch (Exception e){
+            timeDataMap = new Gson().fromJson(new FileReader("./config/time-and-wind/time-data.json"), new TypeToken<HashMap<String, TimeDataStorage>>(){}.getType());
+            result = 1;
+        } catch (IOException e){
             e.printStackTrace();
             timeDataMap = new HashMapOf<>("minecraft:overworld", new TimeDataStorage());
+            result = 0;
         }
         TimeAndWindCT.timeDataMap = timeDataMap;
+        return result;
     }
 
     public void fileWriter(File file, String gson){

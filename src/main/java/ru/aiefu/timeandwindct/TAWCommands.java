@@ -5,9 +5,6 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.CommandManager;
@@ -32,14 +29,19 @@ public class TAWCommands {
         dispatcher.register(CommandManager.literal("taw").then(CommandManager.literal("get-light-level").executes(context -> getLightLevel(context.getSource()))));
 
         dispatcher.register(CommandManager.literal("taw").then(CommandManager.literal("get-time-data").executes(context -> getTimeConfig(context.getSource()))));
-        dispatcher.register(CommandManager.literal("taw").then(CommandManager.literal("time-checker-values").executes(context -> getTimeChecker(context.getSource()))));
-        dispatcher.register(CommandManager.literal("taw").then(CommandManager.literal("system-time").executes(context -> getSystemTime(context.getSource()))));
+
+        dispatcher.register(CommandManager.literal("taw").then(CommandManager.literal("time-ticker-values").executes(context -> getTimeChecker(context.getSource()))));
+        //dispatcher.register(CommandManager.literal("taw").then(CommandManager.literal("system-time").executes(context -> getSystemTime(context.getSource()))));
     }
 
     public static int reloadCfg(ServerCommandSource source) throws CommandSyntaxException {
         if(source.hasPermissionLevel(4) || source.getServer().isHost(source.getPlayer().getGameProfile())) {
             MinecraftServer server = source.getServer();
-            IOManager.readTimeData();
+            int result = IOManager.readTimeData();
+            if(result == 0){
+                source.sendFeedback(new LiteralText("Unable to reload config"), false);
+                return 0;
+            }
             source.getServer().getWorlds().forEach(serverWorld -> {
                 String id = serverWorld.getRegistryKey().getValue().toString();
                 if (TimeAndWindCT.timeDataMap.containsKey(id)) {

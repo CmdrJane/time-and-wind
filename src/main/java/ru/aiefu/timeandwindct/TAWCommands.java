@@ -35,14 +35,14 @@ public class TAWCommands {
     }
 
     public static int reloadCfg(ServerCommandSource source) throws CommandSyntaxException {
-        if(source.hasPermissionLevel(4) || source.getServer().isHost(source.getPlayer().getGameProfile())) {
-            MinecraftServer server = source.getServer();
+        if(source.hasPermissionLevel(4) || source.getMinecraftServer().isHost(source.getPlayer().getGameProfile())) {
+            MinecraftServer server = source.getMinecraftServer();
             int result = IOManager.readTimeData();
             if(result == 0){
                 source.sendFeedback(new LiteralText("Unable to reload config"), false);
                 return 0;
             }
-            source.getServer().getWorlds().forEach(serverWorld -> {
+            source.getMinecraftServer().getWorlds().forEach(serverWorld -> {
                 String id = serverWorld.getRegistryKey().getValue().toString();
                 if (TimeAndWindCT.timeDataMap.containsKey(id)) {
                     ((ITimeOperations) serverWorld).getTimeTicker().setupCustomTime(TimeAndWindCT.timeDataMap.get(id).dayDuration, TimeAndWindCT.timeDataMap.get(id).nightDuration);
@@ -69,9 +69,9 @@ public class TAWCommands {
         return 0;
     }
     public static int parseWorldsIds(ServerCommandSource source) throws CommandSyntaxException {
-        if(source.hasPermissionLevel(4) || source.getServer().isHost(source.getPlayer().getGameProfile())) {
+        if(source.hasPermissionLevel(4) || source.getMinecraftServer().isHost(source.getPlayer().getGameProfile())) {
             List<String> ids = new ArrayList<>();
-            source.getServer().getWorlds().forEach(serverWorld -> ids.add(serverWorld.getRegistryKey().getValue().toString()));
+            source.getMinecraftServer().getWorlds().forEach(serverWorld -> ids.add(serverWorld.getRegistryKey().getValue().toString()));
             File file = new File("taw-worlds-ids.json");
             new IOManager().fileWriter(file, new GsonBuilder().setPrettyPrinting().create().toJson(ids));
             source.sendFeedback(new LiteralText("Saved to " + file.getAbsolutePath()), false);

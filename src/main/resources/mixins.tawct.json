@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "ru.aiefu.timeandwindct.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "ServerWorldMixins"
+  ],
+  "client": [
+    "ClientWorldMixins"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

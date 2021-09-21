@@ -25,7 +25,6 @@ public class TAWNetworkHandler {
     }
 
     public static void registerMessages() {
-        // Register messages which are sent from the client to the server here:
         INSTANCE.registerMessage(SyncConfig.Handler.class, SyncConfig.class, nextID(), Side.CLIENT);
         INSTANCE.registerMessage(CheckConfig.Handler.class, CheckConfig.class, nextID(), Side.CLIENT);
         INSTANCE.registerMessage(WorldIDToClipboard.Handler.class, WorldIDToClipboard.class, nextID(), Side.CLIENT);

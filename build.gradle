@@ -20,7 +20,7 @@ apply plugin: 'maven-publish'
 
 version = '1.0+1.12.2'
 group = 'ru.aiefu.time-and-wind-ct' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = 'time-andwind-ct'
+archivesBaseName = 'time-and-wind-ct'
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
 

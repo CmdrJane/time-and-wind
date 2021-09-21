@@ -3,6 +3,7 @@
   "minVersion": "0.8",
   "package": "ru.aiefu.timeandwindct.mixin",
   "compatibilityLevel": "JAVA_8",
+  "refmap": "mixins.tawct.refmap.json",
   "mixins": [
     "ServerWorldMixins"
   ],

@@ -8,9 +8,11 @@ import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerAboutToStartEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import org.apache.logging.log4j.Logger;
+import ru.aiefu.timeandwindct.commands.TAWCommands;
 import ru.aiefu.timeandwindct.packets.SyncConfig;
 
 import java.io.IOException;
@@ -47,13 +49,17 @@ public class TimeAndWindCT {
         EntityPlayer player = e.player;
         if(!player.world.isRemote){
             TAWNetworkHandler.INSTANCE.sendTo(new SyncConfig(), (EntityPlayerMP) player);
-            logger.info(timeDataMap);
             logger.info("Sending config to client...");
         }
     }
 
     @EventHandler
-    public void onServerStartup(FMLServerAboutToStartEvent e){
+    public void onServerStartup(FMLServerStartingEvent e){
+        e.registerServerCommand(new TAWCommands());
+    }
+
+    @EventHandler
+    public void onServerStartupEarly(FMLServerAboutToStartEvent e){
         IOManager.readTimeData();
     }
 

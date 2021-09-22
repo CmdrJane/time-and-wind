@@ -1,4 +1,4 @@
-package ru.aiefu.timeandwind;
+package ru.aiefu.timeandwindct;
 
 public class TimeDataStorage {
     public long dayDuration = 12000;

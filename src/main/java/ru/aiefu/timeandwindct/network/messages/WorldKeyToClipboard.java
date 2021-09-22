@@ -1,4 +1,4 @@
-package ru.aiefu.timeandwind.network.messages;
+package ru.aiefu.timeandwindct.network.messages;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.PacketBuffer;

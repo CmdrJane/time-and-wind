@@ -1,22 +1,22 @@
-package ru.aiefu.timeandwind;
+package ru.aiefu.timeandwindct;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
-import ru.aiefu.timeandwind.network.NetworkHandler;
-import ru.aiefu.timeandwind.network.messages.SyncConfig;
+import ru.aiefu.timeandwindct.network.NetworkHandler;
+import ru.aiefu.timeandwindct.network.messages.SyncConfig;
 
-public class TimeAndWindEvents {
+public class TimeAndWindCTEvents {
     @SubscribeEvent
     public void playerJoin(PlayerEvent.PlayerLoggedInEvent event){
         NetworkHandler.sendTo(new SyncConfig(), (ServerPlayerEntity) event.getPlayer());
-        TimeAndWind.LOGGER.info("[Time & Wind] Sending configuration to player");
+        TimeAndWindCT.LOGGER.info("[Time & Wind] Sending configuration to player");
     }
     @SubscribeEvent
     public void serverStarting(FMLServerAboutToStartEvent event){
-        TimeAndWind.LOGGER.info("Reading time cfg...");
+        TimeAndWindCT.LOGGER.info("Reading time cfg...");
         IOManager.readTimeData();
     }
     @SubscribeEvent

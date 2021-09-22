@@ -1,4 +1,4 @@
-package ru.aiefu.timeandwind.network;
+package ru.aiefu.timeandwindct.network;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
@@ -7,8 +7,8 @@ import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
-import ru.aiefu.timeandwind.TimeAndWind;
-import ru.aiefu.timeandwind.network.messages.*;
+import ru.aiefu.timeandwindct.TimeAndWindCT;
+import ru.aiefu.timeandwindct.network.messages.*;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -16,7 +16,7 @@ import java.util.function.Function;
 
 public class NetworkHandler{
     private static final String PROTOCOL_VERSION = Integer.toString(1);
-    public static final SimpleChannel network = NetworkRegistry.ChannelBuilder.named(new ResourceLocation(TimeAndWind.MOD_ID, "main"))
+    public static final SimpleChannel network = NetworkRegistry.ChannelBuilder.named(new ResourceLocation(TimeAndWindCT.MOD_ID, "main"))
             .clientAcceptedVersions(PROTOCOL_VERSION::equals)
             .serverAcceptedVersions(PROTOCOL_VERSION::equals)
             .networkProtocolVersion(() -> PROTOCOL_VERSION)

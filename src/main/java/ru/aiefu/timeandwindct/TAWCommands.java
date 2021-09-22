@@ -1,20 +1,17 @@
-package ru.aiefu.timeandwind;
+package ru.aiefu.timeandwindct;
 
 import com.google.gson.GsonBuilder;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.merchant.villager.VillagerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.StringTextComponent;
-import ru.aiefu.timeandwind.network.NetworkHandler;
-import ru.aiefu.timeandwind.network.messages.ConfigDebugInfo;
-import ru.aiefu.timeandwind.network.messages.SyncConfig;
-import ru.aiefu.timeandwind.network.messages.WorldKeyToClipboard;
+import ru.aiefu.timeandwindct.network.NetworkHandler;
+import ru.aiefu.timeandwindct.network.messages.ConfigDebugInfo;
+import ru.aiefu.timeandwindct.network.messages.SyncConfig;
+import ru.aiefu.timeandwindct.network.messages.WorldKeyToClipboard;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -39,14 +36,8 @@ public class TAWCommands {
             IOManager.readTimeData();
             source.getServer().getAllLevels().forEach(serverWorld -> {
                 String id = serverWorld.dimension().location().toString();
-                if (TimeAndWind.timeDataMap.containsKey(id)) {
-                    ((IDimType) serverWorld.dimensionType()).setCycleDuration(TimeAndWind.timeDataMap.get(id).dayDuration, TimeAndWind.timeDataMap.get(id).nightDuration);
-                }
-                TAWScheduler.createTAWSchedule(serverWorld.dimensionType(), serverWorld.dimension().location().getPath(), "_villager_taw", false);
-                TAWScheduler.createTAWSchedule(serverWorld.dimensionType(), serverWorld.dimension().location().getPath(), "_villager_baby_taw", true);
-                List<Entity> villagers  = serverWorld.getEntities(EntityType.VILLAGER, entity -> true);
-                for(Entity e : villagers){
-                    ((VillagerEntity)e).refreshBrain(serverWorld);
+                if (TimeAndWindCT.timeDataMap.containsKey(id)) {
+                    ((ITimeOperations) serverWorld).getTimeTicker().setupCustomTime(TimeAndWindCT.timeDataMap.get(id).dayDuration, TimeAndWindCT.timeDataMap.get(id).nightDuration);
                 }
             });
             for(ServerPlayerEntity player : server.getPlayerList().getPlayers()){
@@ -90,9 +81,12 @@ public class TAWCommands {
         if(player.level.dimensionType().hasFixedTime()){
             source.sendSuccess(new StringTextComponent("Current dimension has fixed time, custom configuration is useless"), false);
         } else source.sendSuccess(new StringTextComponent("Current dimension does not has fixed time, custom configuration should work fine"), false);
-        if(TimeAndWind.timeDataMap.containsKey(worldId)) {
-            TimeDataStorage storage = TimeAndWind.timeDataMap.get(worldId);
+        if(TimeAndWindCT.timeDataMap.containsKey(worldId)) {
+            TimeDataStorage storage = TimeAndWindCT.timeDataMap.get(worldId);
             source.sendSuccess(new StringTextComponent("Server config for current world: Day Duration: " + storage.dayDuration + " Night Duration: " + storage.nightDuration), true);
+            TimeTicker ticker = ((ITimeOperations) player.level).getTimeTicker();
+            source.sendSuccess(new StringTextComponent("[S] Day Mod: " + ticker.getDayMod() + " Night Mod: " + ticker.getNightMod()), false);
+            source.sendSuccess(new StringTextComponent("[S] Day RE: " + ticker.getDayRoundingError() + " Night RE: " + ticker.getNightRoundingError()), false);
             NetworkHandler.sendTo(new ConfigDebugInfo(), player);
         } else source.sendFailure(new StringTextComponent("No Data found for current world on server side"));
         return 0;

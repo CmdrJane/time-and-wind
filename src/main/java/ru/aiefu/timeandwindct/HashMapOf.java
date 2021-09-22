@@ -1,4 +1,4 @@
-package ru.aiefu.timeandwind;
+package ru.aiefu.timeandwindct;
 
 import java.util.HashMap;
 

@@ -1,4 +1,4 @@
-package ru.aiefu.timeandwind;
+package ru.aiefu.timeandwindct;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -27,7 +27,7 @@ public class IOManager {
             e.printStackTrace();
             timeDataMap = new HashMapOf<>("minecraft:overworld", new TimeDataStorage());
         }
-        TimeAndWind.timeDataMap = timeDataMap;
+        TimeAndWindCT.timeDataMap = timeDataMap;
     }
 
     public void fileWriter(File file, String gson){

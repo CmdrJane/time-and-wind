@@ -1,21 +1,14 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "ru.aiefu.timeandwind.mixin",
+  "package": "ru.aiefu.timeandwindct.mixin",
   "refmap": "taw.refmap.json",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "DimensionTypeMixin",
-    "EntityMixins",
-    "NoBrainInjection",
-    "ServerWorldInjection",
-    "TimeCommandMixins",
-    "VillagerInjection",
-    "WorldMixins"
+    "ServerWorldMixins"
   ],
   "client": [
-    "DebugHudMixins",
-    "WorldRendererMixins"
+    "ClientWorldMixins"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -23,9 +23,9 @@ compileJava   {
     targetCompatibility = '1.8'
 }
 
-version = '1.3.6-forge'
+version = '1.0'
 group = '' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = 'time-and-wind'
+archivesBaseName = 'time-and-wind-ct'
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(8) // Mojang ships Java 8 to end users, so your mod should target Java 8.
 

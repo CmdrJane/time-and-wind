@@ -19,7 +19,7 @@ public class TimeTicker{
             return;
         }
         int currentTime = (int) (timeOfDay % 24000);
-        boolean isDay = currentTime < 12001;
+        boolean isDay = currentTime < 12000;
         double mod = isDay ? dayMod : nightMod;
         if(world.getTimeTAW() % mod == 0){
             if(!disableRoundChecker && leftOver >= 1.0D){

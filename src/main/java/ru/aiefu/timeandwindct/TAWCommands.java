@@ -31,7 +31,7 @@ public class TAWCommands {
         dispatcher.register(CommandManager.literal("taw").then(CommandManager.literal("get-time-data").executes(context -> getTimeConfig(context.getSource()))));
 
         dispatcher.register(CommandManager.literal("taw").then(CommandManager.literal("time-ticker-values").executes(context -> getTimeChecker(context.getSource()))));
-        //dispatcher.register(CommandManager.literal("taw").then(CommandManager.literal("system-time").executes(context -> getSystemTime(context.getSource()))));
+        dispatcher.register(CommandManager.literal("taw").then(CommandManager.literal("system-time").executes(context -> getSystemTime(context.getSource()))));
     }
 
     public static int reloadCfg(ServerCommandSource source) throws CommandSyntaxException {

@@ -36,7 +36,7 @@ public abstract class ClientWorldMixins extends World implements ITimeOperations
     @Inject(method = "<init>", at = @At("TAIL"))
     private void attachTimeDataTAW(ClientPlayNetworkHandler networkHandler, ClientWorld.Properties properties, RegistryKey<World> registryRef, DimensionType dimensionType, int loadDistance, Supplier<Profiler> profiler, WorldRenderer worldRenderer, boolean debugWorld, long seed, CallbackInfo ci){
         String worldId = this.getRegistryKey().getValue().toString();
-        if (TimeAndWindCT.timeDataMap.containsKey(worldId)) {
+        if (TimeAndWindCT.timeDataMap != null && TimeAndWindCT.timeDataMap.containsKey(worldId)) {
             TimeDataStorage storage = TimeAndWindCT.timeDataMap.get(worldId);
             this.timeTicker.setupCustomTime(storage.dayDuration, storage.nightDuration);
         }

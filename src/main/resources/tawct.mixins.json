@@ -4,6 +4,7 @@
   "package": "ru.aiefu.timeandwindct.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "DimensionMixins",
     "PlayerManagerMixins",
     "ServerWorldMixins"
   ],

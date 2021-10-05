@@ -13,7 +13,7 @@
     "sources": "https://github.com/CmdrJane/time-and-wind/tree/custom-ticker-1.17.1"
   },
 
-  "license": "CC0-1.0",
+  "license": "GPL-v3",
   "icon": "assets/tawct/icon.png",
 
   "environment": "*",

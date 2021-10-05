@@ -4,11 +4,13 @@
   "package": "ru.aiefu.timeandwindct.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
+    "DimensionMixins",
     "PlayerManagerMixins",
     "ServerWorldMixins"
   ],
   "client": [
-    "ClientWorldMixins"
+    "ClientWorldMixins",
+    "WorldRendererMixins"
   ],
   "injectors": {
     "defaultRequire": 1

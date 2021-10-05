@@ -11,10 +11,32 @@ import java.io.IOException;
 import java.util.HashMap;
 
 public class IOManager {
-    private HashMap<String, TimeDataStorage> timeData = new HashMapOf<>("minecraft:overworld", new TimeDataStorage());
+    public static void genTimeData(){
+        String gson = new GsonBuilder().setPrettyPrinting().create().toJson(new HashMapOf<>("minecraft:overworld", new TimeDataStorage()));
+        File file = new File("./config/time-and-wind/time-data.json");
+        fileWriter(file, gson);
+    }
 
-    public void genTimeData(){
-        String gson = new GsonBuilder().setPrettyPrinting().create().toJson(this.timeData);
+    public static void generateModConfig(){
+        String gson = new GsonBuilder().setPrettyPrinting().create().toJson(new ModConfig(true, false));
+        File file = new File("./config/time-and-wind/config.json");
+        fileWriter(file, gson);
+    }
+
+    public static ModConfig readModConfig(){
+        ModConfig config;
+        try {
+            config = new Gson().fromJson(new FileReader("./config/time-and-wind/config.json"), ModConfig.class);
+        } catch (IOException e){
+            e.printStackTrace();
+            config = new ModConfig(true, false);
+        }
+        return config;
+    }
+
+    public static void updateTimeData(String id, long dayD, long nightD){
+        TimeAndWindCT.timeDataMap.put(id, new TimeDataStorage(dayD, nightD));
+        String gson = new GsonBuilder().setPrettyPrinting().create().toJson(TimeAndWindCT.timeDataMap);
         File file = new File("./config/time-and-wind/time-data.json");
         fileWriter(file, gson);
     }
@@ -34,7 +56,7 @@ public class IOManager {
         return result;
     }
 
-    public void fileWriter(File file, String gson){
+    public static void fileWriter(File file, String gson){
         try {
             file.createNewFile();
         } catch (IOException e) {

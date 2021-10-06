@@ -5,10 +5,12 @@
   "compatibilityLevel": "JAVA_8",
   "refmap": "mixins.tawct.refmap.json",
   "mixins": [
-    "ServerWorldMixins"
+    "ServerWorldMixins",
+    "WorldProviderMixins"
   ],
   "client": [
-    "ClientWorldMixins"
+    "ClientWorldMixins",
+    "RenderGlobalMixins"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -61,14 +61,16 @@ public class SyncConfig implements IMessage {
                 if(client != null){
                     Logger logger = TimeAndWindCT.getLogger();
                     String worldId = client.provider.getDimensionType().getName();
-                    TimeDataStorage storage = map.get(worldId);
-                    ((ITimeOperations)Minecraft.getMinecraft().world).getTimeTicker().setupCustomTime(storage.dayDuration, storage.nightDuration);
-                    TimeTicker timeOps = ((ITimeOperations) client).getTimeTicker();
-                    logger.info("DayMod: " + timeOps.getDayMod() + " NightMod: " + timeOps.getNightMod());
-                    logger.info("D RE: " + timeOps.getDayRoundingError() + " N RE: " + timeOps.getNightRoundingError());
-                    logger.info("Day: " + timeOps.getDayD() + " Night: " + timeOps.getNightD());
-                    logger.info(TimeAndWindCT.timeDataMap);
-                    logger.info("Configuration synchronized");
+                    if(map.containsKey(worldId)) {
+                        TimeDataStorage storage = map.get(worldId);
+                        ((ITimeOperations) Minecraft.getMinecraft().world).getTimeTicker().setupCustomTime(storage.dayDuration, storage.nightDuration);
+                        TimeTicker timeOps = ((ITimeOperations) client).getTimeTicker();
+                        logger.info("DayMod: " + timeOps.getDayMod() + " NightMod: " + timeOps.getNightMod());
+                        logger.info("D RE: " + timeOps.getDayRoundingError() + " N RE: " + timeOps.getNightRoundingError());
+                        logger.info("Day: " + timeOps.getDayD() + " Night: " + timeOps.getNightD());
+                        logger.info(TimeAndWindCT.timeDataMap);
+                        logger.info("Configuration synchronized");
+                    } else ((ITimeOperations) Minecraft.getMinecraft().world).getTimeTicker().setCustomTicker(false);
                 }
             }
         }

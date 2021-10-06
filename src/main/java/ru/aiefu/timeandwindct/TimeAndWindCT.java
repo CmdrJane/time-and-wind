@@ -29,6 +29,9 @@ public class TimeAndWindCT {
 
     public static HashMap<String, TimeDataStorage> timeDataMap;
 
+    public static ModConfig CONFIG;
+    public static boolean debugMode = false;
+
     private static Logger logger;
 
     @EventHandler
@@ -75,10 +78,13 @@ public class TimeAndWindCT {
             if(!Files.isDirectory(Paths.get("./config/time-and-wind"))){
                 Files.createDirectory(Paths.get("./config/time-and-wind"));
             }
-            IOManager ioManager = new IOManager();
             if(!Files.exists(Paths.get("./config/time-and-wind/time-data.json"))){
-                ioManager.genTimeData();
+                IOManager.genTimeData();
             }
+            if(!Files.exists(Paths.get("./config/time-and-wind/config.json"))){
+                IOManager.generateModConfig();
+            }
+            CONFIG = IOManager.readModConfig();
         }
         catch (IOException e){
             e.printStackTrace();

@@ -37,7 +37,7 @@ public abstract class ClientWorldMixins extends World implements ITimeOperations
     @Inject(method = "<init>", at = @At("TAIL"))
     private void attachTimeDataTAW(ClientPlayNetHandler p_i242067_1_, ClientWorld.ClientWorldInfo p_i242067_2_, RegistryKey<World> p_i242067_3_, DimensionType p_i242067_4_, int p_i242067_5_, Supplier<IProfiler> p_i242067_6_, WorldRenderer p_i242067_7_, boolean p_i242067_8_, long p_i242067_9_, CallbackInfo ci){
         String worldId = this.dimension().location().toString();
-        if (TimeAndWindCT.timeDataMap.containsKey(worldId)) {
+        if (TimeAndWindCT.timeDataMap != null && TimeAndWindCT.timeDataMap.containsKey(worldId)) {
             TimeDataStorage storage = TimeAndWindCT.timeDataMap.get(worldId);
             this.timeTicker.setupCustomTime(storage.dayDuration, storage.nightDuration);
         }
@@ -45,7 +45,7 @@ public abstract class ClientWorldMixins extends World implements ITimeOperations
 
     @Redirect(method = "tickTime", at = @At(value = "INVOKE", target = "net/minecraft/client/world/ClientWorld.setDayTime(J)V"))
     private void customTickerTAW(ClientWorld clientWorld, long timeOfDay) {
-        timeTicker.tickTime((ITimeOperations) clientWorld, timeOfDay);
+        this.timeTicker.tickTime((ITimeOperations) clientWorld, timeOfDay);
     }
 
     @Override

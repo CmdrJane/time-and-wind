@@ -33,6 +33,9 @@ public class TAWCommands {
                 then(CommandManager.argument("night_length", LongArgumentType.longArg(1)).executes(context ->
                         setTimeLength(DimensionArgumentType.getDimensionArgument(context, "dimension"), context.getSource(),
                                 LongArgumentType.getLong(context, "day_length"), LongArgumentType.getLong(context,"night_length"))))))));
+        dispatcher.register(CommandManager.literal("taw").then(CommandManager.literal("remove-cycle-entry").
+                then(CommandManager.argument("dimension", DimensionArgumentType.dimension()).executes(context ->
+                        removeConfigEntry(context.getSource(), DimensionArgumentType.getDimensionArgument(context, "dimension"))))));
 
         dispatcher.register(CommandManager.literal("taw").then(CommandManager.literal("get-current-world-id").executes(context -> printCurrentWorldId(context.getSource()))));
 
@@ -64,6 +67,18 @@ public class TAWCommands {
         return 0;
     }
 
+    private static int removeConfigEntry(ServerCommandSource source, ServerWorld targetWorld) throws CommandSyntaxException {
+        if(source.hasPermissionLevel(4) || source.getMinecraftServer().isHost(source.getPlayer().getGameProfile())) {
+            String worldId = targetWorld.getRegistryKey().getValue().toString();
+            if(TimeAndWindCT.timeDataMap.containsKey(worldId)){
+                TimeAndWindCT.timeDataMap.remove(worldId);
+                IOManager.updateTimeData();
+                source.sendFeedback(new LiteralText("Entry removed, now use /taw reload to apply changes"), false);
+            } else source.sendError(new LiteralText("Config does not contains settings for " + worldId));
+        } else source.sendError(new LiteralText("[Time & Wind] Permission level of 4 is required to run this command"));
+        return 0;
+    }
+
     private static int reloadCfg(ServerCommandSource source) throws CommandSyntaxException {
         if(source.hasPermissionLevel(4) || source.getMinecraftServer().isHost(source.getPlayer().getGameProfile())) {
             MinecraftServer server = source.getMinecraftServer();
@@ -76,7 +91,7 @@ public class TAWCommands {
                 String id = serverWorld.getRegistryKey().getValue().toString();
                 if (TimeAndWindCT.timeDataMap.containsKey(id)) {
                     ((ITimeOperations) serverWorld).getTimeTicker().setupCustomTime(TimeAndWindCT.timeDataMap.get(id).dayDuration, TimeAndWindCT.timeDataMap.get(id).nightDuration);
-                }
+                } else ((ITimeOperations) serverWorld).getTimeTicker().setCustomTicker(false);
             });
             for(ServerPlayerEntity player : server.getPlayerManager().getPlayerList()){
                TimeAndWindCT.sendConfigSyncPacket(player);

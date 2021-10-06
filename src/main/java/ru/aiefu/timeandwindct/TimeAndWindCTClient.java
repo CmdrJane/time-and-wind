@@ -34,8 +34,11 @@ public class TimeAndWindCTClient implements ClientModInitializer {
                     }
                     ClientWorld clientWorld = MinecraftClient.getInstance().world;
                     if (clientWorld != null) {
-                        TimeDataStorage storage = TimeAndWindCT.timeDataMap.get(clientWorld.getRegistryKey().getValue().toString());
-                        ((ITimeOperations)MinecraftClient.getInstance().world).getTimeTicker().setupCustomTime(storage.dayDuration, storage.nightDuration);
+                        String worldId = clientWorld.getRegistryKey().getValue().toString();
+                        if(TimeAndWindCT.timeDataMap.containsKey(worldId)) {
+                            TimeDataStorage storage = TimeAndWindCT.timeDataMap.get(worldId);
+                            ((ITimeOperations) MinecraftClient.getInstance().world).getTimeTicker().setupCustomTime(storage.dayDuration, storage.nightDuration);
+                        } else ((ITimeOperations) MinecraftClient.getInstance().world).getTimeTicker().setCustomTicker(false);
                     }
                     TimeAndWindCT.LOGGER.info("[Time & Wind] Configuration synchronized");
                 }
@@ -66,9 +69,12 @@ public class TimeAndWindCTClient implements ClientModInitializer {
         });
         ClientPlayNetworking.registerGlobalReceiver(NetworkPacketsID.SETUP_TIME, (client, handler, buf, responseSender) -> {
             ClientWorld clientWorld = MinecraftClient.getInstance().world;
-            if (clientWorld != null) {
-                TimeDataStorage storage = TimeAndWindCT.timeDataMap.get(clientWorld.getRegistryKey().getValue().toString());
-                ((ITimeOperations)MinecraftClient.getInstance().world).getTimeTicker().setupCustomTime(storage.dayDuration, storage.nightDuration);
+            if (clientWorld != null && TimeAndWindCT.timeDataMap != null) {
+                String worldId = clientWorld.getRegistryKey().getValue().toString();
+                if(TimeAndWindCT.timeDataMap.containsKey(worldId)) {
+                    TimeDataStorage storage = TimeAndWindCT.timeDataMap.get(worldId);
+                    ((ITimeOperations) MinecraftClient.getInstance().world).getTimeTicker().setupCustomTime(storage.dayDuration, storage.nightDuration);
+                } else ((ITimeOperations) MinecraftClient.getInstance().world).getTimeTicker().setCustomTicker(false);
             }
             TimeAndWindCT.LOGGER.info("[Time & Wind] Timedata reloaded on client");
         });

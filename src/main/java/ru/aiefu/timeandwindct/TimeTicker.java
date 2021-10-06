@@ -2,7 +2,7 @@ package ru.aiefu.timeandwindct;
 
 public class TimeTicker{
 
-    private boolean enableCustomTicker = true;
+    private boolean enableCustomTicker = false;
     private long dayD;
     private int dayMod;
     private double dayRoundingError;

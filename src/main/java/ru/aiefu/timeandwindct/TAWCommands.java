@@ -2,6 +2,7 @@ package ru.aiefu.timeandwindct;
 
 import com.google.gson.GsonBuilder;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.netty.buffer.Unpooled;
@@ -24,8 +25,8 @@ import java.util.List;
 public class TAWCommands {
     public static void registerCommands(CommandDispatcher<ServerCommandSource> dispatcher){
         dispatcher.register(CommandManager.literal("taw").then(CommandManager.literal("reload").executes(context -> reloadCfg(context.getSource()))));
-        dispatcher.register(CommandManager.literal("taw").then(CommandManager.literal("enable-debug").executes(context ->
-                enableDebug(context.getSource()))));
+        dispatcher.register(CommandManager.literal("taw").then(CommandManager.literal("enable-debug").then(CommandManager.argument("boolean", BoolArgumentType.bool()).executes(context ->
+                enableDebug(context.getSource(), BoolArgumentType.getBool(context, "boolean"))))));
 
         dispatcher.register(CommandManager.literal("taw").then(CommandManager.literal("set-cycle-length").
                 then(CommandManager.argument("dimension", DimensionArgumentType.dimension()).then(CommandManager.argument("day_length", LongArgumentType.longArg(1)).
@@ -46,10 +47,10 @@ public class TAWCommands {
         dispatcher.register(CommandManager.literal("taw").then(CommandManager.literal("system-time").executes(context -> getSystemTime(context.getSource()))));
     }
 
-    private static int enableDebug(ServerCommandSource source) throws CommandSyntaxException {
+    private static int enableDebug(ServerCommandSource source, boolean bl) throws CommandSyntaxException {
         if(source.hasPermissionLevel(4) || source.getServer().isHost(source.getPlayer().getGameProfile())) {
-            TimeAndWindCT.debugMode = true;
-            source.sendFeedback(new LiteralText("[Time & Wind] Debug mode enabled"), true);
+            TimeAndWindCT.debugMode = bl;
+            source.sendFeedback(new LiteralText("[Time & Wind] Debug mode set to " + bl), true);
         } else source.sendError(new LiteralText("[Time & Wind] Permission level of 4 is required to run this command"));
         return 0;
     }

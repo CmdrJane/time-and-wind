@@ -34,6 +34,10 @@ public class TAWCommands {
                                 setTimeLength(DimensionArgument.getDimension(context, "dimension"), context.getSource(),
                                         LongArgumentType.getLong(context, "day_length"), LongArgumentType.getLong(context,"night_length"))))))));
 
+        dispatcher.register(Commands.literal("taw").then(Commands.literal("remove-cycle-entry").
+                then(Commands.argument("dimension", DimensionArgument.dimension()).executes(context ->
+                        removeConfigEntry(context.getSource(), DimensionArgument.getDimension(context, "dimension"))))));
+
         dispatcher.register(Commands.literal("taw").then(Commands.literal("get-current-world-id").executes(context -> printCurrentWorldId(context.getSource()))));
 
         dispatcher.register(Commands.literal("taw").then(Commands.literal("parse-worlds-ids").executes(context -> parseWorldsIds(context.getSource()))));
@@ -66,6 +70,18 @@ public class TAWCommands {
         else {
             source.sendFailure(new StringTextComponent("[Time & Wind] Permission level of 4 is required to run this command"));
         }
+        return 0;
+    }
+
+    private static int removeConfigEntry(CommandSource source, ServerWorld targetWorld) throws CommandSyntaxException {
+        if(source.hasPermission(4) || source.getServer().isSingleplayerOwner(source.getPlayerOrException().getGameProfile())) {
+            String worldId = targetWorld.dimension().location().toString();
+            if(TimeAndWindCT.timeDataMap.containsKey(worldId)){
+                TimeAndWindCT.timeDataMap.remove(worldId);
+                IOManager.updateTimeData();
+                source.sendSuccess(new StringTextComponent("Entry removed, now use /taw reload to apply changes"), false);
+            } else source.sendFailure(new StringTextComponent("Config does not contains settings for " + worldId));
+        } else source.sendFailure(new StringTextComponent("[Time & Wind] Permission level of 4 is required to run this command"));
         return 0;
     }
 

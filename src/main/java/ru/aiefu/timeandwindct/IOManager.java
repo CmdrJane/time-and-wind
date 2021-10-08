@@ -41,6 +41,12 @@ public class IOManager {
         fileWriter(file, gson);
     }
 
+    public static void updateTimeData(){
+        String gson = new GsonBuilder().setPrettyPrinting().create().toJson(TimeAndWindCT.timeDataMap);
+        File file = new File("./config/time-and-wind/time-data.json");
+        fileWriter(file, gson);
+    }
+
     public static int readTimeData(){
         HashMap<String, TimeDataStorage> timeDataMap;
         int result;

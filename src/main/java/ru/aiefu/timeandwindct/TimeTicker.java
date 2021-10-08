@@ -2,7 +2,7 @@ package ru.aiefu.timeandwindct;
 
 public class TimeTicker{
 
-    private boolean enableCustomTicker = true;
+    private boolean enableCustomTicker = false;
     private long dayD;
     private int dayMod;
     private double dayRoundingError;
@@ -17,25 +17,26 @@ public class TimeTicker{
     private double leftOverInverted = 0;
 
     public void tickTime(ITimeOperations world, long timeOfDay){
+        long time = world.getTimeOfDayTAW();
         if(!enableCustomTicker){
-            world.setTimeOfDayTAW(world.getTimeOfDayTAW() + 1L);
+            world.setTimeOfDayTAW(time + 1L);
             return;
         }
-        int currentTime = (int) (timeOfDay % 24000);
+        int currentTime = (int) (time % 24000);
         int mod;
         double leftOverToAdd;
         if(currentTime < 12000){
             mod = dayMod;
             leftOverToAdd = dayRoundingError;
             if(isDayLesserThanVanilla){
-                tickTime(world, mod, leftOverToAdd);
+                tickTime(world, mod, leftOverToAdd, time, currentTime, 12000);
                 return;
             }
         } else {
             mod = nightMod;
             leftOverToAdd = nightRoundingError;
             if(isNightLesserThanVanilla){
-                tickTime(world, mod, leftOverToAdd);
+                tickTime(world, mod, leftOverToAdd, time, currentTime, 24000);
                 return;
             }
         }
@@ -45,17 +46,21 @@ public class TimeTicker{
                 return;
             }
             leftOver += leftOverToAdd;
-            world.setTimeOfDayTAW(world.getTimeOfDayTAW() + 1);
+            world.setTimeOfDayTAW(time + 1L);
         }
     }
-
-    private void tickTime(ITimeOperations world, int mod, double leftOverToAdd){
+    private void tickTime(ITimeOperations world, int mod, double leftOverToAdd, long timeOfDay, int currentTime, int cap){
+        if(currentTime + mod > cap){
+            world.setTimeOfDayTAW(timeOfDay + (cap - currentTime));
+            leftOverInverted = 0.0D;
+            return;
+        }
         if(leftOverInverted >= 1.0D){
-            world.setTimeOfDayTAW(world.getTimeOfDayTAW() + mod + 1);
+            world.setTimeOfDayTAW(timeOfDay + mod + 1L);
             leftOverInverted -= 1;
             return;
         }
-        world.setTimeOfDayTAW(world.getTimeOfDayTAW() + mod);
+        world.setTimeOfDayTAW(timeOfDay + mod);
         leftOverInverted += leftOverToAdd;
     }
 
@@ -90,9 +95,6 @@ public class TimeTicker{
         return shouldInverse ? 12000.0D / value : value / 12000.0D;
     }
 
-
-
-
     public void setCustomTicker(boolean bl){
         this.enableCustomTicker = bl;
     }
@@ -113,5 +115,8 @@ public class TimeTicker{
     }
     public double getNightRoundingError(){
         return this.nightRoundingError;
+    }
+    public boolean getState(){
+        return this.enableCustomTicker;
     }
 }

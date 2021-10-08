@@ -40,7 +40,7 @@ public abstract class ClientWorldMixins extends World implements ITimeOperations
         if (TimeAndWindCT.timeDataMap != null && TimeAndWindCT.timeDataMap.containsKey(worldId)) {
             TimeDataStorage storage = TimeAndWindCT.timeDataMap.get(worldId);
             this.timeTicker.setupCustomTime(storage.dayDuration, storage.nightDuration);
-        }
+        } else this.timeTicker.setCustomTicker(false);
     }
 
     @Redirect(method = "tickTime", at = @At(value = "INVOKE", target = "net/minecraft/client/world/ClientWorld.setDayTime(J)V"))

@@ -36,9 +36,12 @@ public class SyncConfig implements ITAWPacket{
                 }
                 ClientWorld clientWorld = Minecraft.getInstance().level;
                 if (clientWorld != null) {
+                    String worldId = clientWorld.dimension().location().toString();
                     ITimeOperations timeOps = (ITimeOperations) clientWorld;
-                    TimeDataStorage storage = TimeAndWindCT.timeDataMap.get(clientWorld.dimension().location().toString());
-                    timeOps.getTimeTicker().setupCustomTime(storage.dayDuration, storage.nightDuration);
+                    if(TimeAndWindCT.timeDataMap.containsKey(worldId)) {
+                        TimeDataStorage storage = TimeAndWindCT.timeDataMap.get(worldId);
+                        timeOps.getTimeTicker().setupCustomTime(storage.dayDuration, storage.nightDuration);
+                    } else timeOps.getTimeTicker().setCustomTicker(false);
                 }
                 TimeAndWindCT.LOGGER.info("[Time & Wind] Configuration synchronized");
                 return;

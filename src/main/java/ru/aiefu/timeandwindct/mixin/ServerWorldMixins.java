@@ -46,7 +46,7 @@ public abstract class ServerWorldMixins extends World implements ITimeOperations
 		if (TimeAndWindCT.timeDataMap.containsKey(worldId)) {
 			TimeDataStorage storage = TimeAndWindCT.timeDataMap.get(worldId);
 			this.timeTicker.setupCustomTime(storage.dayDuration, storage.nightDuration);
-		}
+		} else this.timeTicker.setCustomTicker(false);
 	}
 
 	@Redirect(method = "tickTime", at = @At(value = "INVOKE", target = "net/minecraft/world/server/ServerWorld.setDayTime(J)V"))

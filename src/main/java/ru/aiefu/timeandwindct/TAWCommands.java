@@ -56,7 +56,7 @@ public class TAWCommands {
                 String id = serverWorld.dimension().location().toString();
                 if (TimeAndWindCT.timeDataMap.containsKey(id)) {
                     ((ITimeOperations) serverWorld).getTimeTicker().setupCustomTime(TimeAndWindCT.timeDataMap.get(id).dayDuration, TimeAndWindCT.timeDataMap.get(id).nightDuration);
-                }
+                } else ((ITimeOperations) serverWorld).getTimeTicker().setCustomTicker(false);
             });
             for(ServerPlayerEntity player : server.getPlayerList().getPlayers()){
                 NetworkHandler.sendTo(new SyncConfig(), player);

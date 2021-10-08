@@ -27,6 +27,7 @@ public class NetworkHandler{
         registerPacket(SyncConfig.class, SyncConfig::new, NetworkDirection.PLAY_TO_CLIENT);
         registerPacket(ConfigDebugInfo.class, ConfigDebugInfo::new, NetworkDirection.PLAY_TO_CLIENT);
         registerPacket(WorldKeyToClipboard.class, WorldKeyToClipboard::new, NetworkDirection.PLAY_TO_CLIENT);
+        registerPacket(SyncModConfig.class, SyncModConfig::new, NetworkDirection.PLAY_TO_CLIENT);
 
         registerPacket(ResyncConfig.class, ResyncConfig::new, NetworkDirection.PLAY_TO_SERVER);
     }

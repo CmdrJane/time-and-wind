@@ -14,6 +14,7 @@ import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import org.apache.logging.log4j.Logger;
 import ru.aiefu.timeandwindct.commands.TAWCommands;
 import ru.aiefu.timeandwindct.packets.SyncConfig;
+import ru.aiefu.timeandwindct.packets.SyncModConfig;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -52,6 +53,7 @@ public class TimeAndWindCT {
         EntityPlayer player = e.player;
         if(!player.world.isRemote){
             TAWNetworkHandler.INSTANCE.sendTo(new SyncConfig(), (EntityPlayerMP) player);
+            TAWNetworkHandler.INSTANCE.sendTo(new SyncModConfig(), (EntityPlayerMP) player);
             logger.info("Sending config to client...");
         }
     }

@@ -23,7 +23,7 @@ public class TAWCommands extends CommandBase {
     @Override
     @Nonnull
     public String getUsage(@Nonnull ICommandSender sender) {
-        return "taw reload add-entry remove-entry get-cfg time-values get-world-id";
+        return "taw reload add-entry remove-entry debug-mode get-cfg time-values get-world-id";
     }
 
     @Override
@@ -90,8 +90,9 @@ public class TAWCommands extends CommandBase {
                         notifyCommandListener(sender, this, "Debug mode disabled");
                         break;
                     }
+                    default: notifyCommandListener(sender, this, "Invalid argument, can only be true or false");
                 }
-            } else notifyCommandListener(sender, this, "Wrond syntax, use /taw debug-mode <true/false>");
+            } else notifyCommandListener(sender, this, "Wrong syntax, use /taw debug-mode <true/false>");
         } else notifyCommandListener(sender, this, "[Time & Wind] Permission level of 4 is required to run this command");
     }
 
@@ -181,6 +182,7 @@ public class TAWCommands extends CommandBase {
     public void getCurrentTimeValue(ICommandSender sender, MinecraftServer server){
         if(TimeAndWindCT.debugMode || sender.canUseCommand(4, this.getName()) || server.isSinglePlayer()) {
             TimeTicker ticker = ((ITimeOperations) sender.getEntityWorld()).getTimeTicker();
+            notifyCommandListener(sender, this, "State: " + ticker.getState());
             notifyCommandListener(sender, this, "Day Mod: " + ticker.getDayMod() + " Night Mod: " + ticker.getNightMod());
             notifyCommandListener(sender, this, "Day RE: " + ticker.getDayRoundingError() + " Night RE: " + ticker.getNightRoundingError());
             notifyCommandListener(sender, this, "Day Duration: " + ticker.getDayD() + " Night Day: " + ticker.getNightD());

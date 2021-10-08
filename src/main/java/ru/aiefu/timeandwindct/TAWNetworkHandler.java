@@ -5,6 +5,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
 import ru.aiefu.timeandwindct.packets.CheckConfig;
 import ru.aiefu.timeandwindct.packets.SyncConfig;
+import ru.aiefu.timeandwindct.packets.SyncModConfig;
 import ru.aiefu.timeandwindct.packets.WorldIDToClipboard;
 
 public class TAWNetworkHandler {
@@ -28,5 +29,6 @@ public class TAWNetworkHandler {
         INSTANCE.registerMessage(SyncConfig.Handler.class, SyncConfig.class, nextID(), Side.CLIENT);
         INSTANCE.registerMessage(CheckConfig.Handler.class, CheckConfig.class, nextID(), Side.CLIENT);
         INSTANCE.registerMessage(WorldIDToClipboard.Handler.class, WorldIDToClipboard.class, nextID(), Side.CLIENT);
+        INSTANCE.registerMessage(SyncModConfig.Handler.class, SyncModConfig.class, nextID(), Side.CLIENT);
     }
 }

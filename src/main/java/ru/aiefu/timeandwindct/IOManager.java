@@ -12,7 +12,7 @@ import java.util.HashMap;
 
 public class IOManager {
     public static void genTimeData(){
-        String gson = new GsonBuilder().setPrettyPrinting().create().toJson(new HashMapOf<>("minecraft:overworld", new TimeDataStorage()));
+        String gson = new GsonBuilder().setPrettyPrinting().create().toJson(new HashMapOf<>("overworld", new TimeDataStorage()));
         File file = new File("./config/time-and-wind/time-data.json");
         fileWriter(file, gson);
     }

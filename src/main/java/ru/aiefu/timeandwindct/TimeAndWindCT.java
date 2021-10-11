@@ -72,4 +72,13 @@ public class TimeAndWindCT implements ModInitializer {
 			LOGGER.info("[Time & Wind] Sending config to player");
 		} else ServerPlayNetworking.send(player, NetworkPacketsID.SETUP_TIME, new PacketByteBuf(Unpooled.buffer()));
 	}
+
+	public static void sendModConfigSyncPacket(ServerPlayerEntity player){
+		if(!player.getServer().isHost(player.getGameProfile())) {
+			PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
+			buf.writeBoolean(CONFIG.patchSkyAngle);
+			buf.writeBoolean(CONFIG.syncWithSystemTime);
+			ServerPlayNetworking.send(player, NetworkPacketsID.SYNC_MOD_CONFIG, buf);
+		}
+	}
 }

@@ -78,5 +78,10 @@ public class TimeAndWindCTClient implements ClientModInitializer {
             }
             TimeAndWindCT.LOGGER.info("[Time & Wind] Timedata reloaded on client");
         });
+        ClientPlayNetworking.registerGlobalReceiver(NetworkPacketsID.SYNC_MOD_CONFIG, (client, handler, buf, responseSender) -> {
+            if(buf.readableBytes() > 0){
+                TimeAndWindCT.CONFIG = new ModConfig(buf.readBoolean(), buf.readBoolean());
+            }
+        });
     }
 }

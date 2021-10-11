@@ -19,6 +19,7 @@ public class TimeAndWindClient implements ClientModInitializer {
      */
     @Override
     public void onInitializeClient() {
+        /*
         ClientPlayNetworking.registerGlobalReceiver(new Identifier(TimeAndWind.MOD_ID, "sync_cycle"), (client, handler, buf, responseSender) -> {
             NbtCompound tag = buf.readNbt();
             ClientWorld world = MinecraftClient.getInstance().world;
@@ -27,6 +28,7 @@ public class TimeAndWindClient implements ClientModInitializer {
                 dim.setCycleDuration(tag.getLong("dayD"), tag.getLong("nightD"));
             }
         });
+         */
         ClientPlayNetworking.registerGlobalReceiver(NetworkPacketsID.SYNC_CONFIG, (client, handler, buf, responseSender) -> {
             if(buf.readableBytes() > 0 ){
                 NbtCompound nbtCMP = buf.readNbt();
@@ -44,8 +46,11 @@ public class TimeAndWindClient implements ClientModInitializer {
                     ClientWorld clientWorld = MinecraftClient.getInstance().world;
                     if (clientWorld != null) {
                         IDimType dim = (IDimType) clientWorld.getDimension();
-                        TimeDataStorage storage = TimeAndWind.timeDataMap.get(clientWorld.getRegistryKey().getValue().toString());
-                        dim.setCycleDuration(storage.dayDuration, storage.nightDuration);
+                        String worldId = clientWorld.getRegistryKey().getValue().toString();
+                        if(TimeAndWind.timeDataMap.containsKey(worldId)) {
+                            TimeDataStorage storage = TimeAndWind.timeDataMap.get(worldId);
+                            dim.setCycleDuration(storage.dayDuration, storage.nightDuration);
+                        } else dim.resetCycleDuration();
                     }
                     TimeAndWind.LOGGER.info("[Time & Wind] Configuration synchronized");
                 }
@@ -73,6 +78,18 @@ public class TimeAndWindClient implements ClientModInitializer {
             } catch (Exception e){
                 e.printStackTrace();
             }
+        });
+        ClientPlayNetworking.registerGlobalReceiver(NetworkPacketsID.SETUP_TIME, (client, handler, buf, responseSender) -> {
+            ClientWorld clientWorld = MinecraftClient.getInstance().world;
+            if (clientWorld != null) {
+                IDimType dim = (IDimType) clientWorld.getDimension();
+                String worldId = clientWorld.getRegistryKey().getValue().toString();
+                if(TimeAndWind.timeDataMap.containsKey(worldId)) {
+                    TimeDataStorage storage = TimeAndWind.timeDataMap.get(worldId);
+                    dim.setCycleDuration(storage.dayDuration, storage.nightDuration);
+                } else dim.resetCycleDuration();
+            }
+            TimeAndWind.LOGGER.info("[Time & Wind] Reloaded on client");
         });
     }
 }

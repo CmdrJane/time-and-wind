@@ -44,9 +44,8 @@ public class TimeAndWind implements ModInitializer {
 			if(!Files.isDirectory(Paths.get("./config/time-and-wind"))){
 				Files.createDirectory(Paths.get("./config/time-and-wind"));
 			}
-			IOManager ioManager = new IOManager();
 			if(!Files.exists(Paths.get("./config/time-and-wind/time-data.json"))){
-				ioManager.genTimeData();
+				IOManager.genTimeData();
 			}
 		}
 		catch (IOException e){
@@ -75,7 +74,7 @@ public class TimeAndWind implements ModInitializer {
 			tag.put("tawConfig", listTag);
 			ServerPlayNetworking.send(player, NetworkPacketsID.SYNC_CONFIG, new PacketByteBuf(Unpooled.buffer()).writeNbt(tag));
 			LOGGER.info("[Time & Wind] Sending config to player");
-		}
+		} else ServerPlayNetworking.send(player, NetworkPacketsID.SETUP_TIME, new PacketByteBuf(Unpooled.buffer()));
 	}
 	public static String get24TimeFormat(World world){
 		if(world != null){

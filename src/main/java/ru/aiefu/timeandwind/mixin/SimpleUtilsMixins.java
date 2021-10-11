@@ -16,6 +16,5 @@ public class SimpleUtilsMixins {
     @Inject(method = "parseTime", at =@At("HEAD"), cancellable = true, remap = false)
     private static void patchTimeParserTAW(long time, CallbackInfoReturnable<String> cir){
         cir.setReturnValue(TimeAndWind.get24TimeFormat(MinecraftClient.getInstance().world));
-        return;
     }
 }

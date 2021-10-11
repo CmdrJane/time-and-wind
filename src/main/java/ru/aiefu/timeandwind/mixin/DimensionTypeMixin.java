@@ -41,7 +41,7 @@ public class DimensionTypeMixin implements IDimType {
 
 	@Inject(method = "getSkyAngle", at = @At("HEAD"), cancellable = true)
 	private void calculateCelestialAngle(long time, CallbackInfoReturnable<Float> cir){
-		if(!this.fixedTime.isPresent()){
+		if(this.fixedTime.isEmpty()){
 			cir.setReturnValue((float) syncTime(dayDuration, nightDuration, time));
 		}
 	}
@@ -81,6 +81,13 @@ public class DimensionTypeMixin implements IDimType {
 			float r = timeOfDay / dayD * 100;
 			return Math.round(12000.0F / 100 * r);
 		}
+	}
+
+	@Override
+	public void resetCycleDuration() {
+		this.dayDuration = 12000L;
+		this.nightDuration = 12000L;
+		this.cycleTime = dayDuration + nightDuration;
 	}
 
 	@Override

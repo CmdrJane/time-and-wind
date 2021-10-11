@@ -33,7 +33,7 @@ public class WorldMixins {
         if (TimeAndWind.timeDataMap.containsKey(worldId)) {
             TimeDataStorage storage = TimeAndWind.timeDataMap.get(worldId);
             ((IDimType) this.dimension).setCycleDuration(storage.dayDuration, storage.nightDuration);
-        }
+        } else ((IDimType) this.dimension).resetCycleDuration();
         TAWScheduler.createTAWSchedule(this.dimension, this.registryKey.getValue().getPath(), "_villager_taw", false);
         TAWScheduler.createTAWSchedule(this.dimension, this.registryKey.getValue().getPath(), "_villager_baby_taw", true);
     }

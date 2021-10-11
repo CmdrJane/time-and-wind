@@ -8,4 +8,5 @@ public interface IDimType {
     float getPrevAngle();
     float untweakedAngle();
     int calculateIrisWorldDayTime(long time);
+    void resetCycleDuration();
 }

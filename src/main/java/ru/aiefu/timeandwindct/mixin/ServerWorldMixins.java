@@ -18,10 +18,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import ru.aiefu.timeandwindct.ITimeOperations;
-import ru.aiefu.timeandwindct.TimeAndWindCT;
-import ru.aiefu.timeandwindct.TimeDataStorage;
-import ru.aiefu.timeandwindct.TimeTicker;
+import ru.aiefu.timeandwindct.*;
+import ru.aiefu.timeandwindct.config.TimeDataStorage;
+import ru.aiefu.timeandwindct.tickers.DefaultTicker;
+import ru.aiefu.timeandwindct.tickers.SystemTimeTicker;
+import ru.aiefu.timeandwindct.tickers.Ticker;
+import ru.aiefu.timeandwindct.tickers.TimeTicker;
 
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -38,29 +40,32 @@ public abstract class ServerWorldMixins extends World implements ITimeOperations
 	@Shadow
 	public abstract void setDayTime(long p_241114_1_);
 
-	protected TimeTicker timeTicker = new TimeTicker();
+	protected Ticker timeTicker;
 
 	@Inject(method = "<init>", at = @At("TAIL"))
 	private void attachTimeDataTAW(MinecraftServer p_i241885_1_, Executor p_i241885_2_, SaveFormat.LevelSave p_i241885_3_, IServerWorldInfo p_i241885_4_, RegistryKey<World> p_i241885_5_, DimensionType p_i241885_6_, IChunkStatusListener p_i241885_7_, ChunkGenerator p_i241885_8_, boolean p_i241885_9_, long p_i241885_10_, List<ISpecialSpawner> p_i241885_12_, boolean p_i241885_13_, CallbackInfo ci){
 		String worldId = this.dimension().location().toString();
-		if (TimeAndWindCT.timeDataMap.containsKey(worldId)) {
+		if (TimeAndWindCT.CONFIG.syncWithSystemTime) {
+			this.timeTicker = new SystemTimeTicker(this);
+		}
+		else if (TimeAndWindCT.timeDataMap.containsKey(worldId)) {
 			TimeDataStorage storage = TimeAndWindCT.timeDataMap.get(worldId);
-			this.timeTicker.setupCustomTime(storage.dayDuration, storage.nightDuration);
-		} else this.timeTicker.setCustomTicker(false);
+			this.timeTicker = new TimeTicker(storage.dayDuration, storage.nightDuration);
+		} else this.timeTicker = new DefaultTicker();
 	}
 
 	@Redirect(method = "tickTime", at = @At(value = "INVOKE", target = "net/minecraft/world/server/ServerWorld.setDayTime(J)V"))
-	private void customTickerTAW(ServerWorld world, long timeOfDay) {
-		this.timeTicker.tickTime((ITimeOperations) world, timeOfDay);
+	private void customTickerTAW(ServerWorld serverWorld, long p_241114_1_) {
+		this.timeTicker.tick(this);
 	}
 
 	@Override
-	public TimeTicker getTimeTicker() {
+	public Ticker getTimeTicker() {
 		return this.timeTicker;
 	}
 
 	@Override
-	public void setTimeTicker(TimeTicker timeTicker) {
+	public void setTimeTicker(Ticker timeTicker) {
 		this.timeTicker = timeTicker;
 	}
 

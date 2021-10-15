@@ -1,4 +1,4 @@
-package ru.aiefu.timeandwindct;
+package ru.aiefu.timeandwindct.config;
 
 public class ModConfig {
     public boolean patchSkyAngle;

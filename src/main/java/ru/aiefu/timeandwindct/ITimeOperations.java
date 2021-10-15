@@ -1,8 +1,10 @@
 package ru.aiefu.timeandwindct;
 
+import ru.aiefu.timeandwindct.tickers.Ticker;
+
 public interface ITimeOperations {
-    TimeTicker getTimeTicker();
-    void setTimeTicker(TimeTicker timeTicker);
+    Ticker getTimeTicker();
+    void setTimeTicker(Ticker timeTicker);
     void setTimeOfDayTAW(long time);
     long getTimeTAW();
     long getTimeOfDayTAW();

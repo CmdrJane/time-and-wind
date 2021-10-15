@@ -3,6 +3,9 @@ package ru.aiefu.timeandwindct;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import ru.aiefu.timeandwindct.config.ModConfig;
+import ru.aiefu.timeandwindct.config.SystemTimeConfig;
+import ru.aiefu.timeandwindct.config.TimeDataStorage;
 
 import java.io.File;
 import java.io.FileReader;
@@ -15,6 +18,23 @@ public class IOManager {
         String gson = new GsonBuilder().setPrettyPrinting().create().toJson(new HashMapOf<>("minecraft:overworld", new TimeDataStorage()));
         File file = new File("./config/time-and-wind/time-data.json");
         fileWriter(file, gson);
+    }
+
+    public static void generateSysTimeCfg(){
+        String gson = new GsonBuilder().setPrettyPrinting().create().toJson(new SystemTimeConfig("5:00", "20:00", "3:00"));
+        File file = new File("./config/time-and-wind/system-time-data.json");
+        fileWriter(file, gson);
+    }
+
+    public static SystemTimeConfig readSysTimeCfg(){
+        SystemTimeConfig config;
+        try {
+            config = new Gson().fromJson(new FileReader("./config/time-and-wind/system-time-data.json"), SystemTimeConfig.class);
+        } catch (IOException e){
+            e.printStackTrace();
+            config = new SystemTimeConfig("7:00", "19:00", "local");
+        }
+        return config;
     }
 
     public static void generateModConfig(){

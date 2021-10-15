@@ -20,14 +20,13 @@ public class NetworkHandler{
             .clientAcceptedVersions(PROTOCOL_VERSION::equals)
             .serverAcceptedVersions(PROTOCOL_VERSION::equals)
             .networkProtocolVersion(() -> PROTOCOL_VERSION)
-            .simpleChannel();;
+            .simpleChannel();
     private static int id = 0;
 
     public static void setup(){
         registerPacket(SyncConfig.class, SyncConfig::new, NetworkDirection.PLAY_TO_CLIENT);
         registerPacket(ConfigDebugInfo.class, ConfigDebugInfo::new, NetworkDirection.PLAY_TO_CLIENT);
         registerPacket(WorldKeyToClipboard.class, WorldKeyToClipboard::new, NetworkDirection.PLAY_TO_CLIENT);
-        registerPacket(SyncModConfig.class, SyncModConfig::new, NetworkDirection.PLAY_TO_CLIENT);
 
         registerPacket(ResyncConfig.class, ResyncConfig::new, NetworkDirection.PLAY_TO_SERVER);
     }

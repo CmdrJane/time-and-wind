@@ -12,10 +12,15 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.server.ServerWorld;
+import ru.aiefu.timeandwindct.config.TimeDataStorage;
 import ru.aiefu.timeandwindct.network.NetworkHandler;
 import ru.aiefu.timeandwindct.network.messages.ConfigDebugInfo;
 import ru.aiefu.timeandwindct.network.messages.SyncConfig;
 import ru.aiefu.timeandwindct.network.messages.WorldKeyToClipboard;
+import ru.aiefu.timeandwindct.tickers.DefaultTicker;
+import ru.aiefu.timeandwindct.tickers.SystemTimeTicker;
+import ru.aiefu.timeandwindct.tickers.Ticker;
+import ru.aiefu.timeandwindct.tickers.TimeTicker;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -58,9 +63,13 @@ public class TAWCommands {
             }
             source.getServer().getAllLevels().forEach(serverWorld -> {
                 String id = serverWorld.dimension().location().toString();
-                if (TimeAndWindCT.timeDataMap.containsKey(id)) {
-                    ((ITimeOperations) serverWorld).getTimeTicker().setupCustomTime(TimeAndWindCT.timeDataMap.get(id).dayDuration, TimeAndWindCT.timeDataMap.get(id).nightDuration);
-                } else ((ITimeOperations) serverWorld).getTimeTicker().setCustomTicker(false);
+                if(TimeAndWindCT.CONFIG.syncWithSystemTime){
+                    ((ITimeOperations) serverWorld).setTimeTicker(new SystemTimeTicker((ITimeOperations) serverWorld));
+                }
+                else if (TimeAndWindCT.timeDataMap.containsKey(id)) {
+                    TimeDataStorage storage = TimeAndWindCT.timeDataMap.get(id);
+                    ((ITimeOperations) serverWorld).setTimeTicker(new TimeTicker(storage.dayDuration, storage.nightDuration));
+                } else ((ITimeOperations) serverWorld).setTimeTicker(new DefaultTicker());
             });
             for(ServerPlayerEntity player : server.getPlayerList().getPlayers()){
                 NetworkHandler.sendTo(new SyncConfig(), player);
@@ -139,16 +148,27 @@ public class TAWCommands {
             String worldId = player.level.dimension().location().toString();
             if (player.level.dimensionType().hasFixedTime()) {
                 source.sendSuccess(new StringTextComponent("Current dimension has fixed time, custom configuration is useless"), false);
-            } else
-                source.sendSuccess(new StringTextComponent("Current dimension does not has fixed time, custom configuration should work fine"), false);
-            if (TimeAndWindCT.timeDataMap.containsKey(worldId)) {
+            } else source.sendSuccess(new StringTextComponent("Current dimension does not has fixed time, custom configuration should work fine"), false);
+
+            Ticker t = ((ITimeOperations) player.level).getTimeTicker();
+            if (t instanceof TimeTicker && TimeAndWindCT.timeDataMap.containsKey(worldId)) {
                 TimeDataStorage storage = TimeAndWindCT.timeDataMap.get(worldId);
                 source.sendSuccess(new StringTextComponent("Server config for current world: Day Duration: " + storage.dayDuration + " Night Duration: " + storage.nightDuration), true);
-                TimeTicker ticker = ((ITimeOperations) player.level).getTimeTicker();
+                TimeTicker ticker = (TimeTicker) t;
                 source.sendSuccess(new StringTextComponent("[S] Day Mod: " + ticker.getDayMod() + " Night Mod: " + ticker.getNightMod()), false);
                 source.sendSuccess(new StringTextComponent("[S] Day RE: " + ticker.getDayRoundingError() + " Night RE: " + ticker.getNightRoundingError()), false);
                 NetworkHandler.sendTo(new ConfigDebugInfo(), player);
-            } else source.sendFailure(new StringTextComponent("No Data found for current world on server side"));
+
+            } else if(t instanceof SystemTimeTicker){
+                SystemTimeTicker stt = (SystemTimeTicker) t;
+                String sunrise = TimeAndWindCT.getFormattedTime(stt.getSunrise() / 1000);
+                String sunset = TimeAndWindCT.getFormattedTime(stt.getSunset() / 1000);
+                String dayD = TimeAndWindCT.getFormattedTime(stt.getDayD() / 1000);
+                String nightD = TimeAndWindCT.getFormattedTime(stt.getNightD() / 1000);
+                source.sendSuccess(new StringTextComponent("Sunrise are at: " + sunrise + " and sunset are at: " + sunset + " in timezone: " + TimeAndWindCT.systemTimeConfig.timeZone), false);
+                source.sendSuccess(new StringTextComponent("Day Length are: " + dayD + " and Night Length are: " + nightD), false);
+            } else if (t instanceof DefaultTicker) source.sendSuccess(new StringTextComponent("This world uses default time ticker"), false);
+            else source.sendFailure(new StringTextComponent("No Data found for current world on server side"));
         }
         return 0;
     }

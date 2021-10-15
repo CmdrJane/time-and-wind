@@ -6,6 +6,9 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import ru.aiefu.timeandwindct.config.ModConfig;
+import ru.aiefu.timeandwindct.config.SystemTimeConfig;
+import ru.aiefu.timeandwindct.config.TimeDataStorage;
 import ru.aiefu.timeandwindct.network.NetworkHandler;
 
 import java.io.IOException;
@@ -20,6 +23,7 @@ public class TimeAndWindCT {
 	public static HashMap<String, TimeDataStorage> timeDataMap;
 
 	public static ModConfig CONFIG;
+	public static SystemTimeConfig systemTimeConfig;
 	public static boolean debugMode = false;
 
 	public TimeAndWindCT() {
@@ -50,10 +54,23 @@ public class TimeAndWindCT {
 			if(!Files.exists(Paths.get("./config/time-and-wind/config.json"))){
 				IOManager.generateModConfig();
 			}
+			if(!Files.exists(Paths.get("./config/time-and-wind/system-time-data.json"))){
+				IOManager.generateSysTimeCfg();
+			}
 			CONFIG = IOManager.readModConfig();
+			systemTimeConfig = IOManager.readSysTimeCfg();
 		}
 		catch (IOException e){
 			e.printStackTrace();
 		}
+	}
+
+	public static String getFormattedTime(long ms){
+		long seconds = ms;
+		long hours = seconds / 3600;
+		seconds -= (hours * 3600);
+		long minutes = seconds / 60;
+		seconds -= (minutes * 60);
+		return String.format("%02d:%02d:%02d", hours, minutes, seconds);
 	}
 }

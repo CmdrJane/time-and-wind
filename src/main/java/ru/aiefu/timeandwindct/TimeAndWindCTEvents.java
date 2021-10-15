@@ -7,13 +7,11 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
 import ru.aiefu.timeandwindct.network.NetworkHandler;
 import ru.aiefu.timeandwindct.network.messages.SyncConfig;
-import ru.aiefu.timeandwindct.network.messages.SyncModConfig;
 
 public class TimeAndWindCTEvents {
     @SubscribeEvent
     public void playerJoin(PlayerEvent.PlayerLoggedInEvent event){
         NetworkHandler.sendTo(new SyncConfig(), (ServerPlayerEntity) event.getPlayer());
-        NetworkHandler.sendTo(new SyncModConfig(), (ServerPlayerEntity) event.getPlayer());
         TimeAndWindCT.LOGGER.info("[Time & Wind] Sending configuration to player");
     }
     @SubscribeEvent

@@ -88,6 +88,11 @@ public abstract class ServerWorldMixins extends World implements ITimeOperations
 		}
 	}
 
+	@Inject(method = "addPlayer", at =@At("HEAD"))
+	private void onPlayerJoin(ServerPlayerEntity player, CallbackInfo ci){
+		NetworkHandler.sendTo(new NightSkip(enableNightSkipAcceleration, accelerationSpeed), player);
+	}
+
 	@Redirect(method = "tickTime", at = @At(value = "INVOKE", target = "net/minecraft/world/server/ServerWorld.setDayTime(J)V"))
 	private void customTickerTAW(ServerWorld serverWorld, long p_241114_1_) {
 		this.timeTicker.tick(this, enableNightSkipAcceleration, accelerationSpeed);

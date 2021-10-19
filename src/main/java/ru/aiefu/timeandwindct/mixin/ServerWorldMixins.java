@@ -77,7 +77,7 @@ public abstract class ServerWorldMixins extends World implements ITimeOperations
 			int sleepingPlayers = (int) totalPlayers.stream().filter(ServerPlayerEntity::isSleeping).count();
 			double factor = (double)sleepingPlayers / totalPlayers.size();
 			int threshold = TimeAndWindCT.CONFIG.enableThreshold ? totalPlayers.size() / 100 * TimeAndWindCT.CONFIG.thresholdPercentage : 0;
-			if(sleepingPlayers > threshold){
+			if(sleepingPlayers >= threshold){
 				enableNightSkipAcceleration = true;
 				this.accelerationSpeed = TimeAndWindCT.CONFIG.enableThreshold && TimeAndWindCT.CONFIG.flatAcceleration ?
 						TimeAndWindCT.CONFIG.accelerationSpeed :

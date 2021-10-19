@@ -3,7 +3,6 @@ package ru.aiefu.timeandwindct;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.world.GameRules;
 import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.SleepingTimeCheckEvent;
 import net.minecraftforge.eventbus.api.Event;
@@ -14,7 +13,6 @@ import ru.aiefu.timeandwindct.network.NetworkHandler;
 import ru.aiefu.timeandwindct.network.messages.SyncConfig;
 
 public class TimeAndWindCTEvents {
-    private int sleepTimer = 0;
 
     @SubscribeEvent
     public void playerJoin(PlayerEvent.PlayerLoggedInEvent event){
@@ -39,15 +37,5 @@ public class TimeAndWindCTEvents {
     @SubscribeEvent
     public void enableSleepingAtDay(SleepingTimeCheckEvent e){
         if(TimeAndWindCT.CONFIG.syncWithSystemTime) e.setResult(Event.Result.ALLOW);
-    }
-    @SubscribeEvent
-    public void playerTick(TickEvent.PlayerTickEvent e){
-        if(e.phase == TickEvent.Phase.END && e.player.isSleepingLongEnough()){
-            ++sleepTimer;
-            if(sleepTimer > 60){
-                e.player.heal(1.0F);
-                sleepTimer = 0;
-            }
-        } else sleepTimer = 0;
     }
 }

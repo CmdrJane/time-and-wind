@@ -36,6 +36,7 @@ public class SyncConfig implements ITAWPacket{
             String sunrise = buf.readUtf();
             String sunset = buf.readUtf();
             String timeZone = buf.readUtf();
+            CompoundNBT nbtCMP = buf.readNbt();
 
             TimeAndWindCT.CONFIG = new ModConfig(skyAnglePatch, syncWithSysTime, nightSkip, speed, threshold, percentage, flatS);
             TimeAndWindCT.systemTimeConfig = new SystemTimeConfig(sunrise, sunset, timeZone);
@@ -43,7 +44,6 @@ public class SyncConfig implements ITAWPacket{
             ClientWorld clientWorld = Minecraft.getInstance().level;
             if(clientWorld != null) {
                 ITimeOperations timeOps = (ITimeOperations) clientWorld;
-                CompoundNBT nbtCMP = buf.readNbt();
                 if(syncWithSysTime){
                     timeOps.setTimeTicker(new SystemTimeTicker((ITimeOperations) clientWorld));
                 } else if (nbtCMP != null) {

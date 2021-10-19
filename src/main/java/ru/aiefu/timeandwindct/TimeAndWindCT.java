@@ -29,14 +29,13 @@ public class TimeAndWindCT {
 	public TimeAndWindCT() {
 		// Register the setup method for modloading
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
-
 		MinecraftForge.EVENT_BUS.register(new TimeAndWindCTEvents());
 	}
+
 	public void setup(final FMLCommonSetupEvent event) {
 		LOGGER.info("[Time & Wind] Initializing...");
 		craftPaths();
 		NetworkHandler.setup();
-		//CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> TAWCommands.registerCommands(dispatcher));
 		LOGGER.info("[Time & Wind] I'm in time control now!");
 	}
 

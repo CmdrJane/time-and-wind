@@ -28,14 +28,19 @@ public class SystemTimeConfig {
     }
 
     private int parseTime(@Nonnull String s){
-        long timeMs;
-        int i = s.indexOf(":");
-        if(i != -1){
-            long hour = Long.parseLong(s.substring(0,i)) * 3_600_000;
-            timeMs = hour + Long.parseLong(s.substring(i+1)) * 60_000;
+        try {
+            long timeMs;
+            int i = s.indexOf(":");
+            if (i != -1) {
+                long hour = Long.parseLong(s.substring(0, i)) * 3_600_000;
+                timeMs = hour + Long.parseLong(s.substring(i + 1)) * 60_000;
 
-        } else timeMs = Long.parseLong(s) * 3_600_000;
-        return (int) timeMs;
+            } else timeMs = Long.parseLong(s) * 3_600_000;
+            return (int) timeMs;
+        } catch (NumberFormatException e){
+            e.printStackTrace();
+            return OffsetDateTime.now().get(ChronoField.OFFSET_SECONDS) * 1000;
+        }
     }
     private int parseTimeZone(String timeZone){
         if(timeZone.equalsIgnoreCase("local")){

@@ -1,11 +1,9 @@
 package ru.aiefu.timeandwindct.tickers;
 
 import ru.aiefu.timeandwindct.ITimeOperations;
-import ru.aiefu.timeandwindct.config.SystemTimeConfig;
 import ru.aiefu.timeandwindct.TimeAndWindCT;
+import ru.aiefu.timeandwindct.config.SystemTimeConfig;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.function.LongSupplier;
 
 public class SystemTimeTicker implements Ticker{
@@ -13,7 +11,6 @@ public class SystemTimeTicker implements Ticker{
     protected long timeZoneOffset;
     protected final LongSupplier systemTime = () -> System.currentTimeMillis() + timeZoneOffset;
 
-    protected long zero_point;
     protected int tickMod;
     protected int dayMod;
     protected int nightMod;
@@ -44,19 +41,18 @@ public class SystemTimeTicker implements Ticker{
         this.dayMod = dayF / 50;
         this.nightMod = nightF / 50;
 
-        setZeroPoint();
         int startingTick = calculateCurrentTick();
         world.setTimeOfDayTAW(unwrapTime(startingTick, world.getTimeOfDayTAW()));
     }
 
-    public void tick(ITimeOperations world){
+    public void tick(ITimeOperations world, boolean nskip, int acceleration){
         ++ticks;
         long time = world.getTimeOfDayTAW();
         tickMod = time % 24000L < 12000 ? dayMod : nightMod;
         if(ticks % tickMod == 0){
             world.setTimeOfDayTAW(time + 1L);
         }
-        if(ticks % 6000 == 0){
+        if(!world.isClient() && ticks % 6000 == 0){
             TimeAndWindCT.LOGGER.info("Checking if time corrections is needed...");
             int targetTicks = calculateCurrentTick();
             int timeTicks = (int) (time % 24000L);
@@ -65,6 +61,10 @@ public class SystemTimeTicker implements Ticker{
                 TimeAndWindCT.LOGGER.info("Time corrected");
             } else TimeAndWindCT.LOGGER.info("Skipping correction");
         }
+    }
+
+    public void updateTime(ITimeOperations world){
+        world.setTimeOfDayTAW(unwrapTime(calculateCurrentTick(), world.getTimeOfDayTAW()));
     }
 
     private int calculateCurrentTick(){
@@ -77,17 +77,12 @@ public class SystemTimeTicker implements Ticker{
     }
 
     private long calculateElapsedTimeWithShift(){
-        long currentTime = (systemTime.getAsLong() - zero_point) % 86_400_000;
+        long currentTime = systemTime.getAsLong()  % 86_400_000;
         int val = (int) (currentTime - sunrise); /// currentTime - shift
-        if(val <0){
+        if(val < 0){
             val = (int) (86_400_000 - (sunrise - currentTime)); //shift - currentTime
         }
         return val;
-    }
-
-    private void setZeroPoint(){
-        long sysTime = System.currentTimeMillis();
-        this.zero_point = (sysTime - sysTime % 86_400_000);
     }
 
     private long unwrapTime(int targetTime, long timeOfDay){

@@ -38,8 +38,12 @@ public class TimeTicker implements Ticker {
         this.nightD = nightD;
     }
 
-    public void tick(ITimeOperations world) {
+    public void tick(ITimeOperations world, boolean nskip, int acceleration) {
         long time = world.getTimeOfDayTAW();
+        if(nskip){
+            world.setTimeOfDayTAW(time + acceleration);
+            return;
+        }
         int currentTime = (int) (time % 24000);
         int mod;
         double leftOverToAdd;

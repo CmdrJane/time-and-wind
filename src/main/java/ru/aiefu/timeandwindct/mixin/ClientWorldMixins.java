@@ -14,7 +14,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import ru.aiefu.timeandwindct.*;
+import ru.aiefu.timeandwindct.ITimeOperations;
+import ru.aiefu.timeandwindct.TimeAndWindCT;
 import ru.aiefu.timeandwindct.config.TimeDataStorage;
 import ru.aiefu.timeandwindct.tickers.DefaultTicker;
 import ru.aiefu.timeandwindct.tickers.SystemTimeTicker;
@@ -36,6 +37,9 @@ public abstract class ClientWorldMixins extends World implements ITimeOperations
 
     protected Ticker timeTicker;
 
+    private boolean skipState = false;
+    private int speed = 0;
+
     @Inject(method = "<init>", at = @At("TAIL"))
     private void attachTimeDataTAW(ClientPlayNetHandler p_i242067_1_, ClientWorld.ClientWorldInfo p_i242067_2_, RegistryKey<World> p_i242067_3_, DimensionType p_i242067_4_, int p_i242067_5_, Supplier<IProfiler> p_i242067_6_, WorldRenderer p_i242067_7_, boolean p_i242067_8_, long p_i242067_9_, CallbackInfo ci){
         String worldId = this.dimension().location().toString();
@@ -50,7 +54,7 @@ public abstract class ClientWorldMixins extends World implements ITimeOperations
 
     @Redirect(method = "tickTime", at = @At(value = "INVOKE", target = "net/minecraft/client/world/ClientWorld.setDayTime(J)V"))
     private void customTickerTAW0(ClientWorld clientWorld, long p_72877_1_) {
-        timeTicker.tick((ITimeOperations) clientWorld);
+        timeTicker.tick((ITimeOperations) clientWorld, skipState, speed);
     }
 
     @Override
@@ -76,5 +80,20 @@ public abstract class ClientWorldMixins extends World implements ITimeOperations
     @Override
     public long getTimeOfDayTAW() {
         return this.levelData.getDayTime();
+    }
+
+    @Override
+    public boolean isClient() {
+        return this.isClientSide();
+    }
+
+    @Override
+    public void setSkipState(boolean bl) {
+        this.skipState = bl;
+    }
+
+    @Override
+    public void setSpeed(int speed) {
+        this.speed = speed;
     }
 }

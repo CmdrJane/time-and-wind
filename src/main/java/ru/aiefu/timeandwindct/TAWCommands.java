@@ -11,6 +11,7 @@ import net.minecraft.command.arguments.DimensionArgument;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.world.GameRules;
 import net.minecraft.world.server.ServerWorld;
 import ru.aiefu.timeandwindct.config.TimeDataStorage;
 import ru.aiefu.timeandwindct.network.NetworkHandler;
@@ -43,6 +44,10 @@ public class TAWCommands {
                 then(Commands.argument("dimension", DimensionArgument.dimension()).executes(context ->
                         removeConfigEntry(context.getSource(), DimensionArgument.getDimension(context, "dimension"))))));
 
+        dispatcher.register(Commands.literal("taw").then(Commands.literal("switch-system-time-sync").
+                then(Commands.argument("ssyncstate", BoolArgumentType.bool()).executes(context ->
+                        switchSystemTimeSyncState(context.getSource(), BoolArgumentType.getBool(context,"ssyncstate"))))));
+
         dispatcher.register(Commands.literal("taw").then(Commands.literal("get-current-world-id").executes(context -> printCurrentWorldId(context.getSource()))));
 
         dispatcher.register(Commands.literal("taw").then(Commands.literal("parse-worlds-ids").executes(context -> parseWorldsIds(context.getSource()))));
@@ -57,6 +62,8 @@ public class TAWCommands {
         if(source.hasPermission(4) || source.getServer().isSingleplayerOwner(source.getPlayerOrException().getGameProfile())) {
             MinecraftServer server = source.getServer();
             int result = IOManager.readTimeData();
+            TimeAndWindCT.CONFIG = IOManager.readModConfig();
+            TimeAndWindCT.systemTimeConfig = IOManager.readSysTimeCfg();
             if(result == 0){
                 source.sendFailure(new StringTextComponent("Unable to reload config"));
                 return 0;
@@ -79,6 +86,16 @@ public class TAWCommands {
         else {
             source.sendFailure(new StringTextComponent("[Time & Wind] Permission level of 4 is required to run this command"));
         }
+        return 0;
+    }
+
+    private static int switchSystemTimeSyncState(CommandSource source, boolean state) throws CommandSyntaxException {
+        if(source.hasPermission(4) || source.getServer().isSingleplayerOwner(source.getPlayerOrException().getGameProfile())) {
+            TimeAndWindCT.CONFIG.syncWithSystemTime = state;
+            source.getServer().getGameRules().getRule(GameRules.RULE_DOINSOMNIA).set(!state, source.getServer());
+            IOManager.updateSysTimeCfg();
+            source.sendSuccess(new StringTextComponent("SysTimeSync state switched to" + state + " now use /taw reload to apply changes"), false);
+        } else source.sendFailure(new StringTextComponent("[Time & Wind] Permission level of 4 is required to run this command"));
         return 0;
     }
 
@@ -165,6 +182,7 @@ public class TAWCommands {
                 String sunset = TimeAndWindCT.getFormattedTime(stt.getSunset() / 1000);
                 String dayD = TimeAndWindCT.getFormattedTime(stt.getDayD() / 1000);
                 String nightD = TimeAndWindCT.getFormattedTime(stt.getNightD() / 1000);
+                source.sendSuccess(new StringTextComponent("Time is controlled by SystemTimeTicker(Time is synced with system time)"), false);
                 source.sendSuccess(new StringTextComponent("Sunrise are at: " + sunrise + " and sunset are at: " + sunset + " in timezone: " + TimeAndWindCT.systemTimeConfig.timeZone), false);
                 source.sendSuccess(new StringTextComponent("Day Length are: " + dayD + " and Night Length are: " + nightD), false);
             } else if (t instanceof DefaultTicker) source.sendSuccess(new StringTextComponent("This world uses default time ticker"), false);

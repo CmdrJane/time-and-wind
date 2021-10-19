@@ -7,11 +7,10 @@ import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 import ru.aiefu.timeandwindct.ITimeOperations;
-import ru.aiefu.timeandwindct.config.ModConfig;
 import ru.aiefu.timeandwindct.TimeAndWindCT;
+import ru.aiefu.timeandwindct.config.ModConfig;
 import ru.aiefu.timeandwindct.config.SystemTimeConfig;
 import ru.aiefu.timeandwindct.config.TimeDataStorage;
-import ru.aiefu.timeandwindct.network.NetworkHandler;
 import ru.aiefu.timeandwindct.tickers.DefaultTicker;
 import ru.aiefu.timeandwindct.tickers.SystemTimeTicker;
 import ru.aiefu.timeandwindct.tickers.TimeTicker;
@@ -29,11 +28,16 @@ public class SyncConfig implements ITAWPacket{
         if(buf.readableBytes() > 0 ){
             boolean skyAnglePatch = buf.readBoolean();
             boolean syncWithSysTime = buf.readBoolean();
+            boolean nightSkip = buf.readBoolean();
+            int speed = buf.readInt();
+            boolean threshold = buf.readBoolean();
+            int percentage = buf.readInt();
+            boolean flatS = buf.readBoolean();
             String sunrise = buf.readUtf();
             String sunset = buf.readUtf();
             String timeZone = buf.readUtf();
 
-            TimeAndWindCT.CONFIG = new ModConfig(skyAnglePatch, syncWithSysTime);
+            TimeAndWindCT.CONFIG = new ModConfig(skyAnglePatch, syncWithSysTime, nightSkip, speed, threshold, percentage, flatS);
             TimeAndWindCT.systemTimeConfig = new SystemTimeConfig(sunrise, sunset, timeZone);
 
             ClientWorld clientWorld = Minecraft.getInstance().level;
@@ -70,6 +74,11 @@ public class SyncConfig implements ITAWPacket{
         SystemTimeConfig scfg = TimeAndWindCT.systemTimeConfig;
         buf.writeBoolean(cfg.patchSkyAngle);
         buf.writeBoolean(cfg.syncWithSystemTime);
+        buf.writeBoolean(cfg.enableNightSkipAcceleration);
+        buf.writeInt(cfg.accelerationSpeed);
+        buf.writeBoolean(cfg.enableThreshold);
+        buf.writeInt(cfg.thresholdPercentage);
+        buf.writeBoolean(cfg.flatAcceleration);
         buf.writeUtf(scfg.sunrise);
         buf.writeUtf(scfg.sunset);
         buf.writeUtf(scfg.timeZone);

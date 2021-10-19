@@ -3,6 +3,9 @@ package ru.aiefu.timeandwindct;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import ru.aiefu.timeandwindct.config.ModConfig;
+import ru.aiefu.timeandwindct.config.SystemTimeConfig;
+import ru.aiefu.timeandwindct.config.TimeDataStorage;
 
 import java.io.File;
 import java.io.FileReader;
@@ -17,8 +20,32 @@ public class IOManager {
         fileWriter(file, gson);
     }
 
+    public static void generateSysTimeCfg(){
+        String gson = new GsonBuilder().setPrettyPrinting().create().toJson(new SystemTimeConfig("5:00", "20:00", "3:00"));
+        File file = new File("./config/time-and-wind/system-time-data.json");
+        fileWriter(file, gson);
+    }
+
+    public static void updateSysTimeCfg(){
+        String gson = new GsonBuilder().setPrettyPrinting().create().toJson(TimeAndWindCT.systemTimeConfig);
+        File file = new File("./config/time-and-wind/system-time-data.json");
+        fileWriter(file, gson);
+    }
+
+    public static SystemTimeConfig readSysTimeCfg(){
+        SystemTimeConfig config;
+        try {
+            config = new Gson().fromJson(new FileReader("./config/time-and-wind/system-time-data.json"), SystemTimeConfig.class);
+        } catch (IOException e){
+            e.printStackTrace();
+            config = new SystemTimeConfig("7:00", "19:00", "local");
+        }
+        return config;
+    }
+
     public static void generateModConfig(){
-        String gson = new GsonBuilder().setPrettyPrinting().create().toJson(new ModConfig(true, false));
+        String gson = new GsonBuilder().setPrettyPrinting().create().toJson(new ModConfig(true, false,
+                true, 10, true, 50, false));
         File file = new File("./config/time-and-wind/config.json");
         fileWriter(file, gson);
     }
@@ -27,11 +54,22 @@ public class IOManager {
         ModConfig config;
         try {
             config = new Gson().fromJson(new FileReader("./config/time-and-wind/config.json"), ModConfig.class);
+            if(config.config_ver == 1){
+                config = patchModConfig(config);
+                String gson = new GsonBuilder().setPrettyPrinting().create().toJson(config);
+                File file = new File("./config/time-and-wind/config.json");
+                fileWriter(file, gson);
+            }
         } catch (IOException e){
             e.printStackTrace();
-            config = new ModConfig(true, false);
+            config = new ModConfig(true, false,
+                    true, 10, true, 50, false);
         }
         return config;
+    }
+
+    public static ModConfig patchModConfig(ModConfig config){
+        return new ModConfig(config.patchSkyAngle, config.syncWithSystemTime, true, 10, true, 50, false);
     }
 
     public static void updateTimeData(String id, long dayD, long nightD){
@@ -74,4 +112,5 @@ public class IOManager {
             e.printStackTrace();
         }
     }
+
 }

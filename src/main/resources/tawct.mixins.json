@@ -6,10 +6,13 @@
   "mixins": [
     "DimensionMixins",
     "PlayerManagerMixins",
+    "PlayerMixins",
+    "ServerPlayerMixins",
     "ServerWorldMixins"
   ],
   "client": [
     "ClientWorldMixins",
+    "IntegratedServerMixins",
     "WorldRendererMixins"
   ],
   "injectors": {

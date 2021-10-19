@@ -1,25 +1,47 @@
-package ru.aiefu.timeandwindct;
+package ru.aiefu.timeandwindct.tickers;
 
-public class TimeTicker{
+import ru.aiefu.timeandwindct.ITimeOperations;
 
-    private boolean enableCustomTicker = false;
-    private long dayD;
-    private int dayMod;
-    private double dayRoundingError;
-    private long nightD;
-    private int nightMod;
-    private double nightRoundingError;
+public class TimeTicker implements Ticker{
 
-    private boolean isDayLesserThanVanilla = false;
-    private boolean isNightLesserThanVanilla = false;
+    private final long dayD;
+    private final int dayMod;
+    private final double dayRoundingError;
+    private final long nightD;
+    private final int nightMod;
+    private final double nightRoundingError;
+
+    private final boolean isDayLesserThanVanilla;
+    private final boolean isNightLesserThanVanilla;
 
     private double leftOver = 0;
     private double leftOverInverted = 0;
 
-    public void tickTime(ITimeOperations world, long timeOfDay){
+    public TimeTicker(long dayD, long nightD){
+        double dayVal;
+        double nightVal;
+        boolean dayInversion = dayD < 12000;
+        boolean nightInversion = nightD < 12000;
+        dayVal = getFactor(dayD, dayInversion);
+        nightVal = getFactor(nightD, nightInversion);
+        this.isDayLesserThanVanilla = dayInversion;
+        this.isNightLesserThanVanilla = nightInversion;
+        int checkDay = (int) dayVal;
+        int checkNight = (int) nightVal;
+        this.dayMod = checkDay;
+        this.nightMod = checkNight;
+
+        this.dayRoundingError = dayVal - checkDay;
+        this.nightRoundingError = nightVal - checkNight;
+
+        this.dayD = dayD;
+        this.nightD = nightD;
+    }
+
+    public void tick(ITimeOperations world, boolean nskip, int acceleration) {
         long time = world.getTimeOfDayTAW();
-        if(!enableCustomTicker){
-            world.setTimeOfDayTAW(time + 1L);
+        if(nskip){
+            world.setTimeOfDayTAW(time + acceleration);
             return;
         }
         int currentTime = (int) (time % 24000);
@@ -64,43 +86,10 @@ public class TimeTicker{
         leftOverInverted += leftOverToAdd;
     }
 
-    public void setupCustomTime(long dayD, long nightD){
-        if(dayD == 12000 && nightD == 12000){
-            enableCustomTicker = false;
-            return;
-        }
-        this.enableCustomTicker = true;
-        double dayVal;
-        double nightVal;
-        boolean dayInversion = dayD < 12000;
-        boolean nightInversion = nightD < 12000;
-        dayVal = getFactor(dayD, dayInversion);
-        nightVal = getFactor(nightD, nightInversion);
-        this.isDayLesserThanVanilla = dayInversion;
-        this.isNightLesserThanVanilla = nightInversion;
-        int checkDay = (int) dayVal;
-        int checkNight = (int) nightVal;
-        this.dayMod = checkDay;
-        this.nightMod = checkNight;
-
-        this.dayRoundingError = dayVal - checkDay;
-        this.nightRoundingError = nightVal - checkNight;
-
-        this.dayD = dayD;
-        this.nightD = nightD;
-
-    }
-
     private double getFactor(long value, boolean shouldInverse){
         return shouldInverse ? 12000.0D / value : value / 12000.0D;
     }
 
-
-
-
-    public void setCustomTicker(boolean bl){
-        this.enableCustomTicker = bl;
-    }
     public long getDayD(){
         return this.dayD;
     }
@@ -118,8 +107,5 @@ public class TimeTicker{
     }
     public double getNightRoundingError(){
         return this.nightRoundingError;
-    }
-    public boolean getState(){
-        return this.enableCustomTicker;
     }
 }

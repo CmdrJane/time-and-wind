@@ -16,8 +16,11 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import ru.aiefu.timeandwindct.ITimeOperations;
 import ru.aiefu.timeandwindct.TimeAndWindCT;
-import ru.aiefu.timeandwindct.TimeDataStorage;
-import ru.aiefu.timeandwindct.TimeTicker;
+import ru.aiefu.timeandwindct.config.TimeDataStorage;
+import ru.aiefu.timeandwindct.tickers.DefaultTicker;
+import ru.aiefu.timeandwindct.tickers.SystemTimeTicker;
+import ru.aiefu.timeandwindct.tickers.Ticker;
+import ru.aiefu.timeandwindct.tickers.TimeTicker;
 
 import java.util.function.Supplier;
 
@@ -31,29 +34,35 @@ public abstract class ClientWorldMixins extends World implements ITimeOperations
     @Shadow
     public abstract void setTimeOfDay(long timeOfDay);
 
-    protected TimeTicker timeTicker = new TimeTicker();
+    protected Ticker timeTicker;
+
+    private boolean skipState = false;
+    private int speed = 0;
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void attachTimeDataTAW(ClientPlayNetworkHandler networkHandler, ClientWorld.Properties properties, RegistryKey<World> registryRef, DimensionType dimensionType, int loadDistance, Supplier<Profiler> profiler, WorldRenderer worldRenderer, boolean debugWorld, long seed, CallbackInfo ci){
         String worldId = this.getRegistryKey().getValue().toString();
-        if (TimeAndWindCT.timeDataMap != null && TimeAndWindCT.timeDataMap.containsKey(worldId)) {
+        if(TimeAndWindCT.CONFIG.syncWithSystemTime){
+            this.timeTicker = new SystemTimeTicker(this);
+        }
+        else if (TimeAndWindCT.timeDataMap != null && TimeAndWindCT.timeDataMap.containsKey(worldId)) {
             TimeDataStorage storage = TimeAndWindCT.timeDataMap.get(worldId);
-            this.timeTicker.setupCustomTime(storage.dayDuration, storage.nightDuration);
-        } else this.timeTicker.setCustomTicker(false);
+            this.timeTicker = new TimeTicker(storage.dayDuration, storage.nightDuration);
+        } else this.timeTicker = new DefaultTicker();
     }
 
     @Redirect(method = "tickTime", at = @At(value = "INVOKE", target = "net/minecraft/client/world/ClientWorld.setTimeOfDay(J)V"))
     private void customTickerTAW(ClientWorld clientWorld, long timeOfDay) {
-        timeTicker.tickTime((ITimeOperations) clientWorld, timeOfDay);
+        timeTicker.tick(this, skipState, speed);
     }
 
     @Override
-    public TimeTicker getTimeTicker() {
+    public Ticker getTimeTicker() {
         return this.timeTicker;
     }
 
     @Override
-    public void setTimeTicker(TimeTicker timeTicker) {
+    public void setTimeTicker(Ticker timeTicker) {
         this.timeTicker = timeTicker;
     }
 
@@ -70,5 +79,20 @@ public abstract class ClientWorldMixins extends World implements ITimeOperations
     @Override
     public long getTimeOfDayTAW() {
         return this.properties.getTimeOfDay();
+    }
+
+    @Override
+    public boolean isClientSide() {
+        return this.isClient();
+    }
+
+    @Override
+    public void setSkipState(boolean bl) {
+        this.skipState = bl;
+    }
+
+    @Override
+    public void setSpeed(int speed) {
+        this.speed = speed;
     }
 }

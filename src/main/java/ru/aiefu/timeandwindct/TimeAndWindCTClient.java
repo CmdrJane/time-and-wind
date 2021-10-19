@@ -107,5 +107,15 @@ public class TimeAndWindCTClient implements ClientModInitializer {
                 TimeAndWindCT.LOGGER.info("[Time & Wind] Timedata reloaded on client");
             }
         });
+        ClientPlayNetworking.registerGlobalReceiver(NetworkPacketsID.NIGHT_SKIP_INFO, (client, handler, buf, responseSender) -> {
+            if(buf.readableBytes() > 0) {
+                ClientWorld world = MinecraftClient.getInstance().world;
+                if(world != null){
+                    ITimeOperations ops = (ITimeOperations) world;
+                    ops.setSkipState(buf.readBoolean());
+                    ops.setSpeed(buf.readInt());
+                }
+            }
+        });
     }
 }

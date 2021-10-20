@@ -186,7 +186,7 @@ public class TAWCommands {
                 source.sendFeedback(new LiteralText("Day: " + ticker.getDayD() + " Night: " + ticker.getNightD()), false);
                 source.sendFeedback(new LiteralText("Day Mod: " + ticker.getDayMod() + " Night Mod: " + ticker.getNightMod()), false);
                 source.sendFeedback(new LiteralText("Day RE: " + ticker.getDayRoundingError() + " Night RE: " + ticker.getNightRoundingError()), false);
-            } if(t instanceof SystemTimeTicker){
+            } else if(t instanceof SystemTimeTicker){
                 SystemTimeTicker stt = (SystemTimeTicker) t;
                 String sunrise = TimeAndWindCT.getFormattedTime(stt.getSunrise() / 1000);
                 String sunset = TimeAndWindCT.getFormattedTime(stt.getSunset() / 1000);

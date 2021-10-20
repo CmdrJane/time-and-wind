@@ -51,7 +51,7 @@ public abstract class ServerWorldMixins extends World implements ITimeOperations
 	@Shadow @Final private List<ServerPlayerEntity> players;
 	protected Ticker timeTicker;
 
-	protected boolean enableNightSkipAcceleration;
+	protected boolean enableNightSkipAcceleration = false;
 	protected int accelerationSpeed = 0;
 
 	@Inject(method = "<init>", at = @At("TAIL"))
@@ -74,14 +74,16 @@ public abstract class ServerWorldMixins extends World implements ITimeOperations
 		} else if (TimeAndWindCT.CONFIG.enableNightSkipAcceleration){
 			this.allPlayersSleeping = false;
 			List<ServerPlayerEntity> totalPlayers = this.players.stream().filter(player -> !player.isSpectator() || !player.isCreative()).collect(Collectors.toList());
-			int sleepingPlayers = (int) totalPlayers.stream().filter(ServerPlayerEntity::isSleeping).count();
-			double factor = (double)sleepingPlayers / totalPlayers.size();
-			int threshold = TimeAndWindCT.CONFIG.enableThreshold ? totalPlayers.size() / 100 * TimeAndWindCT.CONFIG.thresholdPercentage : 0;
-			if(sleepingPlayers >= threshold){
-				enableNightSkipAcceleration = true;
-				this.accelerationSpeed = TimeAndWindCT.CONFIG.enableThreshold && TimeAndWindCT.CONFIG.flatAcceleration ?
-						TimeAndWindCT.CONFIG.accelerationSpeed :
-						(int) Math.ceil(TimeAndWindCT.CONFIG.accelerationSpeed * factor);
+			if(totalPlayers.size() > 0) {
+				int sleepingPlayers = (int) totalPlayers.stream().filter(ServerPlayerEntity::isSleeping).count();
+				double factor = (double) sleepingPlayers / totalPlayers.size();
+				int threshold = TimeAndWindCT.CONFIG.enableThreshold ? totalPlayers.size() / 100 * TimeAndWindCT.CONFIG.thresholdPercentage : 0;
+				if (sleepingPlayers > threshold) {
+					enableNightSkipAcceleration = true;
+					this.accelerationSpeed = TimeAndWindCT.CONFIG.enableThreshold && TimeAndWindCT.CONFIG.flatAcceleration ?
+							TimeAndWindCT.CONFIG.accelerationSpeed :
+							(int) Math.ceil(TimeAndWindCT.CONFIG.accelerationSpeed * factor);
+				} else enableNightSkipAcceleration = false;
 			} else enableNightSkipAcceleration = false;
 			PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
 			buf.writeBoolean(enableNightSkipAcceleration);

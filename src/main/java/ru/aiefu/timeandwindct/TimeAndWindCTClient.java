@@ -97,13 +97,14 @@ public class TimeAndWindCTClient implements ClientModInitializer {
             ClientWorld clientWorld = MinecraftClient.getInstance().world;
             if (clientWorld != null) {
                 String worldId = clientWorld.getRegistryKey().getValue().toString();
+                ITimeOperations timeOps = (ITimeOperations) clientWorld;
                 if (TimeAndWindCT.CONFIG.syncWithSystemTime) {
-                    ((ITimeOperations)clientWorld).setTimeTicker(new SystemTimeTicker((ITimeOperations) clientWorld));
+                    timeOps.setTimeTicker(new SystemTimeTicker((ITimeOperations) clientWorld));
                 }
                 else if (TimeAndWindCT.timeDataMap != null && TimeAndWindCT.timeDataMap.containsKey(worldId)) {
                     TimeDataStorage storage = TimeAndWindCT.timeDataMap.get(worldId);
-                    ((ITimeOperations)clientWorld).setTimeTicker(new TimeTicker(storage.dayDuration, storage.nightDuration));
-                } else ((ITimeOperations)clientWorld).setTimeTicker(new DefaultTicker());
+                    timeOps.setTimeTicker(new TimeTicker(storage.dayDuration, storage.nightDuration));
+                } else timeOps.setTimeTicker(new DefaultTicker());
                 TimeAndWindCT.LOGGER.info("[Time & Wind] Timedata reloaded on client");
             }
         });

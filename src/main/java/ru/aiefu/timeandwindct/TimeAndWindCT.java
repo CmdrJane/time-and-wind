@@ -9,8 +9,12 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.world.GameRules;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import ru.aiefu.timeandwindct.config.ModConfig;
+import ru.aiefu.timeandwindct.config.SystemTimeConfig;
+import ru.aiefu.timeandwindct.config.TimeDataStorage;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -23,12 +27,17 @@ public class TimeAndWindCT implements ModInitializer {
 	public static final Logger LOGGER = LogManager.getLogger();
 	public static HashMap<String, TimeDataStorage> timeDataMap;
 	public static ModConfig CONFIG;
+	public static SystemTimeConfig systemTimeConfig;
 	public static boolean debugMode = false;
 
 	@Override
 	public void onInitialize() {
 		craftPaths();
 		ServerLifecycleEvents.SERVER_STARTING.register(server -> IOManager.readTimeData());
+		ServerLifecycleEvents.SERVER_STARTED.register(server -> {
+			if(CONFIG.syncWithSystemTime) server.getGameRules().get(GameRules.DO_INSOMNIA).set(false, server);
+
+		});
 		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> TAWCommands.registerCommands(dispatcher));
 	}
 
@@ -46,15 +55,44 @@ public class TimeAndWindCT implements ModInitializer {
 			if(!Files.exists(Paths.get("./config/time-and-wind/config.json"))){
 				IOManager.generateModConfig();
 			}
+			if(!Files.exists(Paths.get("./config/time-and-wind/system-time-data.json"))){
+				IOManager.generateSysTimeCfg();
+			}
 			CONFIG = IOManager.readModConfig();
+			systemTimeConfig = IOManager.readSysTimeCfg();
 		}
 		catch (IOException e){
 			e.printStackTrace();
 		}
 	}
 
+	public static String getFormattedTime(long ms){
+		long seconds = ms;
+		long hours = seconds / 3600;
+		seconds -= (hours * 3600);
+		long minutes = seconds / 60;
+		seconds -= (minutes * 60);
+		return String.format("%02d:%02d:%02d", hours, minutes, seconds);
+	}
+
 	public static void sendConfigSyncPacket(ServerPlayerEntity player){
 		if(!player.getServer().isHost(player.getGameProfile())) {
+			PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
+
+			ModConfig cfg = TimeAndWindCT.CONFIG;
+			SystemTimeConfig cfgs = TimeAndWindCT.systemTimeConfig;
+			buf.writeBoolean(cfg.patchSkyAngle);
+			buf.writeBoolean(cfg.syncWithSystemTime);
+			buf.writeBoolean(cfg.enableNightSkipAcceleration);
+			buf.writeInt(cfg.accelerationSpeed);
+			buf.writeBoolean(cfg.enableThreshold);
+			buf.writeInt(cfg.thresholdPercentage);
+			buf.writeBoolean(cfg.flatAcceleration);
+
+			buf.writeString(cfgs.sunrise);
+			buf.writeString(cfgs.sunset);
+			buf.writeString(cfgs.timeZone);
+
 			NbtList listTag = new NbtList();
 			int i = 0;
 			for (Map.Entry<String, TimeDataStorage> e : timeDataMap.entrySet()) {
@@ -68,17 +106,9 @@ public class TimeAndWindCT implements ModInitializer {
 			}
 			NbtCompound tag = new NbtCompound();
 			tag.put("tawConfig", listTag);
-			ServerPlayNetworking.send(player, NetworkPacketsID.SYNC_CONFIG, new PacketByteBuf(Unpooled.buffer()).writeNbt(tag));
+			buf.writeNbt(tag);
+			ServerPlayNetworking.send(player, NetworkPacketsID.SYNC_CONFIG, buf);
 			LOGGER.info("[Time & Wind] Sending config to player");
 		} else ServerPlayNetworking.send(player, NetworkPacketsID.SETUP_TIME, new PacketByteBuf(Unpooled.buffer()));
-	}
-
-	public static void sendModConfigSyncPacket(ServerPlayerEntity player){
-		if(!player.getServer().isHost(player.getGameProfile())) {
-			PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
-			buf.writeBoolean(CONFIG.patchSkyAngle);
-			buf.writeBoolean(CONFIG.syncWithSystemTime);
-			ServerPlayNetworking.send(player, NetworkPacketsID.SYNC_MOD_CONFIG, buf);
-		}
 	}
 }

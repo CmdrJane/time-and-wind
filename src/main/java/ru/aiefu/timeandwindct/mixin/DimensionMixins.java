@@ -19,7 +19,7 @@ public class DimensionMixins {
 
     @Inject(method = "getSkyAngle", at =@At("HEAD"), cancellable = true)
     private void patchSkyAngleTAW(long time, CallbackInfoReturnable<Float> cir){
-        if(TimeAndWindCT.CONFIG.patchSkyAngle && !fixedTime.isPresent()) {
+        if(TimeAndWindCT.CONFIG.patchSkyAngle && fixedTime.isEmpty()) {
             double d = time % 24000L * factor - 0.25D;
             if (d < 0)
                 ++d;

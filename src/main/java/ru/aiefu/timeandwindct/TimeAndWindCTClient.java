@@ -68,9 +68,9 @@ public class TimeAndWindCTClient implements ClientModInitializer {
             }
         });
         ClientPlayNetworking.registerGlobalReceiver(NetworkPacketsID.CFG_DEBUG_INFO, (client, handler, buf, responseSender) -> {
-            try {
+            if(client.world != null && client.player != null) {
                 String worldId = client.world.getRegistryKey().getValue().toString();
-                if(((ITimeOperations)client.world).getTimeTicker() instanceof SystemTimeTicker){
+                if (((ITimeOperations) client.world).getTimeTicker() instanceof SystemTimeTicker) {
                     return;
                 }
                 if (TimeAndWindCT.timeDataMap.containsKey(worldId)) {
@@ -78,19 +78,14 @@ public class TimeAndWindCTClient implements ClientModInitializer {
                     client.player.sendSystemMessage(new LiteralText("Client config for current world: Day Duration: " + storage.dayDuration + " Night Duration: " + storage.nightDuration), Util.NIL_UUID);
                 } else
                     client.player.sendSystemMessage(new LiteralText("No Data found for current world on client side"), Util.NIL_UUID);
-            } catch (NullPointerException e){
-                e.printStackTrace();
             }
         });
         ClientPlayNetworking.registerGlobalReceiver(NetworkPacketsID.WORLD_ID_CLIPBOARD, (client, handler, buf, responseSender) -> {
-            try{
-                if(buf.readableBytes() > 0) {
-                    String string = buf.readString();
-                    client.keyboard.setClipboard(string);
-                    client.player.sendMessage(new LiteralText("Also copied this to clipboard"), false);
-                }
-            } catch (Exception e){
-                e.printStackTrace();
+
+            if(buf.readableBytes() > 0 && client.player != null) {
+                String string = buf.readString();
+                client.keyboard.setClipboard(string);
+                client.player.sendMessage(new LiteralText("Also copied this to clipboard"), false);
             }
         });
         ClientPlayNetworking.registerGlobalReceiver(NetworkPacketsID.SETUP_TIME, (client, handler, buf, responseSender) -> {

@@ -74,14 +74,16 @@ public abstract class ServerWorldMixins extends World implements ITimeOperations
 		} else if (TimeAndWindCT.CONFIG.enableNightSkipAcceleration){
 			this.allPlayersSleeping = false;
 			List<ServerPlayerEntity> totalPlayers = this.players.stream().filter(player -> !player.isSpectator() || !player.isCreative()).collect(Collectors.toList());
-			int sleepingPlayers = (int) totalPlayers.stream().filter(ServerPlayerEntity::isSleeping).count();
-			double factor = (double)sleepingPlayers / totalPlayers.size();
-			int threshold = TimeAndWindCT.CONFIG.enableThreshold ? totalPlayers.size() / 100 * TimeAndWindCT.CONFIG.thresholdPercentage : 0;
-			if(sleepingPlayers >= threshold){
-				enableNightSkipAcceleration = true;
-				this.accelerationSpeed = TimeAndWindCT.CONFIG.enableThreshold && TimeAndWindCT.CONFIG.flatAcceleration ?
-						TimeAndWindCT.CONFIG.accelerationSpeed :
-						(int) Math.ceil(TimeAndWindCT.CONFIG.accelerationSpeed * factor);
+			if(totalPlayers.size() > 0) {
+				int sleepingPlayers = (int) totalPlayers.stream().filter(ServerPlayerEntity::isSleeping).count();
+				double factor = (double) sleepingPlayers / totalPlayers.size();
+				int threshold = TimeAndWindCT.CONFIG.enableThreshold ? totalPlayers.size() / 100 * TimeAndWindCT.CONFIG.thresholdPercentage : 0;
+				if (sleepingPlayers > threshold) {
+					enableNightSkipAcceleration = true;
+					this.accelerationSpeed = TimeAndWindCT.CONFIG.enableThreshold && TimeAndWindCT.CONFIG.flatAcceleration ?
+							TimeAndWindCT.CONFIG.accelerationSpeed :
+							(int) Math.ceil(TimeAndWindCT.CONFIG.accelerationSpeed * factor);
+				} else enableNightSkipAcceleration = false;
 			} else enableNightSkipAcceleration = false;
 			this.players.forEach(player -> NetworkHandler.sendTo(new NightSkip(enableNightSkipAcceleration, accelerationSpeed), player));
 			ci.cancel();

@@ -1,6 +1,6 @@
 package ru.aiefu.timeandwindct.mixin;
 
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.level.dimension.DimensionType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -17,7 +17,7 @@ public class DimensionMixins {
 
     private final double factor = 1.0D / 24000D;
 
-    @Inject(method = "getSkyAngle", at =@At("HEAD"), cancellable = true)
+    @Inject(method = "timeOfDay", at =@At("HEAD"), cancellable = true)
     private void patchSkyAngleTAW(long time, CallbackInfoReturnable<Float> cir){
         if(TimeAndWindCT.CONFIG.patchSkyAngle && fixedTime.isEmpty()) {
             double d = time % 24000L * factor - 0.25D;

@@ -2,11 +2,11 @@ package ru.aiefu.timeandwindct;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.text.LiteralText;
-import net.minecraft.util.Util;
+import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.TextComponent;
 import ru.aiefu.timeandwindct.config.ModConfig;
 import ru.aiefu.timeandwindct.config.SystemTimeConfig;
 import ru.aiefu.timeandwindct.config.TimeDataStorage;
@@ -33,12 +33,12 @@ public class TimeAndWindCTClient implements ClientModInitializer {
                 boolean threshold = buf.readBoolean();
                 int percentage = buf.readInt();
                 boolean flatS = buf.readBoolean();
-                String sunrise = buf.readString();
-                String sunset = buf.readString();
-                String timeZone = buf.readString();
+                String sunrise = buf.readUtf();
+                String sunset = buf.readUtf();
+                String timeZone = buf.readUtf();
 
-                HashMap<String, TimeDataStorage> map = (HashMap<String, TimeDataStorage>) buf.readMap(PacketByteBuf::readString, packetByteBuf -> new TimeDataStorage(packetByteBuf.readLong(), packetByteBuf.readLong()));
-                HashMap<String, SystemTimeConfig> sysMap = (HashMap<String, SystemTimeConfig>) buf.readMap(PacketByteBuf::readString, packetByteBuf -> new SystemTimeConfig(buf.readString(), buf.readString(), buf.readString()));
+                HashMap<String, TimeDataStorage> map = (HashMap<String, TimeDataStorage>) buf.readMap(FriendlyByteBuf::readUtf, packetByteBuf -> new TimeDataStorage(packetByteBuf.readLong(), packetByteBuf.readLong()));
+                HashMap<String, SystemTimeConfig> sysMap = (HashMap<String, SystemTimeConfig>) buf.readMap(FriendlyByteBuf::readUtf, packetByteBuf -> new SystemTimeConfig(buf.readUtf(), buf.readUtf(), buf.readUtf()));
                 TimeAndWindCT.timeDataMap = map;
                 TimeAndWindCT.sysTimeMap = sysMap;
 
@@ -46,9 +46,9 @@ public class TimeAndWindCTClient implements ClientModInitializer {
                 TimeAndWindCT.CONFIG = new ModConfig(skyAnglePatch, syncWithSysTime, sysTimePerDim, nightSkip, speed, threshold, percentage, flatS);
                 TimeAndWindCT.systemTimeConfig = new SystemTimeConfig(sunrise, sunset, timeZone);
                 TimeAndWindCT.LOGGER.info("[Time & Wind] Configuration synchronized");
-                ClientWorld clientWorld = MinecraftClient.getInstance().world;
+                ClientLevel clientWorld = Minecraft.getInstance().level;
                 if(clientWorld != null) {
-                    String worldId = clientWorld.getRegistryKey().getValue().toString();
+                    String worldId = clientWorld.dimension().location().toString();
                     ITimeOperations timeOps = (ITimeOperations) clientWorld;
                     if(syncWithSysTime){
                         if(sysTimePerDim && sysMap.containsKey(worldId)) {
@@ -67,33 +67,33 @@ public class TimeAndWindCTClient implements ClientModInitializer {
             }
         });
         ClientPlayNetworking.registerGlobalReceiver(NetworkPacketsID.CFG_DEBUG_INFO, (client, handler, buf, responseSender) -> {
-            if(client.world != null && client.player != null) {
-                String worldId = client.world.getRegistryKey().getValue().toString();
-                if (((ITimeOperations) client.world).getTimeTicker() instanceof SystemTimeTicker) {
+            if(client.level != null && client.player != null) {
+                String worldId = client.level.dimension().location().toString();
+                if (((ITimeOperations) client.level).getTimeTicker() instanceof SystemTimeTicker) {
                     return;
                 }
                 if(TimeAndWindCT.timeDataMap == null){
-                    client.player.sendSystemMessage(new LiteralText("[Client Side] TimeDataMap is NULL, this is a bug"), Util.NIL_UUID);
+                    client.player.sendMessage(new TextComponent("[Client Side] TimeDataMap is NULL, this is a bug"), Util.NIL_UUID);
                 }
                 else if (TimeAndWindCT.timeDataMap.containsKey(worldId)) {
                     TimeDataStorage storage = TimeAndWindCT.timeDataMap.get(worldId);
-                    client.player.sendSystemMessage(new LiteralText("Client config for current world: Day Duration: " + storage.dayDuration + " Night Duration: " + storage.nightDuration), Util.NIL_UUID);
+                    client.player.sendMessage(new TextComponent("Client config for current world: Day Duration: " + storage.dayDuration + " Night Duration: " + storage.nightDuration), Util.NIL_UUID);
                 } else
-                    client.player.sendSystemMessage(new LiteralText("No Data found for current world on client side"), Util.NIL_UUID);
+                    client.player.sendMessage(new TextComponent("No Data found for current world on client side"), Util.NIL_UUID);
             }
         });
         ClientPlayNetworking.registerGlobalReceiver(NetworkPacketsID.WORLD_ID_CLIPBOARD, (client, handler, buf, responseSender) -> {
 
             if(buf.readableBytes() > 0 && client.player != null) {
-                String string = buf.readString();
-                client.keyboard.setClipboard(string);
-                client.player.sendMessage(new LiteralText("Also copied this to clipboard"), false);
+                String string = buf.readUtf();
+                client.keyboardHandler.setClipboard(string);
+                client.player.displayClientMessage(new TextComponent("Also copied this to clipboard"), false);
             }
         });
         ClientPlayNetworking.registerGlobalReceiver(NetworkPacketsID.SETUP_TIME, (client, handler, buf, responseSender) -> {
-            ClientWorld clientWorld = MinecraftClient.getInstance().world;
+            ClientLevel clientWorld = Minecraft.getInstance().level;
             if (clientWorld != null) {
-                String worldId = clientWorld.getRegistryKey().getValue().toString();
+                String worldId = clientWorld.dimension().location().toString();
                 ITimeOperations timeOps = (ITimeOperations) clientWorld;
                 if (TimeAndWindCT.CONFIG.syncWithSystemTime) {
                     if(TimeAndWindCT.CONFIG.systemTimePerDimensions && TimeAndWindCT.sysTimeMap.containsKey(worldId)) {
@@ -109,7 +109,7 @@ public class TimeAndWindCTClient implements ClientModInitializer {
         });
         ClientPlayNetworking.registerGlobalReceiver(NetworkPacketsID.NIGHT_SKIP_INFO, (client, handler, buf, responseSender) -> {
             if(buf.readableBytes() > 0) {
-                ClientWorld world = MinecraftClient.getInstance().world;
+                ClientLevel world = Minecraft.getInstance().level;
                 if(world != null){
                     ITimeOperations ops = (ITimeOperations) world;
                     ops.setSkipState(buf.readBoolean());

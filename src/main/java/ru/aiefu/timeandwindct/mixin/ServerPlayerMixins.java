@@ -2,17 +2,17 @@ package ru.aiefu.timeandwindct.mixin;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Either;
-import net.minecraft.advancement.criterion.Criteria;
-import net.minecraft.entity.mob.HostileEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.stat.Stats;
+import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.Stats;
 import net.minecraft.util.Unit;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -21,32 +21,32 @@ import ru.aiefu.timeandwindct.TimeAndWindCT;
 
 import java.util.List;
 
-@Mixin(ServerPlayerEntity.class)
-public abstract class ServerPlayerMixins extends PlayerEntity{
+@Mixin(ServerPlayer.class)
+public abstract class ServerPlayerMixins extends Player{
 
-    public ServerPlayerMixins(World world, BlockPos pos, float yaw, GameProfile profile) {
+    public ServerPlayerMixins(Level world, BlockPos pos, float yaw, GameProfile profile) {
         super(world, pos, yaw, profile);
     }
 
-    @Inject(method = "trySleep", at = @At(value = "FIELD", target = "net/minecraft/entity/player/PlayerEntity$SleepFailureReason.NOT_POSSIBLE_NOW:Lnet/minecraft/entity/player/PlayerEntity$SleepFailureReason;"), cancellable = true)
-    private void patchSleep(BlockPos pos, CallbackInfoReturnable<Either<PlayerEntity.SleepFailureReason, Unit>> cir){
+    @Inject(method = "startSleepInBed", at = @At(value = "FIELD", target = "net/minecraft/world/entity/player/Player$BedSleepingProblem.NOT_POSSIBLE_NOW:Lnet/minecraft/world/entity/player/Player$BedSleepingProblem;"), cancellable = true)
+    private void patchSleep(BlockPos pos, CallbackInfoReturnable<Either<Player.BedSleepingProblem, Unit>> cir){
         if(TimeAndWindCT.CONFIG.syncWithSystemTime) cir.setReturnValue(patchSleepMechanics(pos));
     }
 
-    private Either<PlayerEntity.SleepFailureReason, Unit> patchSleepMechanics(BlockPos pos){
+    private Either<Player.BedSleepingProblem, Unit> patchSleepMechanics(BlockPos pos){
         if (!this.isCreative()) {
-            Vec3d vec3d = Vec3d.ofBottomCenter(pos);
-            List<HostileEntity> list = this.world.getEntitiesByClass(HostileEntity.class, new Box(vec3d.getX() - 8.0D, vec3d.getY() - 5.0D, vec3d.getZ() - 8.0D, vec3d.getX() + 8.0D, vec3d.getY() + 5.0D, vec3d.getZ() + 8.0D), (hostileEntity) -> hostileEntity.isAngryAt(this));
+            Vec3 vec3d = Vec3.atBottomCenterOf(pos);
+            List<Monster> list = this.level.getEntitiesOfClass(Monster.class, new AABB(vec3d.x() - 8.0D, vec3d.y() - 5.0D, vec3d.z() - 8.0D, vec3d.x() + 8.0D, vec3d.y() + 5.0D, vec3d.z() + 8.0D), (hostileEntity) -> hostileEntity.isPreventingPlayerRest(this));
             if (!list.isEmpty()) {
-                return Either.left(PlayerEntity.SleepFailureReason.NOT_SAFE);
+                return Either.left(Player.BedSleepingProblem.NOT_SAFE);
             }
         }
 
-        Either<PlayerEntity.SleepFailureReason, Unit> either = super.trySleep(pos).ifRight((unit) -> {
-            this.incrementStat(Stats.SLEEP_IN_BED);
-            Criteria.SLEPT_IN_BED.trigger((ServerPlayerEntity) (Object)this);
+        Either<Player.BedSleepingProblem, Unit> either = super.startSleepInBed(pos).ifRight((unit) -> {
+            this.awardStat(Stats.SLEEP_IN_BED);
+            CriteriaTriggers.SLEPT_IN_BED.trigger((ServerPlayer) (Object)this);
         });
-        ((ServerWorld)this.world).updateSleepingPlayers();
+        ((ServerLevel)this.level).updateSleepingPlayerList();
         return either;
     }
 }

@@ -5,9 +5,9 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.world.GameRules;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.GameRules;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ru.aiefu.timeandwindct.config.ModConfig;
@@ -37,7 +37,7 @@ public class TimeAndWindCT implements ModInitializer {
 					sysTimeMap = IOManager.readSysTimeCfg();
 		});
 		ServerLifecycleEvents.SERVER_STARTED.register(server -> {
-			if(CONFIG.syncWithSystemTime) server.getGameRules().get(GameRules.DO_INSOMNIA).set(false, server);
+			if(CONFIG.syncWithSystemTime) server.getGameRules().getRule(GameRules.RULE_DOINSOMNIA).set(false, server);
 
 		});
 		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> TAWCommands.registerCommands(dispatcher));
@@ -82,9 +82,9 @@ public class TimeAndWindCT implements ModInitializer {
 		return String.format("%02d:%02d:%02d", hours, minutes, seconds);
 	}
 
-	public static void sendConfigSyncPacket(ServerPlayerEntity player){
-		if(!player.getServer().isHost(player.getGameProfile())) {
-			PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
+	public static void sendConfigSyncPacket(ServerPlayer player){
+		if(!player.getServer().isSingleplayerOwner(player.getGameProfile())) {
+			FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
 
 			ModConfig cfg = TimeAndWindCT.CONFIG;
 			SystemTimeConfig cfgs = TimeAndWindCT.systemTimeConfig;
@@ -97,21 +97,21 @@ public class TimeAndWindCT implements ModInitializer {
 			buf.writeInt(cfg.thresholdPercentage);
 			buf.writeBoolean(cfg.flatAcceleration);
 
-			buf.writeString(cfgs.sunrise);
-			buf.writeString(cfgs.sunset);
-			buf.writeString(cfgs.timeZone);
+			buf.writeUtf(cfgs.sunrise);
+			buf.writeUtf(cfgs.sunset);
+			buf.writeUtf(cfgs.timeZone);
 
-			buf.writeMap(TimeAndWindCT.timeDataMap, PacketByteBuf::writeString, (packetByteBuf, timeDataStorage) -> {
+			buf.writeMap(TimeAndWindCT.timeDataMap, FriendlyByteBuf::writeUtf, (packetByteBuf, timeDataStorage) -> {
 				packetByteBuf.writeLong(timeDataStorage.dayDuration);
 				packetByteBuf.writeLong(timeDataStorage.nightDuration);
 			});
-			buf.writeMap(TimeAndWindCT.sysTimeMap, PacketByteBuf::writeString, (packetByteBuf, systemTimeConfig1) -> {
-				packetByteBuf.writeString(systemTimeConfig1.sunrise);
-				packetByteBuf.writeString(systemTimeConfig1.sunset);
-				packetByteBuf.writeString(systemTimeConfig1.timeZone);
+			buf.writeMap(TimeAndWindCT.sysTimeMap, FriendlyByteBuf::writeUtf, (packetByteBuf, systemTimeConfig1) -> {
+				packetByteBuf.writeUtf(systemTimeConfig1.sunrise);
+				packetByteBuf.writeUtf(systemTimeConfig1.sunset);
+				packetByteBuf.writeUtf(systemTimeConfig1.timeZone);
 			});
 			ServerPlayNetworking.send(player, NetworkPacketsID.SYNC_CONFIG, buf);
 			LOGGER.info("[Time & Wind] Sending config to player");
-		} else ServerPlayNetworking.send(player, NetworkPacketsID.SETUP_TIME, new PacketByteBuf(Unpooled.buffer()));
+		} else ServerPlayNetworking.send(player, NetworkPacketsID.SETUP_TIME, new FriendlyByteBuf(Unpooled.buffer()));
 	}
 }

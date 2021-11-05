@@ -54,9 +54,14 @@ public class TAWCommands {
                         switchSystemTimePerDim(context.getSource(), BoolArgumentType.getBool(context,"per-dim-state"))))));
 
         dispatcher.register(CommandManager.literal("taw").then(CommandManager.literal("set-system-time-properties").then(CommandManager.argument("dimension", DimensionArgumentType.dimension())
-                .then(CommandManager.argument("sunrise", StringArgumentType.string()).then(CommandManager.argument("sunset", StringArgumentType.string()).executes(context ->
-                        setSysSyncTimeProperties(DimensionArgumentType.getDimensionArgument(context, "dimension"), context.getSource(), StringArgumentType.getString(context, "sunrise"),
-                                StringArgumentType.getString(context, "sunset"))))))));
+                .then(CommandManager.argument("sunrise", StringArgumentType.string()).then(CommandManager.argument("sunset", StringArgumentType.string())
+                        .then(CommandManager.argument("timezone", StringArgumentType.string()).executes(context ->
+                                setSysSyncTimeProperties(DimensionArgumentType.getDimensionArgument(context, "dimension"), context.getSource(), StringArgumentType.getString(context, "sunrise"),
+                                        StringArgumentType.getString(context, "sunset"), StringArgumentType.getString(context, "timezone")))))))));
+        dispatcher.register(CommandManager.literal("taw").then(CommandManager.literal("set-global-sys-time-properties").then(CommandManager.argument("sunrise", StringArgumentType.string())
+                .then(CommandManager.argument("sunset", StringArgumentType.string()).then(CommandManager.argument("timezone", StringArgumentType.string())
+                        .executes(context -> setGlobalSysTimeProps(context.getSource(), StringArgumentType.getString(context, "sunrise"),
+                                StringArgumentType.getString(context, "sunset"), StringArgumentType.getString(context, "timezone"))))))));
 
         dispatcher.register(CommandManager.literal("taw").then(CommandManager.literal("get-current-world-id").executes(context -> printCurrentWorldId(context.getSource()))));
 
@@ -90,13 +95,23 @@ public class TAWCommands {
 
 
 
-    private static int setSysSyncTimeProperties(ServerWorld targetDimension, ServerCommandSource source, String sunrise, String sunset) throws CommandSyntaxException {
+    private static int setSysSyncTimeProperties(ServerWorld targetDimension, ServerCommandSource source, String sunrise, String sunset, String timeZone) throws CommandSyntaxException {
         if(source.hasPermissionLevel(4) || source.getServer().isHost(source.getPlayer().getGameProfile())) {
             String worldId = targetDimension.getRegistryKey().getValue().toString();
-            if(checkFormat(sunrise) && checkFormat(sunset)){
-                IOManager.updateMapSysTime(worldId, sunrise, sunset);
+            if(checkFormat(sunrise) && checkFormat(sunset) && checkFormat(timeZone)){
+                IOManager.updateMapSysTime(worldId, sunrise, sunset, timeZone);
                 source.sendFeedback(new LiteralText("Configuration entry added, now use /taw reload to apply changes"), false);
-            } else source.sendError(new LiteralText("Error, sunrise or sunset param contains non numeric symbols"));
+            } else source.sendError(new LiteralText("Error, sunrise, sunset or timezone param contains non numeric symbols"));
+        } source.sendError(new LiteralText("[Time & Wind] Permission level of 4 is required to run this command"));
+        return 0;
+    }
+
+    private static int setGlobalSysTimeProps(ServerCommandSource source, String sunrise, String sunset, String timezone) throws CommandSyntaxException {
+        if(source.hasPermissionLevel(4) || source.getServer().isHost(source.getPlayer().getGameProfile())) {
+            if(checkFormat(sunrise) && checkFormat(sunset) && checkFormat(timezone)){
+                IOManager.updateGlobalSysTimeCfg(sunrise, sunset, timezone);
+                source.sendFeedback(new LiteralText("Configuration entry added, now use /taw reload to apply changes"), false);
+            } else source.sendError(new LiteralText("Error, sunrise, sunset or timezone param contains non numeric symbols"));
         } source.sendError(new LiteralText("[Time & Wind] Permission level of 4 is required to run this command"));
         return 0;
     }
@@ -153,16 +168,18 @@ public class TAWCommands {
                 source.sendFeedback(new LiteralText("Unable to reload config"), false);
                 return 0;
             }
-            source.getServer().getWorlds().forEach(serverWorld -> {
+            for(ServerWorld serverWorld : source.getServer().getWorlds()){
                 String id = serverWorld.getRegistryKey().getValue().toString();
                 if(TimeAndWindCT.CONFIG.syncWithSystemTime){
+                    if(TimeAndWindCT.CONFIG.systemTimePerDimensions && TimeAndWindCT.sysTimeMap.containsKey(id))
                     ((ITimeOperations) serverWorld).setTimeTicker(new SystemTimeTicker((ITimeOperations) serverWorld, TimeAndWindCT.sysTimeMap.get(id)));
+                    else ((ITimeOperations) serverWorld).setTimeTicker(new SystemTimeTicker((ITimeOperations) serverWorld, TimeAndWindCT.systemTimeConfig));
                 }
                 else if (TimeAndWindCT.timeDataMap.containsKey(id)) {
                     TimeDataStorage storage = TimeAndWindCT.timeDataMap.get(id);
                     ((ITimeOperations) serverWorld).setTimeTicker(new TimeTicker(storage.dayDuration, storage.nightDuration));
                 } else ((ITimeOperations) serverWorld).setTimeTicker(new DefaultTicker());
-            });
+            }
             for(ServerPlayerEntity player : server.getPlayerManager().getPlayerList()){
                TimeAndWindCT.sendConfigSyncPacket(player);
             }

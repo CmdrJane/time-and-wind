@@ -40,11 +40,15 @@ public class IOManager {
         fileWriter(file, gson);
     }
 
-    public static void updateMapSysTime(String worldId, String sunrise, String sunset){
-
+    public static void updateMapSysTime(String worldId, String sunrise, String sunset, String timeZone){
+        TimeAndWindCT.sysTimeMap.put(worldId, new SystemTimeConfig(sunrise, sunset, timeZone));
+        String gson = new GsonBuilder().setPrettyPrinting().create().toJson(TimeAndWindCT.sysTimeMap);
+        File file = new File("./config/time-and-wind/system-time-data.json");
+        fileWriter(file, gson);
     }
 
-    public static void updateGlobalSysTimeCfg(){
+    public static void updateGlobalSysTimeCfg(String sunrise, String sunset, String timezone){
+        TimeAndWindCT.systemTimeConfig = new SystemTimeConfig(sunrise, sunset, timezone);
         String gson = new GsonBuilder().setPrettyPrinting().create().toJson(TimeAndWindCT.systemTimeConfig);
         File file = new File("./config/time-and-wind/system-time-data-global.json");
         fileWriter(file, gson);

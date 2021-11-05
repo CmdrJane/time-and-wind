@@ -96,7 +96,9 @@ public class TimeAndWindCTClient implements ClientModInitializer {
                 String worldId = clientWorld.getRegistryKey().getValue().toString();
                 ITimeOperations timeOps = (ITimeOperations) clientWorld;
                 if (TimeAndWindCT.CONFIG.syncWithSystemTime) {
-                    timeOps.setTimeTicker(new SystemTimeTicker((ITimeOperations) clientWorld, TimeAndWindCT.sysTimeMap.get(worldId)));
+                    if(TimeAndWindCT.CONFIG.systemTimePerDimensions && TimeAndWindCT.sysTimeMap.containsKey(worldId)) {
+                        timeOps.setTimeTicker(new SystemTimeTicker((ITimeOperations) clientWorld, TimeAndWindCT.sysTimeMap.get(worldId)));
+                    } else timeOps.setTimeTicker(new SystemTimeTicker((ITimeOperations) clientWorld, TimeAndWindCT.systemTimeConfig));
                 }
                 else if (TimeAndWindCT.timeDataMap != null && TimeAndWindCT.timeDataMap.containsKey(worldId)) {
                     TimeDataStorage storage = TimeAndWindCT.timeDataMap.get(worldId);

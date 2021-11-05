@@ -8,7 +8,7 @@ public interface ITimeOperations {
     void setTimeOfDayTAW(long time);
     long getTimeTAW();
     long getTimeOfDayTAW();
-    boolean isClientSide();
+    boolean isClient();
     void setSkipState(boolean bl);
     void setSpeed(int speed);
 }

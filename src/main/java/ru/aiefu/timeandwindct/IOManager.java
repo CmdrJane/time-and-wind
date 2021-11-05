@@ -22,20 +22,38 @@ public class IOManager {
 
     public static void generateSysTimeCfg(){
         String gson = new GsonBuilder().setPrettyPrinting().create().toJson(new SystemTimeConfig("5:00", "20:00", "3:00"));
-        File file = new File("./config/time-and-wind/system-time-data.json");
+        File file = new File("./config/time-and-wind/system-time-data-global.json");
         fileWriter(file, gson);
     }
 
-    public static void updateSysTimeCfg(){
+    public static void generateMapSysTime(){
+        String gson2 = new GsonBuilder().setPrettyPrinting().create().toJson(new HashMapOf<>("minecraft:overworld", new SystemTimeConfig("5:00", "20:00", "3:00")));
+        File file2 = new File("./config/time-and-wind/system-time-data.json");
+        fileWriter(file2, gson2);
+    }
+
+
+
+    public static void updateModConfig(ModConfig config){
+        String gson = new GsonBuilder().setPrettyPrinting().create().toJson(config);
+        File file = new File("./config/time-and-wind/config.json");
+        fileWriter(file, gson);
+    }
+
+    public static void updateMapSysTime(String worldId, String sunrise, String sunset){
+
+    }
+
+    public static void updateGlobalSysTimeCfg(){
         String gson = new GsonBuilder().setPrettyPrinting().create().toJson(TimeAndWindCT.systemTimeConfig);
-        File file = new File("./config/time-and-wind/system-time-data.json");
+        File file = new File("./config/time-and-wind/system-time-data-global.json");
         fileWriter(file, gson);
     }
 
-    public static SystemTimeConfig readSysTimeCfg(){
+    public static SystemTimeConfig readGlobalSysTimeCfg(){
         SystemTimeConfig config;
         try {
-            config = new Gson().fromJson(new FileReader("./config/time-and-wind/system-time-data.json"), SystemTimeConfig.class);
+            config = new Gson().fromJson(new FileReader("./config/time-and-wind/system-time-data-global.json"), SystemTimeConfig.class);
         } catch (IOException e){
             e.printStackTrace();
             config = new SystemTimeConfig("7:00", "19:00", "local");
@@ -43,8 +61,19 @@ public class IOManager {
         return config;
     }
 
+    public static HashMap<String, SystemTimeConfig> readSysTimeCfg(){
+        HashMap<String, SystemTimeConfig> map;
+        try {
+            map = new Gson().fromJson(new FileReader("./config/time-and-wind/system-time-data.json"), new TypeToken<HashMap<String, TimeDataStorage>>(){}.getType());
+        } catch (IOException e){
+            e.printStackTrace();
+            map = new HashMapOf<>("minecraft:overworld", new SystemTimeConfig("5:00", "20:00", "3:00"));
+        }
+        return map;
+    }
+
     public static void generateModConfig(){
-        String gson = new GsonBuilder().setPrettyPrinting().create().toJson(new ModConfig(true, false,
+        String gson = new GsonBuilder().setPrettyPrinting().create().toJson(new ModConfig(true, false, false,
                 true, 10, true, 50, false));
         File file = new File("./config/time-and-wind/config.json");
         fileWriter(file, gson);
@@ -55,23 +84,22 @@ public class IOManager {
         try {
             config = new Gson().fromJson(new FileReader("./config/time-and-wind/config.json"), ModConfig.class);
             if(config.config_ver == 1){
-                config = patchModConfig(config);
+                config = patchModConfigV1(config);
                 String gson = new GsonBuilder().setPrettyPrinting().create().toJson(config);
                 File file = new File("./config/time-and-wind/config.json");
                 fileWriter(file, gson);
             }
         } catch (IOException e){
             e.printStackTrace();
-            config = new ModConfig(true, false,
+            config = new ModConfig(true, false, false,
                     true, 10, true, 50, false);
         }
         return config;
     }
 
-    public static ModConfig patchModConfig(ModConfig config){
-        return new ModConfig(config.patchSkyAngle, config.syncWithSystemTime, true, 10, true, 50, false);
+    public static ModConfig patchModConfigV1(ModConfig config){
+        return new ModConfig(config.patchSkyAngle, config.syncWithSystemTime,false, true, 10, true, 50, false);
     }
-
     public static void updateTimeData(String id, long dayD, long nightD){
         TimeAndWindCT.timeDataMap.put(id, new TimeDataStorage(dayD, nightD));
         String gson = new GsonBuilder().setPrettyPrinting().create().toJson(TimeAndWindCT.timeDataMap);

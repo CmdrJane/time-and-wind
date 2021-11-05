@@ -19,7 +19,7 @@ import ru.aiefu.timeandwindct.TimeAndWindCT;
 @Mixin(PlayerEntity.class)
 public abstract class PlayerMixins extends LivingEntity {
 
-    private int sleepTimer = 0;
+    private int restTimer = 0;
 
     protected PlayerMixins(EntityType<? extends LivingEntity> entityType, World world) {
         super(entityType, world);
@@ -38,16 +38,16 @@ public abstract class PlayerMixins extends LivingEntity {
 
     @Inject(method = "trySleep", at =@At("HEAD"))
     private void onPlayerStartedSleeping(BlockPos pos, CallbackInfoReturnable<Either<PlayerEntity.SleepFailureReason, Unit>> cir){
-        this.sleepTimer = 0;
+        this.restTimer = 0;
     }
 
     @Inject(method = "tick", at =@At("TAIL"))
     private void onPlayerTick(CallbackInfo ci){
         if(TimeAndWindCT.CONFIG.syncWithSystemTime && this.isSleepingLongEnough()){
-            ++sleepTimer;
-            if(sleepTimer > 60){
+            ++restTimer;
+            if(restTimer > 60){
                 this.heal(1.0F);
-                sleepTimer = 0;
+                restTimer = 0;
             }
         }
     }

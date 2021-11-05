@@ -57,8 +57,12 @@ public abstract class ServerWorldMixins extends World implements ITimeOperations
 	@Inject(method = "<init>", at = @At("TAIL"))
 	private void attachTimeDataTAW(MinecraftServer server, Executor workerExecutor, LevelStorage.Session session, ServerWorldProperties properties, RegistryKey<World> worldKey, DimensionType dimensionType, WorldGenerationProgressListener worldGenerationProgressListener, ChunkGenerator chunkGenerator, boolean debugWorld, long seed, List<Spawner> spawners, boolean shouldTickTime, CallbackInfo ci){
 		String worldId = this.getRegistryKey().getValue().toString();
-		if (TimeAndWindCT.CONFIG.syncWithSystemTime) {
-			this.timeTicker = new SystemTimeTicker(this);
+		if(this.getDimension().hasFixedTime()){
+			this.timeTicker = new DefaultTicker();
+		}
+		else if(TimeAndWindCT.CONFIG.syncWithSystemTime){
+			if(TimeAndWindCT.CONFIG.systemTimePerDimensions && TimeAndWindCT.sysTimeMap.containsKey(worldId)) this.timeTicker = new SystemTimeTicker(this, TimeAndWindCT.sysTimeMap.get(worldId));
+			else this.timeTicker = new SystemTimeTicker(this, TimeAndWindCT.systemTimeConfig);
 		}
 		else if (TimeAndWindCT.timeDataMap.containsKey(worldId)) {
 			TimeDataStorage storage = TimeAndWindCT.timeDataMap.get(worldId);

@@ -8,7 +8,8 @@
     "PlayerManagerMixins",
     "PlayerMixins",
     "ServerPlayerMixins",
-    "ServerWorldMixins"
+    "ServerWorldMixins",
+    "TimeCommandMixins"
   ],
   "client": [
     "ClientWorldMixins",

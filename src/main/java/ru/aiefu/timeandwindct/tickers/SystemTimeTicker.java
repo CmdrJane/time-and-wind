@@ -23,11 +23,10 @@ public class SystemTimeTicker implements Ticker{
     int sunrise;
     int sunset;
 
-    public SystemTimeTicker(ITimeOperations world){
-        SystemTimeConfig CONFIG = TimeAndWindCT.systemTimeConfig;
-        this.sunrise = CONFIG.getSunriseMs();
-        this.sunset = CONFIG.getSunsetMs();
-        this.timeZoneOffset = CONFIG.getTimeOffset();
+    public SystemTimeTicker(ITimeOperations world, SystemTimeConfig config){
+        this.sunrise = config.getSunriseMs();
+        this.sunset = config.getSunsetMs();
+        this.timeZoneOffset = config.getTimeOffset();
         if(sunrise < sunset){
             dayD = sunset - sunrise;
             nightD = 86_400_000 - dayD;
@@ -52,7 +51,7 @@ public class SystemTimeTicker implements Ticker{
         if(ticks % tickMod == 0){
             world.setTimeOfDayTAW(time + 1L);
         }
-        if(!world.isClientSide() && ticks % 6000 == 0){
+        if(!world.isClient() && ticks % 6000 == 0){
             TimeAndWindCT.LOGGER.info("Checking if time corrections is needed...");
             int targetTicks = calculateCurrentTick();
             int timeTicks = (int) (time % 24000L);

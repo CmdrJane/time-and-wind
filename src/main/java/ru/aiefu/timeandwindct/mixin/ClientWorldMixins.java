@@ -1,13 +1,13 @@
 package ru.aiefu.timeandwindct.mixin;
 
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.client.render.WorldRenderer;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.util.profiler.Profiler;
-import net.minecraft.util.registry.RegistryKey;
-import net.minecraft.world.MutableWorldProperties;
-import net.minecraft.world.World;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.storage.WritableLevelData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -24,15 +24,14 @@ import ru.aiefu.timeandwindct.tickers.TimeTicker;
 
 import java.util.function.Supplier;
 
-@Mixin(ClientWorld.class)
-public abstract class ClientWorldMixins extends World implements ITimeOperations {
+@Mixin(ClientLevel.class)
+public abstract class ClientWorldMixins extends Level implements ITimeOperations {
 
-    protected ClientWorldMixins(MutableWorldProperties properties, RegistryKey<World> registryRef, DimensionType dimensionType, Supplier<Profiler> profiler, boolean isClient, boolean debugWorld, long seed) {
+    @Shadow public abstract void setDayTime(long l);
+
+    protected ClientWorldMixins(WritableLevelData properties, ResourceKey<Level> registryRef, DimensionType dimensionType, Supplier<ProfilerFiller> profiler, boolean isClient, boolean debugWorld, long seed) {
         super(properties, registryRef, dimensionType, profiler, isClient, debugWorld, seed);
     }
-
-    @Shadow
-    public abstract void setTimeOfDay(long timeOfDay);
 
     protected Ticker timeTicker;
 
@@ -40,10 +39,14 @@ public abstract class ClientWorldMixins extends World implements ITimeOperations
     private int speed = 0;
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void attachTimeDataTAW(ClientPlayNetworkHandler networkHandler, ClientWorld.Properties properties, RegistryKey<World> registryRef, DimensionType dimensionType, int loadDistance, Supplier<Profiler> profiler, WorldRenderer worldRenderer, boolean debugWorld, long seed, CallbackInfo ci){
-        String worldId = this.getRegistryKey().getValue().toString();
-        if(TimeAndWindCT.CONFIG.syncWithSystemTime){
-            this.timeTicker = new SystemTimeTicker(this);
+    private void attachTimeDataTAW(ClientPacketListener networkHandler, ClientLevel.ClientLevelData properties, ResourceKey<Level> registryRef, DimensionType dimensionType, int loadDistance, Supplier<ProfilerFiller> profiler, LevelRenderer worldRenderer, boolean debugWorld, long seed, CallbackInfo ci){
+        String worldId = this.dimension().location().toString();
+        if(this.dimensionType().hasFixedTime()){
+            this.timeTicker = new DefaultTicker();
+        }
+        else if(TimeAndWindCT.CONFIG.syncWithSystemTime){
+            if(TimeAndWindCT.CONFIG.systemTimePerDimensions && TimeAndWindCT.sysTimeMap.containsKey(worldId)) this.timeTicker = new SystemTimeTicker(this, TimeAndWindCT.sysTimeMap.get(worldId));
+            else this.timeTicker = new SystemTimeTicker(this, TimeAndWindCT.systemTimeConfig);
         }
         else if (TimeAndWindCT.timeDataMap != null && TimeAndWindCT.timeDataMap.containsKey(worldId)) {
             TimeDataStorage storage = TimeAndWindCT.timeDataMap.get(worldId);
@@ -51,8 +54,8 @@ public abstract class ClientWorldMixins extends World implements ITimeOperations
         } else this.timeTicker = new DefaultTicker();
     }
 
-    @Redirect(method = "tickTime", at = @At(value = "INVOKE", target = "net/minecraft/client/world/ClientWorld.setTimeOfDay(J)V"))
-    private void customTickerTAW(ClientWorld clientWorld, long timeOfDay) {
+    @Redirect(method = "tickTime", at = @At(value = "INVOKE", target = "net/minecraft/client/multiplayer/ClientLevel.setDayTime(J)V"))
+    private void customTickerTAW(ClientLevel clientWorld, long timeOfDay) {
         timeTicker.tick(this, skipState, speed);
     }
 
@@ -68,22 +71,21 @@ public abstract class ClientWorldMixins extends World implements ITimeOperations
 
     @Override
     public void setTimeOfDayTAW(long time) {
-        this.setTimeOfDay(time);
+        this.setDayTime(time);
     }
 
     @Override
     public long getTimeTAW() {
-        return this.properties.getTime();
+        return this.levelData.getGameTime();
     }
 
     @Override
     public long getTimeOfDayTAW() {
-        return this.properties.getTimeOfDay();
+        return this.levelData.getDayTime();
     }
 
-    @Override
-    public boolean isClientSide() {
-        return this.isClient();
+    public boolean isClient() {
+        return this.isClientSide();
     }
 
     @Override

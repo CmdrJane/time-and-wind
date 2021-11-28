@@ -68,7 +68,7 @@ public class IOManager {
     public static HashMap<String, SystemTimeConfig> readSysTimeCfg(){
         HashMap<String, SystemTimeConfig> map;
         try {
-            map = new Gson().fromJson(new FileReader("./config/time-and-wind/system-time-data.json"), new TypeToken<HashMap<String, TimeDataStorage>>(){}.getType());
+            map = new Gson().fromJson(new FileReader("./config/time-and-wind/system-time-data.json"), new TypeToken<HashMap<String, SystemTimeConfig>>(){}.getType());
         } catch (IOException e){
             e.printStackTrace();
             map = new HashMapOf<>("minecraft:overworld", new SystemTimeConfig("5:00", "20:00", "3:00"));

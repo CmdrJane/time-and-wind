@@ -39,7 +39,7 @@ public abstract class ClientWorldMixins extends Level implements ITimeOperations
     private int speed = 0;
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void attachTimeDataTAW(ClientPacketListener networkHandler, ClientLevel.ClientLevelData properties, ResourceKey<Level> registryRef, DimensionType dimensionType, int loadDistance, Supplier<ProfilerFiller> profiler, LevelRenderer worldRenderer, boolean debugWorld, long seed, CallbackInfo ci){
+    private void attachTimeDataTAW(ClientPacketListener clientPacketListener, ClientLevel.ClientLevelData clientLevelData, ResourceKey resourceKey, DimensionType dimensionType, int i, int j, Supplier supplier, LevelRenderer levelRenderer, boolean bl, long l, CallbackInfo ci){
         String worldId = this.dimension().location().toString();
         if(this.dimensionType().hasFixedTime()){
             this.timeTicker = new DefaultTicker();

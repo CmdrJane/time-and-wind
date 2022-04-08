@@ -2,6 +2,7 @@ package ru.aiefu.timeandwindct.mixin;
 
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.core.Holder;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -9,7 +10,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.util.profiling.ProfilerFiller;
-import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -40,12 +40,14 @@ import java.util.stream.Collectors;
 @Mixin(ServerLevel.class)
 public abstract class ServerWorldMixins extends Level implements ITimeOperations {
 
-	protected ServerWorldMixins(WritableLevelData properties, ResourceKey<Level> registryRef, DimensionType dimensionType, Supplier<ProfilerFiller> profiler, boolean isClient, boolean debugWorld, long seed) {
-		super(properties, registryRef, dimensionType, profiler, isClient, debugWorld, seed);
-	}
+
 
 	@Shadow @Final
 	List<ServerPlayer> players;
+
+	protected ServerWorldMixins(WritableLevelData writableLevelData, ResourceKey<Level> resourceKey, Holder<DimensionType> holder, Supplier<ProfilerFiller> supplier, boolean bl, boolean bl2, long l) {
+		super(writableLevelData, resourceKey, holder, supplier, bl, bl2, l);
+	}
 
 	@Shadow public abstract void setDayTime(long l);
 
@@ -57,7 +59,7 @@ public abstract class ServerWorldMixins extends Level implements ITimeOperations
 	private boolean shouldUpdateNSkip = true;
 
 	@Inject(method = "<init>", at = @At("TAIL"))
-	private void attachTimeDataTAW(MinecraftServer server, Executor workerExecutor, LevelStorageSource.LevelStorageAccess session, ServerLevelData properties, ResourceKey<Level> worldKey, DimensionType dimensionType, ChunkProgressListener worldGenerationProgressListener, ChunkGenerator chunkGenerator, boolean debugWorld, long seed, List<CustomSpawner> spawners, boolean shouldTickTime, CallbackInfo ci){
+	private void attachTimeDataTAW(MinecraftServer minecraftServer, Executor executor, LevelStorageSource.LevelStorageAccess levelStorageAccess, ServerLevelData serverLevelData, ResourceKey resourceKey, Holder holder, ChunkProgressListener chunkProgressListener, ChunkGenerator chunkGenerator, boolean bl, long l, List list, boolean bl2, CallbackInfo ci){
 		String worldId = this.dimension().location().toString();
 		if(this.dimensionType().hasFixedTime()){
 			this.timeTicker = new DefaultTicker();

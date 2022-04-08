@@ -2,7 +2,7 @@ package ru.aiefu.timeandwindct.tickers;
 
 import ru.aiefu.timeandwindct.ITimeOperations;
 
-public class TimeTicker implements Ticker{
+public class TimeTicker implements Ticker {
 
     private final long dayD;
     private final int dayMod;

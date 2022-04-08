@@ -3,6 +3,7 @@ package ru.aiefu.timeandwindct.mixin;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.Level;
@@ -27,11 +28,13 @@ import java.util.function.Supplier;
 @Mixin(ClientLevel.class)
 public abstract class ClientWorldMixins extends Level implements ITimeOperations {
 
+    protected ClientWorldMixins(WritableLevelData writableLevelData, ResourceKey<Level> resourceKey, Holder<DimensionType> holder, Supplier<ProfilerFiller> supplier, boolean bl, boolean bl2, long l) {
+        super(writableLevelData, resourceKey, holder, supplier, bl, bl2, l);
+    }
+
     @Shadow public abstract void setDayTime(long l);
 
-    protected ClientWorldMixins(WritableLevelData properties, ResourceKey<Level> registryRef, DimensionType dimensionType, Supplier<ProfilerFiller> profiler, boolean isClient, boolean debugWorld, long seed) {
-        super(properties, registryRef, dimensionType, profiler, isClient, debugWorld, seed);
-    }
+
 
     protected Ticker timeTicker;
 
@@ -39,7 +42,7 @@ public abstract class ClientWorldMixins extends Level implements ITimeOperations
     private int speed = 0;
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void attachTimeDataTAW(ClientPacketListener clientPacketListener, ClientLevel.ClientLevelData clientLevelData, ResourceKey resourceKey, DimensionType dimensionType, int i, int j, Supplier supplier, LevelRenderer levelRenderer, boolean bl, long l, CallbackInfo ci){
+    private void attachTimeDataTAW(ClientPacketListener clientPacketListener, ClientLevel.ClientLevelData clientLevelData, ResourceKey resourceKey, Holder holder, int i, int j, Supplier supplier, LevelRenderer levelRenderer, boolean bl, long l, CallbackInfo ci){
         String worldId = this.dimension().location().toString();
         if(this.dimensionType().hasFixedTime()){
             this.timeTicker = new DefaultTicker();

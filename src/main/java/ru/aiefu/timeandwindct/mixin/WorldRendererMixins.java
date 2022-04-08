@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
+import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.util.Mth;
@@ -21,7 +22,7 @@ public class WorldRendererMixins {
     private float prevSkyAngle;
 
     @Inject(method = "renderSky", at =@At("HEAD"))
-    private void captureDelta(PoseStack matrices, Matrix4f matrix4f, float f, Runnable runnable, CallbackInfo ci){
+    private void captureDelta(PoseStack poseStack, Matrix4f matrix4f, float f, Camera camera, boolean bl, Runnable runnable, CallbackInfo ci){
         this.deltaTime = f;
     }
 

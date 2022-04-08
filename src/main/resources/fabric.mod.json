@@ -10,7 +10,7 @@
   ],
   "contact": {
     "homepage": "https://www.curseforge.com/minecraft/mc-mods/time-wind",
-    "sources": "https://github.com/CmdrJane/time-and-wind/tree/custom-ticker-1.17.1"
+    "sources": "https://github.com/CmdrJane/time-and-wind/tree/custom-ticker-1.18.2"
   },
 
   "license": "GPL-v3",
@@ -30,9 +30,9 @@
   ],
 
   "depends": {
-    "fabricloader": ">=0.11.3",
+    "fabricloader": ">=0.13.2",
     "fabric": "*",
-    "minecraft": "1.18.x",
+    "minecraft": "1.18.2",
     "java": ">=17"
   },
   "suggests": {

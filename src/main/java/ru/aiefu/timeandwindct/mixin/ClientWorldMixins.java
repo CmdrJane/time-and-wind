@@ -28,8 +28,9 @@ import java.util.function.Supplier;
 @Mixin(ClientLevel.class)
 public abstract class ClientWorldMixins extends Level implements ITimeOperations {
 
-    protected ClientWorldMixins(WritableLevelData writableLevelData, ResourceKey<Level> resourceKey, Holder<DimensionType> holder, Supplier<ProfilerFiller> supplier, boolean bl, boolean bl2, long l) {
-        super(writableLevelData, resourceKey, holder, supplier, bl, bl2, l);
+
+    protected ClientWorldMixins(WritableLevelData writableLevelData, ResourceKey<Level> resourceKey, Holder<DimensionType> holder, Supplier<ProfilerFiller> supplier, boolean bl, boolean bl2, long l, int i) {
+        super(writableLevelData, resourceKey, holder, supplier, bl, bl2, l, i);
     }
 
     @Shadow public abstract void setDayTime(long l);

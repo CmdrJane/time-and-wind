@@ -13,6 +13,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraft.world.level.storage.WritableLevelData;
@@ -45,9 +46,10 @@ public abstract class ServerWorldMixins extends Level implements ITimeOperations
 	@Shadow @Final
 	List<ServerPlayer> players;
 
-	protected ServerWorldMixins(WritableLevelData writableLevelData, ResourceKey<Level> resourceKey, Holder<DimensionType> holder, Supplier<ProfilerFiller> supplier, boolean bl, boolean bl2, long l) {
-		super(writableLevelData, resourceKey, holder, supplier, bl, bl2, l);
+	protected ServerWorldMixins(WritableLevelData writableLevelData, ResourceKey<Level> resourceKey, Holder<DimensionType> holder, Supplier<ProfilerFiller> supplier, boolean bl, boolean bl2, long l, int i) {
+		super(writableLevelData, resourceKey, holder, supplier, bl, bl2, l, i);
 	}
+
 
 	@Shadow public abstract void setDayTime(long l);
 
@@ -59,7 +61,7 @@ public abstract class ServerWorldMixins extends Level implements ITimeOperations
 	private boolean shouldUpdateNSkip = true;
 
 	@Inject(method = "<init>", at = @At("TAIL"))
-	private void attachTimeDataTAW(MinecraftServer minecraftServer, Executor executor, LevelStorageSource.LevelStorageAccess levelStorageAccess, ServerLevelData serverLevelData, ResourceKey resourceKey, Holder holder, ChunkProgressListener chunkProgressListener, ChunkGenerator chunkGenerator, boolean bl, long l, List list, boolean bl2, CallbackInfo ci){
+	private void attachTimeDataTAW(MinecraftServer minecraftServer, Executor executor, LevelStorageSource.LevelStorageAccess levelStorageAccess, ServerLevelData serverLevelData, ResourceKey resourceKey, LevelStem levelStem, ChunkProgressListener chunkProgressListener, boolean bl, long l, List list, boolean bl2, CallbackInfo ci){
 		String worldId = this.dimension().location().toString();
 		if(this.dimensionType().hasFixedTime()){
 			this.timeTicker = new DefaultTicker();

@@ -2,7 +2,7 @@ package ru.aiefu.timeandwindct;
 
 import io.netty.buffer.Unpooled;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.FriendlyByteBuf;
@@ -40,7 +40,7 @@ public class TimeAndWindCT implements ModInitializer {
 			if(CONFIG.syncWithSystemTime) server.getGameRules().getRule(GameRules.RULE_DOINSOMNIA).set(false, server);
 
 		});
-		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> TAWCommands.registerCommands(dispatcher));
+		CommandRegistrationCallback.EVENT.register((dispatcher, ra, env) -> TAWCommands.registerCommands(dispatcher));
 	}
 
 	public void craftPaths(){

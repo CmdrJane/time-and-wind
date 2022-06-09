@@ -12,7 +12,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -79,8 +79,8 @@ public class TAWCommands {
     private static int enableDebug(CommandSourceStack source, boolean bl) throws CommandSyntaxException {
         if(source.hasPermission(4) || source.getServer().isSingleplayerOwner(source.getPlayerOrException().getGameProfile())) {
             TimeAndWindCT.debugMode = bl;
-            source.sendSuccess(new TextComponent("[Time & Wind] Set debug mod to " + bl), true);
-        } else source.sendFailure(new TextComponent("[Time & Wind] Permission level of 4 is required to run this command"));
+            source.sendSuccess(Component.literal("[Time & Wind] Set debug mod to " + bl), true);
+        } else source.sendFailure(Component.literal("[Time & Wind] Permission level of 4 is required to run this command"));
         return 0;
     }
 
@@ -88,8 +88,8 @@ public class TAWCommands {
         if(source.hasPermission(4) || source.getServer().isSingleplayerOwner(source.getPlayerOrException().getGameProfile())) {
             String worldId = targetWorld.dimension().location().toString();
             IOManager.updateTimeData(worldId, dayD, nightD);
-            source.sendSuccess(new TextComponent("Configuration entry added, now use /taw reload to apply changes"), false);
-        } else source.sendFailure(new TextComponent("[Time & Wind] Permission level of 4 is required to run this command"));
+            source.sendSuccess(Component.literal("Configuration entry added, now use /taw reload to apply changes"), false);
+        } else source.sendFailure(Component.literal("[Time & Wind] Permission level of 4 is required to run this command"));
         return 0;
     }
 
@@ -100,9 +100,9 @@ public class TAWCommands {
             String worldId = targetDimension.dimension().location().toString();
             if(checkFormat(sunrise) && checkFormat(sunset) && checkFormat(timeZone)){
                 IOManager.updateMapSysTime(worldId, sunrise, sunset, timeZone);
-                source.sendSuccess(new TextComponent("Configuration entry added, now use /taw reload to apply changes"), false);
-            } else source.sendFailure(new TextComponent("Error, sunrise, sunset or timezone param contains non numeric symbols"));
-        } source.sendFailure(new TextComponent("[Time & Wind] Permission level of 4 is required to run this command"));
+                source.sendSuccess(Component.literal("Configuration entry added, now use /taw reload to apply changes"), false);
+            } else source.sendFailure(Component.literal("Error, sunrise, sunset or timezone param contains non numeric symbols"));
+        } source.sendFailure(Component.literal("[Time & Wind] Permission level of 4 is required to run this command"));
         return 0;
     }
 
@@ -110,9 +110,9 @@ public class TAWCommands {
         if(source.hasPermission(4) || source.getServer().isSingleplayerOwner(source.getPlayerOrException().getGameProfile())) {
             if(checkFormat(sunrise) && checkFormat(sunset) && checkFormat(timezone)){
                 IOManager.updateGlobalSysTimeCfg(sunrise, sunset, timezone);
-                source.sendSuccess(new TextComponent("Configuration entry added, now use /taw reload to apply changes"), false);
-            } else source.sendFailure(new TextComponent("Error, sunrise, sunset or timezone param contains non numeric symbols"));
-        } source.sendFailure(new TextComponent("[Time & Wind] Permission level of 4 is required to run this command"));
+                source.sendSuccess(Component.literal("Configuration entry added, now use /taw reload to apply changes"), false);
+            } else source.sendFailure(Component.literal("Error, sunrise, sunset or timezone param contains non numeric symbols"));
+        } source.sendFailure(Component.literal("[Time & Wind] Permission level of 4 is required to run this command"));
         return 0;
     }
 
@@ -130,9 +130,9 @@ public class TAWCommands {
             if(TimeAndWindCT.timeDataMap.containsKey(worldId)){
                 TimeAndWindCT.timeDataMap.remove(worldId);
                 IOManager.updateTimeData();
-                source.sendSuccess(new TextComponent("Entry removed, now use /taw reload to apply changes"), false);
-            } else source.sendFailure(new TextComponent("Config does not contains settings for " + worldId));
-        } else source.sendFailure(new TextComponent("[Time & Wind] Permission level of 4 is required to run this command"));
+                source.sendSuccess(Component.literal("Entry removed, now use /taw reload to apply changes"), false);
+            } else source.sendFailure(Component.literal("Config does not contains settings for " + worldId));
+        } else source.sendFailure(Component.literal("[Time & Wind] Permission level of 4 is required to run this command"));
         return 0;
     }
 
@@ -142,8 +142,8 @@ public class TAWCommands {
             ModConfig cfg = TimeAndWindCT.CONFIG.copy();
             cfg.syncWithSystemTime = state;
             IOManager.updateModConfig(cfg);
-            source.sendSuccess(new TextComponent("SysTimeSync state switched to" + state + " now use /taw reload to apply changes"), false);
-        } else source.sendFailure(new TextComponent("[Time & Wind] Permission level of 4 is required to run this command"));
+            source.sendSuccess(Component.literal("SysTimeSync state switched to" + state + " now use /taw reload to apply changes"), false);
+        } else source.sendFailure(Component.literal("[Time & Wind] Permission level of 4 is required to run this command"));
         return 0;
     }
 
@@ -152,7 +152,7 @@ public class TAWCommands {
             ModConfig cfg = TimeAndWindCT.CONFIG.copy();
             cfg.syncWithSystemTime = state;
             IOManager.updateModConfig(cfg);
-            source.sendSuccess(new TextComponent("SystemTimePerDimension state switched to" + state + " now use /taw reload to apply changes"), false);
+            source.sendSuccess(Component.literal("SystemTimePerDimension state switched to" + state + " now use /taw reload to apply changes"), false);
         }
         return 0;
     }
@@ -165,7 +165,7 @@ public class TAWCommands {
             TimeAndWindCT.systemTimeConfig = IOManager.readGlobalSysTimeCfg();
             TimeAndWindCT.sysTimeMap = IOManager.readSysTimeCfg();
             if(result == 0){
-                source.sendSuccess(new TextComponent("Unable to reload config"), false);
+                source.sendSuccess(Component.literal("Unable to reload config"), false);
                 return 0;
             }
             for(ServerLevel serverWorld : source.getServer().getAllLevels()){
@@ -183,24 +183,24 @@ public class TAWCommands {
             for(ServerPlayer player : server.getPlayerList().getPlayers()){
                TimeAndWindCT.sendConfigSyncPacket(player);
             }
-            source.sendSuccess(new TextComponent("[Time & Wind] Config reloaded"), true);
+            source.sendSuccess(Component.literal("[Time & Wind] Config reloaded"), true);
         }
         else {
-            source.sendFailure(new TextComponent("[Time & Wind] Permission level of 4 is required to run this command"));
+            source.sendFailure(Component.literal("[Time & Wind] Permission level of 4 is required to run this command"));
         }
         return 0;
     }
     private static int printCurrentWorldId(CommandSourceStack source) throws CommandSyntaxException {
         if(TimeAndWindCT.debugMode || source.hasPermission(4) || source.getServer().isSingleplayerOwner(source.getPlayerOrException().getGameProfile())) {
             String id = source.getPlayerOrException().level.dimension().location().toString();
-            source.sendSuccess(new TextComponent(id), false);
+            source.sendSuccess(Component.literal(id), false);
             ServerPlayNetworking.send(source.getPlayerOrException(), NetworkPacketsID.WORLD_ID_CLIPBOARD, new FriendlyByteBuf(Unpooled.buffer()).writeUtf(id));
         }
         return 0;
     }
     private static int printAmbientDarkness(CommandSourceStack source) throws CommandSyntaxException {
         if(TimeAndWindCT.debugMode || source.hasPermission(4) || source.getServer().isSingleplayerOwner(source.getPlayerOrException().getGameProfile())) {
-            source.sendSuccess(new TextComponent("Ambient Darkness: " + source.getPlayerOrException().level.getSkyDarken()), false);
+            source.sendSuccess(Component.literal("Ambient Darkness: " + source.getPlayerOrException().level.getSkyDarken()), false);
         }
         return 0;
     }
@@ -210,13 +210,13 @@ public class TAWCommands {
             source.getServer().getAllLevels().forEach(serverWorld -> ids.add(serverWorld.dimension().location().toString()));
             File file = new File("taw-worlds-ids.json");
             IOManager.fileWriter(file, new GsonBuilder().setPrettyPrinting().create().toJson(ids));
-            source.sendSuccess(new TextComponent("Saved to " + file.getAbsolutePath()), false);
-        } else source.sendFailure(new TextComponent("[Time & Wind] Permission level of 4 is required to run this command"));
+            source.sendSuccess(Component.literal("Saved to " + file.getAbsolutePath()), false);
+        } else source.sendFailure(Component.literal("[Time & Wind] Permission level of 4 is required to run this command"));
         return 0;
     }
     private static int getLightLevel(CommandSourceStack source) throws CommandSyntaxException {
         if(TimeAndWindCT.debugMode || source.hasPermission(4) || source.getServer().isSingleplayerOwner(source.getPlayerOrException().getGameProfile())) {
-            source.sendSuccess(new TextComponent("Light Level: " + source.getPlayerOrException().level.getMaxLocalRawBrightness(source.getPlayerOrException().blockPosition())), false);
+            source.sendSuccess(Component.literal("Light Level: " + source.getPlayerOrException().level.getMaxLocalRawBrightness(source.getPlayerOrException().blockPosition())), false);
         }
         return 0;
     }
@@ -226,14 +226,14 @@ public class TAWCommands {
             ServerPlayer player = source.getPlayerOrException();
             String worldId = player.level.dimension().location().toString();
             if (player.level.dimensionType().hasFixedTime()) {
-                source.sendSuccess(new TextComponent("Current dimension has fixed time, custom configuration is useless"), false);
+                source.sendSuccess(Component.literal("Current dimension has fixed time, custom configuration is useless"), false);
             } else
-                source.sendSuccess(new TextComponent("Current dimension does not has fixed time, custom configuration should work fine"), false);
+                source.sendSuccess(Component.literal("Current dimension does not has fixed time, custom configuration should work fine"), false);
             if (TimeAndWindCT.timeDataMap.containsKey(worldId)) {
                 TimeDataStorage storage = TimeAndWindCT.timeDataMap.get(worldId);
-                source.sendSuccess(new TextComponent("Server config for current world: Day Duration: " + storage.dayDuration + " Night Duration: " + storage.nightDuration), true);
+                source.sendSuccess(Component.literal("Server config for current world: Day Duration: " + storage.dayDuration + " Night Duration: " + storage.nightDuration), true);
                 ServerPlayNetworking.send(player, NetworkPacketsID.CFG_DEBUG_INFO, new FriendlyByteBuf(Unpooled.buffer()));
-            } else source.sendFailure(new TextComponent("No Data found for current world on server side"));
+            } else source.sendFailure(Component.literal("No Data found for current world on server side"));
         }
         return 0;
     }
@@ -242,19 +242,19 @@ public class TAWCommands {
         if(TimeAndWindCT.debugMode || source.hasPermission(4) || source.getServer().isSingleplayerOwner(source.getPlayerOrException().getGameProfile())) {
             Ticker t = ((ITimeOperations) source.getLevel()).getTimeTicker();
             if(t instanceof TimeTicker ticker) {
-                source.sendSuccess(new TextComponent("Day: " + ticker.getDayD() + " Night: " + ticker.getNightD()), false);
-                source.sendSuccess(new TextComponent("Day Mod: " + ticker.getDayMod() + " Night Mod: " + ticker.getNightMod()), false);
-                source.sendSuccess(new TextComponent("Day RE: " + ticker.getDayRoundingError() + " Night RE: " + ticker.getNightRoundingError()), false);
+                source.sendSuccess(Component.literal("Day: " + ticker.getDayD() + " Night: " + ticker.getNightD()), false);
+                source.sendSuccess(Component.literal("Day Mod: " + ticker.getDayMod() + " Night Mod: " + ticker.getNightMod()), false);
+                source.sendSuccess(Component.literal("Day RE: " + ticker.getDayRoundingError() + " Night RE: " + ticker.getNightRoundingError()), false);
             } else if(t instanceof SystemTimeTicker stt){
                 String sunrise = TimeAndWindCT.getFormattedTime(stt.getSunrise() / 1000);
                 String sunset = TimeAndWindCT.getFormattedTime(stt.getSunset() / 1000);
                 String dayD = TimeAndWindCT.getFormattedTime(stt.getDayD() / 1000);
                 String nightD = TimeAndWindCT.getFormattedTime(stt.getNightD() / 1000);
-                source.sendSuccess(new TextComponent("Time is synced with system time"), false);
-                source.sendSuccess(new TextComponent("Sunrise are at: " + sunrise + " and sunset are at: " + sunset + " in timezone: " + TimeAndWindCT.systemTimeConfig.timeZone), false);
-                source.sendSuccess(new TextComponent("Day Length are: " + dayD + " and Night Length are: " + nightD), false);
-            } else source.sendFailure(new TextComponent("This world uses default time ticker"));
-        } else source.sendFailure(new TextComponent("[Time & Wind] Permission level of 4 is required to run this command"));
+                source.sendSuccess(Component.literal("Time is synced with system time"), false);
+                source.sendSuccess(Component.literal("Sunrise are at: " + sunrise + " and sunset are at: " + sunset + " in timezone: " + TimeAndWindCT.systemTimeConfig.timeZone), false);
+                source.sendSuccess(Component.literal("Day Length are: " + dayD + " and Night Length are: " + nightD), false);
+            } else source.sendFailure(Component.literal("This world uses default time ticker"));
+        } else source.sendFailure(Component.literal("[Time & Wind] Permission level of 4 is required to run this command"));
         return 0;
     }
 
@@ -262,8 +262,8 @@ public class TAWCommands {
         if(source.hasPermission(4) || source.getServer().isSingleplayerOwner(source.getPlayerOrException().getGameProfile())) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
             LocalDateTime time = LocalDateTime.now();
-            source.sendSuccess(new TextComponent(time.format(formatter)), false);
-        } else source.sendFailure(new TextComponent("[Time & Wind] Permission level of 4 is required to run this command"));
+            source.sendSuccess(Component.literal(time.format(formatter)), false);
+        } else source.sendFailure(Component.literal("[Time & Wind] Permission level of 4 is required to run this command"));
         return 0;
     }
 

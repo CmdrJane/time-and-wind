@@ -6,7 +6,7 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import ru.aiefu.timeandwindct.config.ModConfig;
 import ru.aiefu.timeandwindct.config.SystemTimeConfig;
 import ru.aiefu.timeandwindct.config.TimeDataStorage;
@@ -73,13 +73,13 @@ public class TimeAndWindCTClient implements ClientModInitializer {
                     return;
                 }
                 if(TimeAndWindCT.timeDataMap == null){
-                    client.player.sendMessage(new TextComponent("[Client Side] TimeDataMap is NULL, this is a bug"), Util.NIL_UUID);
+                    client.player.sendSystemMessage(Component.literal("[Client Side] TimeDataMap is NULL, this is a bug"));
                 }
                 else if (TimeAndWindCT.timeDataMap.containsKey(worldId)) {
                     TimeDataStorage storage = TimeAndWindCT.timeDataMap.get(worldId);
-                    client.player.sendMessage(new TextComponent("Client config for current world: Day Duration: " + storage.dayDuration + " Night Duration: " + storage.nightDuration), Util.NIL_UUID);
+                    client.player.sendSystemMessage(Component.literal("Client config for current world: Day Duration: " + storage.dayDuration + " Night Duration: " + storage.nightDuration));
                 } else
-                    client.player.sendMessage(new TextComponent("No Data found for current world on client side"), Util.NIL_UUID);
+                    client.player.sendSystemMessage(Component.literal("No Data found for current world on client side"));
             }
         });
         ClientPlayNetworking.registerGlobalReceiver(NetworkPacketsID.WORLD_ID_CLIPBOARD, (client, handler, buf, responseSender) -> {
@@ -87,7 +87,7 @@ public class TimeAndWindCTClient implements ClientModInitializer {
             if(buf.readableBytes() > 0 && client.player != null) {
                 String string = buf.readUtf();
                 client.keyboardHandler.setClipboard(string);
-                client.player.displayClientMessage(new TextComponent("Also copied this to clipboard"), false);
+                client.player.displayClientMessage(Component.literal("Also copied this to clipboard"), false);
             }
         });
         ClientPlayNetworking.registerGlobalReceiver(NetworkPacketsID.SETUP_TIME, (client, handler, buf, responseSender) -> {

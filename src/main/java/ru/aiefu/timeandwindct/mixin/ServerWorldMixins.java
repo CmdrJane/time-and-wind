@@ -83,13 +83,10 @@ public abstract class ServerWorldMixins extends Level implements ITimeOperations
 			List<ServerPlayer> totalPlayers = this.players.stream().filter(player -> !player.isSpectator() || !player.isCreative()).collect(Collectors.toList());
 			if(totalPlayers.size() > 0) {
 				int sleepingPlayers = (int) totalPlayers.stream().filter(ServerPlayer::isSleeping).count();
-				double factor = (double) sleepingPlayers / totalPlayers.size();
 				int threshold = TimeAndWindCT.CONFIG.enableThreshold ? totalPlayers.size() / 100 * TimeAndWindCT.CONFIG.thresholdPercentage : 0;
 				if (sleepingPlayers > threshold) {
 					enableNightSkipAcceleration = true;
-					this.accelerationSpeed = TimeAndWindCT.CONFIG.enableThreshold && TimeAndWindCT.CONFIG.flatAcceleration ?
-							TimeAndWindCT.CONFIG.accelerationSpeed :
-							(int) Math.ceil(TimeAndWindCT.CONFIG.accelerationSpeed * factor);
+					this.accelerationSpeed = TimeAndWindCT.CONFIG.accelerationSpeed;
 				} else enableNightSkipAcceleration = false;
 			} else enableNightSkipAcceleration = false;
 			if(this.shouldUpdateNSkip) {

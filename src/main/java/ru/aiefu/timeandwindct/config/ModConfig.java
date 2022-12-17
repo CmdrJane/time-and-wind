@@ -8,12 +8,11 @@ public class ModConfig {
     public int accelerationSpeed;
     public boolean enableThreshold;
     public int thresholdPercentage;
-    public boolean flatAcceleration;
 
-    public int config_ver = 2;
+    public int config_ver = 3;
 
     public ModConfig(boolean patchSkyAngle, boolean syncWithSystemTime, boolean systemTimePerDimensions, boolean enableNightSkipAcceleration,
-                     int accelerationSpeed, boolean enableThreshold, int thresholdPercentage, boolean flatAcceleration){
+                     int accelerationSpeed, boolean enableThreshold, int thresholdPercentage){
         this.patchSkyAngle = patchSkyAngle;
         this.syncWithSystemTime = syncWithSystemTime;
         this.systemTimePerDimensions = systemTimePerDimensions;
@@ -21,10 +20,9 @@ public class ModConfig {
         this.accelerationSpeed = accelerationSpeed;
         this.enableThreshold = enableThreshold;
         this.thresholdPercentage = thresholdPercentage;
-        this.flatAcceleration = flatAcceleration;
     }
 
     public ModConfig copy(){
-        return new ModConfig(patchSkyAngle, syncWithSystemTime, systemTimePerDimensions, enableNightSkipAcceleration, accelerationSpeed, enableThreshold, thresholdPercentage, flatAcceleration);
+        return new ModConfig(patchSkyAngle, syncWithSystemTime, systemTimePerDimensions, enableNightSkipAcceleration, accelerationSpeed, enableThreshold, thresholdPercentage);
     }
 }

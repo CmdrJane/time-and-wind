@@ -78,7 +78,7 @@ public class IOManager {
 
     public static void generateModConfig(){
         String gson = new GsonBuilder().setPrettyPrinting().create().toJson(new ModConfig(true, false, false,
-                true, 10, true, 50, false));
+                true, 30, true, 50));
         File file = new File("./config/time-and-wind/config.json");
         fileWriter(file, gson);
     }
@@ -87,7 +87,7 @@ public class IOManager {
         ModConfig config;
         try {
             config = new Gson().fromJson(new FileReader("./config/time-and-wind/config.json"), ModConfig.class);
-            if(config.config_ver == 1){
+            if(config.config_ver < 3){
                 config = patchModConfigV1(config);
                 String gson = new GsonBuilder().setPrettyPrinting().create().toJson(config);
                 File file = new File("./config/time-and-wind/config.json");
@@ -96,13 +96,13 @@ public class IOManager {
         } catch (IOException e){
             e.printStackTrace();
             config = new ModConfig(true, false, false,
-                    true, 10, true, 50, false);
+                    true, 30, true, 50);
         }
         return config;
     }
 
     public static ModConfig patchModConfigV1(ModConfig config){
-        return new ModConfig(config.patchSkyAngle, config.syncWithSystemTime,false, true, 10, true, 50, false);
+        return new ModConfig(config.patchSkyAngle, config.syncWithSystemTime,false, true, 30, true, 50);
     }
     public static void updateTimeData(String id, long dayD, long nightD){
         TimeAndWindCT.timeDataMap.put(id, new TimeDataStorage(dayD, nightD));

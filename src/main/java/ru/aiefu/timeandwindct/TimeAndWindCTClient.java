@@ -31,7 +31,6 @@ public class TimeAndWindCTClient implements ClientModInitializer {
                 int speed = buf.readInt();
                 boolean threshold = buf.readBoolean();
                 int percentage = buf.readInt();
-                boolean flatS = buf.readBoolean();
                 String sunrise = buf.readUtf();
                 String sunset = buf.readUtf();
                 String timeZone = buf.readUtf();
@@ -42,7 +41,7 @@ public class TimeAndWindCTClient implements ClientModInitializer {
                 TimeAndWindCT.sysTimeMap = sysMap;
 
 
-                TimeAndWindCT.CONFIG = new ModConfig(skyAnglePatch, syncWithSysTime, sysTimePerDim, nightSkip, speed, threshold, percentage, flatS);
+                TimeAndWindCT.CONFIG = new ModConfig(skyAnglePatch, syncWithSysTime, sysTimePerDim, nightSkip, speed, threshold, percentage);
                 TimeAndWindCT.systemTimeConfig = new SystemTimeConfig(sunrise, sunset, timeZone);
                 TimeAndWindCT.LOGGER.info("[Time & Wind] Configuration synchronized");
                 ClientLevel clientWorld = Minecraft.getInstance().level;

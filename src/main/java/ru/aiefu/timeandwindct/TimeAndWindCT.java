@@ -95,7 +95,6 @@ public class TimeAndWindCT implements ModInitializer {
 			buf.writeInt(cfg.accelerationSpeed);
 			buf.writeBoolean(cfg.enableThreshold);
 			buf.writeInt(cfg.thresholdPercentage);
-			buf.writeBoolean(cfg.flatAcceleration);
 
 			buf.writeUtf(cfgs.sunrise);
 			buf.writeUtf(cfgs.sunset);

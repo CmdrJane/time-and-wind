@@ -11,4 +11,5 @@ public interface ITimeOperations {
     boolean isClient();
     void setSkipState(boolean bl);
     void setSpeed(int speed);
+    float getPrevSkyAngle();
 }

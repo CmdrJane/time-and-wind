@@ -41,6 +41,7 @@ public abstract class ClientWorldMixins extends Level implements ITimeOperations
 
     private boolean skipState = false;
     private int speed = 0;
+    private float prevSkyAngle = 0;
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void attachTimeDataTAW(ClientPacketListener clientPacketListener, ClientLevel.ClientLevelData clientLevelData, ResourceKey resourceKey, Holder holder, int i, int j, Supplier supplier, LevelRenderer levelRenderer, boolean bl, long l, CallbackInfo ci){
@@ -60,6 +61,7 @@ public abstract class ClientWorldMixins extends Level implements ITimeOperations
 
     @Redirect(method = "tickTime", at = @At(value = "INVOKE", target = "net/minecraft/client/multiplayer/ClientLevel.setDayTime(J)V"))
     private void customTickerTAW(ClientLevel clientWorld, long timeOfDay) {
+        this.prevSkyAngle = getTimeOfDay(1.0F);
         timeTicker.tick(this, skipState, speed);
     }
 
@@ -100,5 +102,9 @@ public abstract class ClientWorldMixins extends Level implements ITimeOperations
     @Override
     public void setSpeed(int speed) {
         this.speed = speed;
+    }
+
+    public float getPrevSkyAngle(){
+        return prevSkyAngle;
     }
 }

@@ -1,7 +1,5 @@
 package ru.aiefu.timeandwindct.mixin;
 
-import com.mojang.authlib.GameProfileRepository;
-import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.datafixers.DataFixer;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.server.MinecraftServer;
@@ -9,9 +7,7 @@ import net.minecraft.server.Services;
 import net.minecraft.server.WorldStem;
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
 import net.minecraft.server.packs.repository.PackRepository;
-import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.world.level.storage.LevelStorageSource;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;

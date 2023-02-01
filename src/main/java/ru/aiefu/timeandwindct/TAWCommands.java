@@ -226,9 +226,9 @@ public class TAWCommands {
             ServerPlayer player = source.getPlayerOrException();
             String worldId = player.level.dimension().location().toString();
             if (player.level.dimensionType().hasFixedTime()) {
-                source.sendSuccess(Component.literal("Current dimension has fixed time, custom configuration is useless"), false);
+                source.sendSuccess(Component.literal("Current dimension have fixed time, custom configuration is useless"), false);
             } else
-                source.sendSuccess(Component.literal("Current dimension does not has fixed time, custom configuration should work fine"), false);
+                source.sendSuccess(Component.literal("Current dimension does not have fixed time, custom configuration should work fine"), false);
             if (TimeAndWindCT.timeDataMap.containsKey(worldId)) {
                 TimeDataStorage storage = TimeAndWindCT.timeDataMap.get(worldId);
                 source.sendSuccess(Component.literal("Server config for current world: Day Duration: " + storage.dayDuration + " Night Duration: " + storage.nightDuration), true);

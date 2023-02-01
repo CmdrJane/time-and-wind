@@ -1,5 +1,6 @@
 package ru.aiefu.timeandwindct.tickers;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import ru.aiefu.timeandwindct.ITimeOperations;
 import ru.aiefu.timeandwindct.time.MinecraftTimeUnit;
@@ -45,6 +46,9 @@ public class TimeTicker implements Ticker {
     public void tick(ITimeOperations world, boolean nskip, int acceleration) {
         if(nskip){
             timeUnit.accelerate(acceleration);
+            if(timeUnit.getLevel().isDay()){
+                timeUnit.getTimeLevel().wakeUpAllPlayersTAW();
+            }
         }
         else if(timeUnit.isDay()){
             if(timeUnit.shouldUpdate(dayMod)){

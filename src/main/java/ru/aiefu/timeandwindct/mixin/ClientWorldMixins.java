@@ -107,4 +107,9 @@ public abstract class ClientWorldMixins extends Level implements ITimeOperations
     public float getPrevSkyAngle(){
         return prevSkyAngle;
     }
+
+    @Override
+    public void wakeUpAllPlayersTAW() {
+
+    }
 }

@@ -4,19 +4,21 @@ import net.minecraft.world.level.Level;
 import ru.aiefu.timeandwindct.ITimeOperations;
 
 public class MinecraftTimeUnit {
-    private ITimeOperations level;
+    private Level level;
+    private ITimeOperations timeLevel;
     private float fraction;
 
     public MinecraftTimeUnit(Level level){
-        this.level = (ITimeOperations) level;
+        this.level = level;
+        this.timeLevel = (ITimeOperations) level;
     }
 
     public boolean isDay(){
-        return level.getTimeOfDayTAW() % 24000 < 12001;
+        return timeLevel.getTimeOfDayTAW() % 24000 < 12001;
     }
 
     public boolean shouldUpdate(int mod){
-        return level.getTimeOfDayTAW() % mod == 0;
+        return timeLevel.getTimeTAW() % mod == 0;
     }
 
     public void update(int ticksToAdd, float fraction, boolean skip){
@@ -26,14 +28,18 @@ public class MinecraftTimeUnit {
             if(skip) return;
             ticksToAdd += 1;
         }
-        level.setTimeOfDayTAW(level.getTimeOfDayTAW() + ticksToAdd);
+        timeLevel.setTimeOfDayTAW(timeLevel.getTimeOfDayTAW() + ticksToAdd);
     }
 
-    public ITimeOperations getLevel(){
+    public ITimeOperations getTimeLevel(){
+        return timeLevel;
+    }
+
+    public Level getLevel() {
         return level;
     }
 
     public void accelerate(int val){
-        level.setTimeOfDayTAW(level.getTimeOfDayTAW() + val);
+        timeLevel.setTimeOfDayTAW(timeLevel.getTimeOfDayTAW() + val);
     }
 }

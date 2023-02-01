@@ -55,6 +55,8 @@ public abstract class ServerWorldMixins extends Level implements ITimeOperations
 
 	@Shadow protected abstract void resetWeatherCycle();
 
+	@Shadow protected abstract void wakeUpAllPlayers();
+
 	protected Ticker timeTicker;
 
 	protected boolean enableNightSkipAcceleration = false;
@@ -112,6 +114,7 @@ public abstract class ServerWorldMixins extends Level implements ITimeOperations
 
 	@Inject(method = "wakeUpAllPlayers", at =@At("HEAD"))
 	private void preventPacketsSpam(CallbackInfo ci){
+		this.enableNightSkipAcceleration = false;
 		this.shouldUpdateNSkip = false;
 	}
 
@@ -131,6 +134,11 @@ public abstract class ServerWorldMixins extends Level implements ITimeOperations
 	@Redirect(method = "tickTime", at = @At(value = "INVOKE", target = "net/minecraft/server/level/ServerLevel.setDayTime(J)V"))
 	private void customTickerTAW(ServerLevel world, long timeOfDay) {
 		this.timeTicker.tick(this, enableNightSkipAcceleration, accelerationSpeed);
+	}
+
+	@Override
+	public void wakeUpAllPlayersTAW() {
+		wakeUpAllPlayers();
 	}
 
 	@Override

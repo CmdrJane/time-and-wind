@@ -12,4 +12,5 @@ public interface ITimeOperations {
     void setSkipState(boolean bl);
     void setSpeed(int speed);
     float getPrevSkyAngle();
+    void wakeUpAllPlayersTAW();
 }

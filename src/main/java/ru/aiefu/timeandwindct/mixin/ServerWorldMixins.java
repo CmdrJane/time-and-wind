@@ -10,6 +10,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
@@ -52,6 +53,8 @@ public abstract class ServerWorldMixins extends Level implements ITimeOperations
 
 	@Shadow public abstract void setDayTime(long l);
 
+	@Shadow protected abstract void resetWeatherCycle();
+
 	protected Ticker timeTicker;
 
 	protected boolean enableNightSkipAcceleration = false;
@@ -71,7 +74,7 @@ public abstract class ServerWorldMixins extends Level implements ITimeOperations
 		}
 		else if (TimeAndWindCT.timeDataMap.containsKey(worldId)) {
 			TimeDataStorage storage = TimeAndWindCT.timeDataMap.get(worldId);
-			this.timeTicker = new TimeTicker(storage.dayDuration, storage.nightDuration);
+			this.timeTicker = new TimeTicker(storage.dayDuration, storage.nightDuration, this);
 		} else this.timeTicker = new DefaultTicker();
 	}
 
@@ -119,6 +122,10 @@ public abstract class ServerWorldMixins extends Level implements ITimeOperations
 		buf.writeInt(accelerationSpeed);
 		this.players.forEach(player -> ServerPlayNetworking.send(player, NetworkPacketsID.NIGHT_SKIP_INFO, buf));
 		this.shouldUpdateNSkip = true;
+
+		if (this.getGameRules().getBoolean(GameRules.RULE_WEATHER_CYCLE) && this.isRaining()) {
+			this.resetWeatherCycle();
+		}
 	}
 
 	@Redirect(method = "tickTime", at = @At(value = "INVOKE", target = "net/minecraft/server/level/ServerLevel.setDayTime(J)V"))

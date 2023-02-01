@@ -55,7 +55,7 @@ public abstract class ClientWorldMixins extends Level implements ITimeOperations
         }
         else if (TimeAndWindCT.timeDataMap != null && TimeAndWindCT.timeDataMap.containsKey(worldId)) {
             TimeDataStorage storage = TimeAndWindCT.timeDataMap.get(worldId);
-            this.timeTicker = new TimeTicker(storage.dayDuration, storage.nightDuration);
+            this.timeTicker = new TimeTicker(storage.dayDuration, storage.nightDuration, this);
         } else this.timeTicker = new DefaultTicker();
     }
 

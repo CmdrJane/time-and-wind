@@ -104,7 +104,8 @@ public class IOManager {
     public static ModConfig patchModConfigV1(ModConfig config){
         return new ModConfig(config.patchSkyAngle, config.syncWithSystemTime,false, true, 30, true, 50);
     }
-    public static void updateTimeData(String id, long dayD, long nightD){
+
+    public static void updateTimeData(String id, int dayD, int nightD){
         TimeAndWindCT.timeDataMap.put(id, new TimeDataStorage(dayD, nightD));
         String gson = new GsonBuilder().setPrettyPrinting().create().toJson(TimeAndWindCT.timeDataMap);
         File file = new File("./config/time-and-wind/time-data.json");

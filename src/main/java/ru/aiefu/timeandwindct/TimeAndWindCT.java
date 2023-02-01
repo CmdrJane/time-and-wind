@@ -1,5 +1,6 @@
 package ru.aiefu.timeandwindct;
 
+import com.google.gson.Gson;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -86,23 +87,15 @@ public class TimeAndWindCT implements ModInitializer {
 		if(!player.getServer().isSingleplayerOwner(player.getGameProfile())) {
 			FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
 
-			ModConfig cfg = TimeAndWindCT.CONFIG;
-			SystemTimeConfig cfgs = TimeAndWindCT.systemTimeConfig;
-			buf.writeBoolean(cfg.patchSkyAngle);
-			buf.writeBoolean(cfg.syncWithSystemTime);
-			buf.writeBoolean(cfg.systemTimePerDimensions);
-			buf.writeBoolean(cfg.enableNightSkipAcceleration);
-			buf.writeInt(cfg.accelerationSpeed);
-			buf.writeBoolean(cfg.enableThreshold);
-			buf.writeInt(cfg.thresholdPercentage);
+			String cfgJson = new Gson().toJson(TimeAndWindCT.CONFIG);
+			String cfgsJson = new Gson().toJson(TimeAndWindCT.systemTimeConfig);
 
-			buf.writeUtf(cfgs.sunrise);
-			buf.writeUtf(cfgs.sunset);
-			buf.writeUtf(cfgs.timeZone);
+			buf.writeUtf(cfgJson);
+			buf.writeUtf(cfgsJson);
 
 			buf.writeMap(TimeAndWindCT.timeDataMap, FriendlyByteBuf::writeUtf, (packetByteBuf, timeDataStorage) -> {
-				packetByteBuf.writeLong(timeDataStorage.dayDuration);
-				packetByteBuf.writeLong(timeDataStorage.nightDuration);
+				packetByteBuf.writeInt(timeDataStorage.dayDuration);
+				packetByteBuf.writeInt(timeDataStorage.nightDuration);
 			});
 			buf.writeMap(TimeAndWindCT.sysTimeMap, FriendlyByteBuf::writeUtf, (packetByteBuf, systemTimeConfig1) -> {
 				packetByteBuf.writeUtf(systemTimeConfig1.sunrise);

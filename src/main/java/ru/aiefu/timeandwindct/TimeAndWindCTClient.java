@@ -1,5 +1,6 @@
 package ru.aiefu.timeandwindct;
 
+import com.google.gson.Gson;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
@@ -24,32 +25,21 @@ public class TimeAndWindCTClient implements ClientModInitializer {
     public void onInitializeClient() {
         ClientPlayNetworking.registerGlobalReceiver(NetworkPacketsID.SYNC_CONFIG, (client, handler, buf, responseSender) -> {
             if(buf.readableBytes() > 0 ){
-                boolean skyAnglePatch = buf.readBoolean();
-                boolean syncWithSysTime = buf.readBoolean();
-                boolean sysTimePerDim = buf.readBoolean();
-                boolean nightSkip = buf.readBoolean();
-                int speed = buf.readInt();
-                boolean threshold = buf.readBoolean();
-                int percentage = buf.readInt();
-                String sunrise = buf.readUtf();
-                String sunset = buf.readUtf();
-                String timeZone = buf.readUtf();
+                TimeAndWindCT.CONFIG = new Gson().fromJson(buf.readUtf(), ModConfig.class);
+                TimeAndWindCT.systemTimeConfig = new Gson().fromJson(buf.readUtf(), SystemTimeConfig.class);
 
-                HashMap<String, TimeDataStorage> map = (HashMap<String, TimeDataStorage>) buf.readMap(FriendlyByteBuf::readUtf, packetByteBuf -> new TimeDataStorage(packetByteBuf.readLong(), packetByteBuf.readLong()));
+                HashMap<String, TimeDataStorage> map = (HashMap<String, TimeDataStorage>) buf.readMap(FriendlyByteBuf::readUtf, packetByteBuf -> new TimeDataStorage(packetByteBuf.readInt(), packetByteBuf.readInt()));
                 HashMap<String, SystemTimeConfig> sysMap = (HashMap<String, SystemTimeConfig>) buf.readMap(FriendlyByteBuf::readUtf, packetByteBuf -> new SystemTimeConfig(buf.readUtf(), buf.readUtf(), buf.readUtf()));
                 TimeAndWindCT.timeDataMap = map;
                 TimeAndWindCT.sysTimeMap = sysMap;
 
-
-                TimeAndWindCT.CONFIG = new ModConfig(skyAnglePatch, syncWithSysTime, sysTimePerDim, nightSkip, speed, threshold, percentage);
-                TimeAndWindCT.systemTimeConfig = new SystemTimeConfig(sunrise, sunset, timeZone);
                 TimeAndWindCT.LOGGER.info("[Time & Wind] Configuration synchronized");
                 ClientLevel clientWorld = Minecraft.getInstance().level;
                 if(clientWorld != null) {
                     String worldId = clientWorld.dimension().location().toString();
                     ITimeOperations timeOps = (ITimeOperations) clientWorld;
-                    if(syncWithSysTime){
-                        if(sysTimePerDim && sysMap.containsKey(worldId)) {
+                    if(TimeAndWindCT.CONFIG.syncWithSystemTime){
+                        if(TimeAndWindCT.CONFIG.systemTimePerDimensions && sysMap.containsKey(worldId)) {
                             timeOps.setTimeTicker(new SystemTimeTicker((ITimeOperations) clientWorld, sysMap.get(worldId)));
                         } else timeOps.setTimeTicker(new SystemTimeTicker((ITimeOperations) clientWorld, TimeAndWindCT.systemTimeConfig));
                         TimeAndWindCT.LOGGER.info("[Time & Wind] System time ticker synchronized");
@@ -57,7 +47,7 @@ public class TimeAndWindCTClient implements ClientModInitializer {
                     else {
                          if (map.containsKey(worldId)) {
                             TimeDataStorage storage = map.get(worldId);
-                            timeOps.setTimeTicker(new TimeTicker(storage.dayDuration, storage.nightDuration));
+                            timeOps.setTimeTicker(new TimeTicker(storage.dayDuration, storage.nightDuration, clientWorld));
                              TimeAndWindCT.LOGGER.info("[Time & Wind] Custom time ticker for world " + worldId + " synchronized");
                         } else timeOps.setTimeTicker(new DefaultTicker());
                     }
@@ -100,7 +90,7 @@ public class TimeAndWindCTClient implements ClientModInitializer {
                 }
                 else if (TimeAndWindCT.timeDataMap != null && TimeAndWindCT.timeDataMap.containsKey(worldId)) {
                     TimeDataStorage storage = TimeAndWindCT.timeDataMap.get(worldId);
-                    timeOps.setTimeTicker(new TimeTicker(storage.dayDuration, storage.nightDuration));
+                    timeOps.setTimeTicker(new TimeTicker(storage.dayDuration, storage.nightDuration, clientWorld));
                 } else timeOps.setTimeTicker(new DefaultTicker());
                 TimeAndWindCT.LOGGER.info("[Time & Wind] Timedata reloaded on client");
             }

@@ -1,93 +1,87 @@
 package ru.aiefu.timeandwindct.tickers;
 
+import net.minecraft.world.level.Level;
 import ru.aiefu.timeandwindct.ITimeOperations;
+import ru.aiefu.timeandwindct.time.MinecraftTimeUnit;
 
 public class TimeTicker implements Ticker {
 
-    private final long dayD;
-    private final int dayMod;
-    private final double dayRoundingError;
-    private final long nightD;
-    private final int nightMod;
-    private final double nightRoundingError;
+    private final MinecraftTimeUnit timeUnit;
 
-    private final boolean isDayLesserThanVanilla;
-    private final boolean isNightLesserThanVanilla;
+    private final int dayD;
+    private int dayMod;
+    private float dayFraction;
+    private int dayTicksToAdd;
+    private boolean dayAction;
 
-    private double leftOver = 0;
-    private double leftOverInverted = 0;
+    private final int nightD;
+    private int nightMod;
+    private float nightFraction;
+    private int nightTicksToAdd;
+    private boolean nightAction;
 
-    public TimeTicker(long dayD, long nightD){
-        double dayVal;
-        double nightVal;
-        boolean dayInversion = dayD < 12000;
-        boolean nightInversion = nightD < 12000;
-        dayVal = getFactor(dayD, dayInversion);
-        nightVal = getFactor(nightD, nightInversion);
-        this.isDayLesserThanVanilla = dayInversion;
-        this.isNightLesserThanVanilla = nightInversion;
-        int checkDay = (int) dayVal;
-        int checkNight = (int) nightVal;
-        this.dayMod = checkDay;
-        this.nightMod = checkNight;
-
-        this.dayRoundingError = dayVal - checkDay;
-        this.nightRoundingError = nightVal - checkNight;
+    public TimeTicker(int dayD, int nightD, Level level){
+        timeUnit = new MinecraftTimeUnit(level);
 
         this.dayD = dayD;
         this.nightD = nightD;
+
+        boolean dayB = dayD < 12000;
+        boolean nightB = nightD < 12000;
+
+        float dayF = getFactor(dayD, dayB);
+        float nightF = getFactor(nightD, nightB);
+
+        int dayWhole = (int) dayF;
+        int nightWhole = (int) nightF;
+
+        float dayFraction = dayF - dayWhole;
+        float nightFraction = nightF - nightWhole;
+
+        finishSetup(dayB, nightB, dayWhole, nightWhole, dayFraction, nightFraction);
     }
+
 
     public void tick(ITimeOperations world, boolean nskip, int acceleration) {
-        long time = world.getTimeOfDayTAW();
         if(nskip){
-            world.setTimeOfDayTAW(time + acceleration);
-            return;
+            timeUnit.accelerate(acceleration);
         }
-        int currentTime = (int) (time % 24000);
-        int mod;
-        double leftOverToAdd;
-        if(currentTime < 12000){
-            mod = dayMod;
-            leftOverToAdd = dayRoundingError;
-            if(isDayLesserThanVanilla){
-                tickTime(world, mod, leftOverToAdd, time, currentTime, 12000);
-                return;
+        else if(timeUnit.isDay()){
+            if(timeUnit.shouldUpdate(dayMod)){
+                timeUnit.update(dayTicksToAdd, dayFraction, dayAction);
             }
-        } else {
-            mod = nightMod;
-            leftOverToAdd = nightRoundingError;
-            if(isNightLesserThanVanilla){
-                tickTime(world, mod, leftOverToAdd, time, currentTime, 24000);
-                return;
-            }
+        } else if(timeUnit.shouldUpdate(nightMod)){
+            timeUnit.update(nightTicksToAdd, nightFraction, nightAction);
         }
-        if(world.getTimeTAW() % mod == 0){
-            if(leftOver >= 1.0D){
-                leftOver -= 1;
-                return;
-            }
-            leftOver += leftOverToAdd;
-            world.setTimeOfDayTAW(time + 1L);
-        }
-    }
-    private void tickTime(ITimeOperations world, int mod, double leftOverToAdd, long timeOfDay, int currentTime, int cap){
-        if(currentTime + mod > cap){
-            world.setTimeOfDayTAW(timeOfDay + (cap - currentTime));
-            leftOverInverted = 0.0D;
-            return;
-        }
-        if(leftOverInverted >= 1.0D){
-            world.setTimeOfDayTAW(timeOfDay + mod + 1L);
-            leftOverInverted -= 1;
-            return;
-        }
-        world.setTimeOfDayTAW(timeOfDay + mod);
-        leftOverInverted += leftOverToAdd;
     }
 
-    private double getFactor(long value, boolean shouldInverse){
-        return shouldInverse ? 12000.0D / value : value / 12000.0D;
+    private float getFactor(int duration, boolean bl){
+        return bl ? 12000.0F / duration : duration / 12000.0F;
+    }
+
+    public void finishSetup(boolean day, boolean night, int dayWhole, int nightWhole, float dayFraction, float nightFraction){
+        this.dayFraction = dayFraction;
+        this.nightFraction = nightFraction;
+
+        if(day){
+            this.dayMod = 1;
+            this.dayTicksToAdd = dayWhole;
+            this.dayAction = false;
+        } else {
+            this.dayMod = dayWhole;
+            this.dayTicksToAdd = 1;
+            this.dayAction = true;
+        }
+
+        if(night){
+            this.nightMod = 1;
+            this.nightTicksToAdd = nightWhole;
+            this.nightAction = false;
+        } else {
+            this.nightMod = nightWhole;
+            this.nightTicksToAdd = 1;
+            this.nightAction = true;
+        }
     }
 
     public long getDayD(){
@@ -103,9 +97,9 @@ public class TimeTicker implements Ticker {
         return this.nightMod;
     }
     public double getDayRoundingError(){
-        return this.dayRoundingError;
+        return this.dayFraction;
     }
     public double getNightRoundingError(){
-        return this.nightRoundingError;
+        return this.nightFraction;
     }
 }

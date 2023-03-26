@@ -1,13 +1,13 @@
 package ru.aiefu.timeandwindct.config;
 
 public class TimeDataStorage {
-    public long dayDuration = 12000;
-    public long nightDuration = 12000;
+    public int dayDuration = 12000;
+    public int nightDuration = 12000;
 
     public TimeDataStorage() {
     }
 
-    public TimeDataStorage(long dayD, long nightD) {
+    public TimeDataStorage(int dayD, int nightD) {
         this.dayDuration = dayD;
         this.nightDuration = nightD;
     }

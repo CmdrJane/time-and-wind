@@ -1,6 +1,5 @@
 package ru.aiefu.timeandwindct.tickers;
 
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import ru.aiefu.timeandwindct.ITimeOperations;
 import ru.aiefu.timeandwindct.time.MinecraftTimeUnit;

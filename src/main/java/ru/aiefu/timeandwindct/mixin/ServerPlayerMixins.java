@@ -24,8 +24,9 @@ import java.util.List;
 @Mixin(ServerPlayer.class)
 public abstract class ServerPlayerMixins extends Player{
 
-    public ServerPlayerMixins(Level world, BlockPos pos, float yaw, GameProfile profile) {
-        super(world, pos, yaw, profile);
+
+    public ServerPlayerMixins(Level level, BlockPos blockPos, float f, GameProfile gameProfile) {
+        super(level, blockPos, f, gameProfile);
     }
 
     @Inject(method = "startSleepInBed", at = @At(value = "FIELD", target = "net/minecraft/world/entity/player/Player$BedSleepingProblem.NOT_POSSIBLE_NOW:Lnet/minecraft/world/entity/player/Player$BedSleepingProblem;"), cancellable = true)

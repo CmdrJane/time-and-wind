@@ -27,19 +27,21 @@ import java.util.function.Supplier;
 @Mixin(ClientLevel.class)
 public abstract class ClientWorldMixins extends Level implements ITimeOperations {
 
-    @Shadow public abstract void setDayTime(long l);
 
-    protected ClientWorldMixins(WritableLevelData properties, ResourceKey<Level> registryRef, DimensionType dimensionType, Supplier<ProfilerFiller> profiler, boolean isClient, boolean debugWorld, long seed) {
-        super(properties, registryRef, dimensionType, profiler, isClient, debugWorld, seed);
+    protected ClientWorldMixins(WritableLevelData writableLevelData, ResourceKey<Level> resourceKey, DimensionType dimensionType, Supplier<ProfilerFiller> supplier, boolean bl, boolean bl2, long l) {
+        super(writableLevelData, resourceKey, dimensionType, supplier, bl, bl2, l);
     }
+
+    @Shadow public abstract void setDayTime(long l);
 
     protected Ticker timeTicker;
 
     private boolean skipState = false;
     private int speed = 0;
+    private float prevSkyAngle = 0;
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void attachTimeDataTAW(ClientPacketListener networkHandler, ClientLevel.ClientLevelData properties, ResourceKey<Level> registryRef, DimensionType dimensionType, int loadDistance, Supplier<ProfilerFiller> profiler, LevelRenderer worldRenderer, boolean debugWorld, long seed, CallbackInfo ci){
+    private void attachTimeDataTAW(ClientPacketListener clientPacketListener, ClientLevel.ClientLevelData clientLevelData, ResourceKey resourceKey, DimensionType dimensionType, int i, Supplier supplier, LevelRenderer levelRenderer, boolean bl, long l, CallbackInfo ci){
         String worldId = this.dimension().location().toString();
         if(this.dimensionType().hasFixedTime()){
             this.timeTicker = new DefaultTicker();
@@ -50,12 +52,13 @@ public abstract class ClientWorldMixins extends Level implements ITimeOperations
         }
         else if (TimeAndWindCT.timeDataMap != null && TimeAndWindCT.timeDataMap.containsKey(worldId)) {
             TimeDataStorage storage = TimeAndWindCT.timeDataMap.get(worldId);
-            this.timeTicker = new TimeTicker(storage.dayDuration, storage.nightDuration);
+            this.timeTicker = new TimeTicker(storage.dayDuration, storage.nightDuration, this);
         } else this.timeTicker = new DefaultTicker();
     }
 
     @Redirect(method = "tickTime", at = @At(value = "INVOKE", target = "net/minecraft/client/multiplayer/ClientLevel.setDayTime(J)V"))
     private void customTickerTAW(ClientLevel clientWorld, long timeOfDay) {
+        this.prevSkyAngle = getTimeOfDay(1.0F);
         timeTicker.tick(this, skipState, speed);
     }
 
@@ -96,5 +99,14 @@ public abstract class ClientWorldMixins extends Level implements ITimeOperations
     @Override
     public void setSpeed(int speed) {
         this.speed = speed;
+    }
+
+    public float getPrevSkyAngle(){
+        return prevSkyAngle;
+    }
+
+    @Override
+    public void wakeUpAllPlayersTAW() {
+        skipState = false;
     }
 }

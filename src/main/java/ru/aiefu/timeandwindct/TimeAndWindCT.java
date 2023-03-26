@@ -1,5 +1,6 @@
 package ru.aiefu.timeandwindct;
 
+import com.google.gson.Gson;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
@@ -41,7 +42,7 @@ public class TimeAndWindCT implements ModInitializer {
 			if(CONFIG.syncWithSystemTime) server.getGameRules().getRule(GameRules.RULE_DOINSOMNIA).set(false, server);
 
 		});
-		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> TAWCommands.registerCommands(dispatcher));
+		CommandRegistrationCallback.EVENT.register(((dispatcher, dedicated) -> TAWCommands.registerCommands(dispatcher)));
 	}
 
 	public void craftPaths(){
@@ -87,37 +88,29 @@ public class TimeAndWindCT implements ModInitializer {
 		if(!player.getServer().isSingleplayerOwner(player.getGameProfile())) {
 			FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
 
-			ModConfig cfg = TimeAndWindCT.CONFIG;
-			SystemTimeConfig cfgs = TimeAndWindCT.systemTimeConfig;
-			buf.writeBoolean(cfg.patchSkyAngle);
-			buf.writeBoolean(cfg.syncWithSystemTime);
-			buf.writeBoolean(cfg.systemTimePerDimensions);
-			buf.writeBoolean(cfg.enableNightSkipAcceleration);
-			buf.writeInt(cfg.accelerationSpeed);
-			buf.writeBoolean(cfg.enableThreshold);
-			buf.writeInt(cfg.thresholdPercentage);
-			buf.writeBoolean(cfg.flatAcceleration);
+			String cfgJson = new Gson().toJson(TimeAndWindCT.CONFIG);
+			String cfgsJson = new Gson().toJson(TimeAndWindCT.systemTimeConfig);
 
-			buf.writeUtf(cfgs.sunrise);
-			buf.writeUtf(cfgs.sunset);
-			buf.writeUtf(cfgs.timeZone);
+			buf.writeUtf(cfgJson);
+			buf.writeUtf(cfgsJson);
 
 			buf.writeInt(TimeAndWindCT.timeDataMap.size());
-			for(Map.Entry<String, TimeDataStorage> e : timeDataMap.entrySet()){
-				TimeDataStorage storage = e.getValue();
+
+			for (Map.Entry<String, TimeDataStorage> e : TimeAndWindCT.timeDataMap.entrySet()){
 				buf.writeUtf(e.getKey());
-				buf.writeLong(storage.dayDuration);
-				buf.writeLong(storage.nightDuration);
+				buf.writeInt(e.getValue().dayDuration);
+				buf.writeInt(e.getValue().nightDuration);
 			}
 
 			buf.writeInt(TimeAndWindCT.sysTimeMap.size());
-			for(Map.Entry<String, SystemTimeConfig> e : sysTimeMap.entrySet()){
-				SystemTimeConfig config = e.getValue();
+
+			for (Map.Entry<String, SystemTimeConfig> e : TimeAndWindCT.sysTimeMap.entrySet()){
 				buf.writeUtf(e.getKey());
-				buf.writeUtf(config.sunrise);
-				buf.writeUtf(config.sunset);
-				buf.writeUtf(config.timeZone);
+				buf.writeUtf(e.getValue().sunrise);
+				buf.writeUtf(e.getValue().sunset);
+				buf.writeUtf(e.getValue().timeZone);
 			}
+
 			ServerPlayNetworking.send(player, NetworkPacketsID.SYNC_CONFIG, buf);
 			LOGGER.info("[Time & Wind] Sending config to player");
 		} else ServerPlayNetworking.send(player, NetworkPacketsID.SETUP_TIME, new FriendlyByteBuf(Unpooled.buffer()));

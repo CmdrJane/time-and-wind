@@ -3,7 +3,7 @@ package ru.aiefu.timeandwindct;
 import com.google.gson.GsonBuilder;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
-import com.mojang.brigadier.arguments.LongArgumentType;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.netty.buffer.Unpooled;
@@ -37,10 +37,10 @@ public class TAWCommands {
                 enableDebug(context.getSource(), BoolArgumentType.getBool(context, "boolean"))))));
 
         dispatcher.register(Commands.literal("taw").then(Commands.literal("set-cycle-length").
-                then(Commands.argument("dimension", DimensionArgument.dimension()).then(Commands.argument("day_length", LongArgumentType.longArg(1)).
-                then(Commands.argument("night_length", LongArgumentType.longArg(1)).executes(context ->
+                then(Commands.argument("dimension", DimensionArgument.dimension()).then(Commands.argument("day_length", IntegerArgumentType.integer(1)).
+                then(Commands.argument("night_length", IntegerArgumentType.integer(1)).executes(context ->
                         setTimeLength(DimensionArgument.getDimension(context, "dimension"), context.getSource(),
-                                LongArgumentType.getLong(context, "day_length"), LongArgumentType.getLong(context,"night_length"))))))));
+                                IntegerArgumentType.getInteger(context, "day_length"), IntegerArgumentType.getInteger(context,"night_length"))))))));
         dispatcher.register(Commands.literal("taw").then(Commands.literal("remove-cycle-entry").
                 then(Commands.argument("dimension", DimensionArgument.dimension()).executes(context ->
                         removeConfigEntry(context.getSource(), DimensionArgument.getDimension(context, "dimension"))))));
@@ -84,7 +84,7 @@ public class TAWCommands {
         return 0;
     }
 
-    private static int setTimeLength(ServerLevel targetWorld, CommandSourceStack source, long dayD, long nightD) throws CommandSyntaxException {
+    private static int setTimeLength(ServerLevel targetWorld, CommandSourceStack source, int dayD, int nightD) throws CommandSyntaxException {
         if(source.hasPermission(4) || source.getServer().isSingleplayerOwner(source.getPlayerOrException().getGameProfile())) {
             String worldId = targetWorld.dimension().location().toString();
             IOManager.updateTimeData(worldId, dayD, nightD);
@@ -177,7 +177,7 @@ public class TAWCommands {
                 }
                 else if (TimeAndWindCT.timeDataMap.containsKey(id)) {
                     TimeDataStorage storage = TimeAndWindCT.timeDataMap.get(id);
-                    ((ITimeOperations) serverWorld).setTimeTicker(new TimeTicker(storage.dayDuration, storage.nightDuration));
+                    ((ITimeOperations) serverWorld).setTimeTicker(new TimeTicker(storage.dayDuration, storage.nightDuration, serverWorld));
                 } else ((ITimeOperations) serverWorld).setTimeTicker(new DefaultTicker());
             }
             for(ServerPlayer player : server.getPlayerList().getPlayers()){
@@ -226,9 +226,9 @@ public class TAWCommands {
             ServerPlayer player = source.getPlayerOrException();
             String worldId = player.level.dimension().location().toString();
             if (player.level.dimensionType().hasFixedTime()) {
-                source.sendSuccess(new TextComponent("Current dimension has fixed time, custom configuration is useless"), false);
+                source.sendSuccess(new TextComponent("Current dimension have fixed time, custom configuration is useless"), false);
             } else
-                source.sendSuccess(new TextComponent("Current dimension does not has fixed time, custom configuration should work fine"), false);
+                source.sendSuccess(new TextComponent("Current dimension does not have fixed time, custom configuration should work fine"), false);
             if (TimeAndWindCT.timeDataMap.containsKey(worldId)) {
                 TimeDataStorage storage = TimeAndWindCT.timeDataMap.get(worldId);
                 source.sendSuccess(new TextComponent("Server config for current world: Day Duration: " + storage.dayDuration + " Night Duration: " + storage.nightDuration), true);

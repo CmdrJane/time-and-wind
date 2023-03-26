@@ -9,7 +9,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.util.profiling.ProfilerFiller;
-import net.minecraft.world.level.CustomSpawner;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -40,16 +40,25 @@ import java.util.stream.Collectors;
 @Mixin(ServerLevel.class)
 public abstract class ServerWorldMixins extends Level implements ITimeOperations {
 
-	protected ServerWorldMixins(WritableLevelData properties, ResourceKey<Level> registryRef, DimensionType dimensionType, Supplier<ProfilerFiller> profiler, boolean isClient, boolean debugWorld, long seed) {
-		super(properties, registryRef, dimensionType, profiler, isClient, debugWorld, seed);
-	}
+
 
 	@Shadow @Final
-	private List<ServerPlayer> players;
+	List<ServerPlayer> players;
+
+	protected ServerWorldMixins(WritableLevelData writableLevelData, ResourceKey<Level> resourceKey, DimensionType dimensionType, Supplier<ProfilerFiller> supplier, boolean bl, boolean bl2, long l) {
+		super(writableLevelData, resourceKey, dimensionType, supplier, bl, bl2, l);
+	}
+
 
 	@Shadow public abstract void setDayTime(long l);
 
+
+	@Shadow protected abstract void wakeUpAllPlayers();
+
 	@Shadow private boolean allPlayersSleeping;
+
+	@Shadow protected abstract void stopWeather();
+
 	protected Ticker timeTicker;
 
 	protected boolean enableNightSkipAcceleration = false;
@@ -58,7 +67,7 @@ public abstract class ServerWorldMixins extends Level implements ITimeOperations
 	private boolean shouldUpdateNSkip = true;
 
 	@Inject(method = "<init>", at = @At("TAIL"))
-	private void attachTimeDataTAW(MinecraftServer server, Executor workerExecutor, LevelStorageSource.LevelStorageAccess session, ServerLevelData properties, ResourceKey<Level> worldKey, DimensionType dimensionType, ChunkProgressListener worldGenerationProgressListener, ChunkGenerator chunkGenerator, boolean debugWorld, long seed, List<CustomSpawner> spawners, boolean shouldTickTime, CallbackInfo ci){
+	private void attachTimeDataTAW(MinecraftServer minecraftServer, Executor executor, LevelStorageSource.LevelStorageAccess levelStorageAccess, ServerLevelData serverLevelData, ResourceKey resourceKey, DimensionType dimensionType, ChunkProgressListener chunkProgressListener, ChunkGenerator chunkGenerator, boolean bl, long l, List list, boolean bl2, CallbackInfo ci){
 		String worldId = this.dimension().location().toString();
 		if(this.dimensionType().hasFixedTime()){
 			this.timeTicker = new DefaultTicker();
@@ -69,27 +78,23 @@ public abstract class ServerWorldMixins extends Level implements ITimeOperations
 		}
 		else if (TimeAndWindCT.timeDataMap.containsKey(worldId)) {
 			TimeDataStorage storage = TimeAndWindCT.timeDataMap.get(worldId);
-			this.timeTicker = new TimeTicker(storage.dayDuration, storage.nightDuration);
+			this.timeTicker = new TimeTicker(storage.dayDuration, storage.nightDuration, this);
 		} else this.timeTicker = new DefaultTicker();
 	}
 
 	@Inject(method = "updateSleepingPlayerList", at =@At("HEAD"), cancellable = true)
 	private void patchNightSkip(CallbackInfo ci){
 		if(TimeAndWindCT.CONFIG.syncWithSystemTime){
-			this.allPlayersSleeping = false;
 			ci.cancel();
 		} else if (TimeAndWindCT.CONFIG.enableNightSkipAcceleration){
 			this.allPlayersSleeping = false;
 			List<ServerPlayer> totalPlayers = this.players.stream().filter(player -> !player.isSpectator() || !player.isCreative()).collect(Collectors.toList());
 			if(totalPlayers.size() > 0) {
 				int sleepingPlayers = (int) totalPlayers.stream().filter(ServerPlayer::isSleeping).count();
-				double factor = (double) sleepingPlayers / totalPlayers.size();
 				int threshold = TimeAndWindCT.CONFIG.enableThreshold ? totalPlayers.size() / 100 * TimeAndWindCT.CONFIG.thresholdPercentage : 0;
 				if (sleepingPlayers > threshold) {
 					enableNightSkipAcceleration = true;
-					this.accelerationSpeed = TimeAndWindCT.CONFIG.enableThreshold && TimeAndWindCT.CONFIG.flatAcceleration ?
-							TimeAndWindCT.CONFIG.accelerationSpeed :
-							(int) Math.ceil(TimeAndWindCT.CONFIG.accelerationSpeed * factor);
+					this.accelerationSpeed = TimeAndWindCT.CONFIG.accelerationSpeed;
 				} else enableNightSkipAcceleration = false;
 			} else enableNightSkipAcceleration = false;
 			if(this.shouldUpdateNSkip) {
@@ -112,6 +117,7 @@ public abstract class ServerWorldMixins extends Level implements ITimeOperations
 
 	@Inject(method = "wakeUpAllPlayers", at =@At("HEAD"))
 	private void preventPacketsSpam(CallbackInfo ci){
+		this.enableNightSkipAcceleration = false;
 		this.shouldUpdateNSkip = false;
 	}
 
@@ -122,11 +128,20 @@ public abstract class ServerWorldMixins extends Level implements ITimeOperations
 		buf.writeInt(accelerationSpeed);
 		this.players.forEach(player -> ServerPlayNetworking.send(player, NetworkPacketsID.NIGHT_SKIP_INFO, buf));
 		this.shouldUpdateNSkip = true;
+
+		if (this.getGameRules().getBoolean(GameRules.RULE_WEATHER_CYCLE)) {
+			this.stopWeather();
+		}
 	}
 
 	@Redirect(method = "tickTime", at = @At(value = "INVOKE", target = "net/minecraft/server/level/ServerLevel.setDayTime(J)V"))
 	private void customTickerTAW(ServerLevel world, long timeOfDay) {
 		this.timeTicker.tick(this, enableNightSkipAcceleration, accelerationSpeed);
+	}
+
+	@Override
+	public void wakeUpAllPlayersTAW() {
+		wakeUpAllPlayers();
 	}
 
 	@Override

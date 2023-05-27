@@ -37,7 +37,6 @@ import ru.aiefu.timeandwindct.tickers.TimeTicker;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 @Mixin(ServerLevel.class)
 public abstract class ServerWorldMixins extends Level implements ITimeOperations {
@@ -58,6 +57,7 @@ public abstract class ServerWorldMixins extends Level implements ITimeOperations
 
 	@Shadow protected abstract void wakeUpAllPlayers();
 
+	@Shadow @Final private ServerLevelData serverLevelData;
 	protected Ticker timeTicker;
 
 	protected boolean enableNightSkipAcceleration = false;
@@ -86,7 +86,7 @@ public abstract class ServerWorldMixins extends Level implements ITimeOperations
 		if(TimeAndWindCT.CONFIG.syncWithSystemTime){
 			ci.cancel();
 		} else if (TimeAndWindCT.CONFIG.enableNightSkipAcceleration){
-			List<ServerPlayer> totalPlayers = this.players.stream().filter(player -> !player.isSpectator() || !player.isCreative()).collect(Collectors.toList());
+			List<ServerPlayer> totalPlayers = this.players.stream().filter(player -> !player.isSpectator() || !player.isCreative()).toList();
 			if(totalPlayers.size() > 0) {
 				int sleepingPlayers = (int) totalPlayers.stream().filter(ServerPlayer::isSleeping).count();
 				int threshold = TimeAndWindCT.CONFIG.enableThreshold ? totalPlayers.size() / 100 * TimeAndWindCT.CONFIG.thresholdPercentage : 0;
@@ -135,6 +135,18 @@ public abstract class ServerWorldMixins extends Level implements ITimeOperations
 	@Redirect(method = "tickTime", at = @At(value = "INVOKE", target = "net/minecraft/server/level/ServerLevel.setDayTime(J)V"))
 	private void customTickerTAW(ServerLevel world, long timeOfDay) {
 		this.timeTicker.tick(this, enableNightSkipAcceleration, accelerationSpeed);
+		if(enableNightSkipAcceleration && isThundering()){
+			int thunderTime  = this.serverLevelData.getThunderTime();
+			if(thunderTime > 6000){
+				this.serverLevelData.setThunderTime(6000);
+				thunderTime = 6000;
+			}
+			thunderTime -= this.accelerationSpeed;
+			this.serverLevelData.setThunderTime(thunderTime);
+			if(thunderTime < 1){
+				resetWeatherCycle();
+			}
+		}
 	}
 
 	@Override
@@ -174,11 +186,11 @@ public abstract class ServerWorldMixins extends Level implements ITimeOperations
 
 	@Override
 	public void setSkipState(boolean bl) {
-
+		this.enableNightSkipAcceleration = bl;
 	}
 
 	@Override
 	public void setSpeed(int speed) {
-
+		this.accelerationSpeed = speed;
 	}
 }

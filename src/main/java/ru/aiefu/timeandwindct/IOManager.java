@@ -77,8 +77,8 @@ public class IOManager {
     }
 
     public static void generateModConfig(){
-        String gson = new GsonBuilder().setPrettyPrinting().create().toJson(new ModConfig(true, false, false,
-                true, 30, true, 50));
+        String gson = new GsonBuilder().setPrettyPrinting().create().toJson(new ModConfig(false, false, false,
+                false, 30, true, 50));
         File file = new File("./config/time-and-wind/config.json");
         fileWriter(file, gson);
     }
@@ -133,6 +133,7 @@ public class IOManager {
         return result;
     }
 
+    @SuppressWarnings("all")
     public static void fileWriter(File file, String gson){
         try {
             file.createNewFile();

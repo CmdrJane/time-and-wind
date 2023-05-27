@@ -17,8 +17,10 @@ import ru.aiefu.timeandwindct.config.TimeDataStorage;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.Objects;
 
 public class TimeAndWindCT implements ModInitializer {
 	public static final String MOD_ID = "tawct";
@@ -46,20 +48,19 @@ public class TimeAndWindCT implements ModInitializer {
 
 	public void craftPaths(){
 		try{
-			if(!Files.isDirectory(Paths.get("./config"))){
-				Files.createDirectory(Paths.get("./config"));
+			Path dir = Paths.get("./config");
+			if(!Files.isDirectory(dir)){
+				Files.createDirectory(dir);
 			}
-			if(!Files.isDirectory(Paths.get("./config/time-and-wind"))){
-				Files.createDirectory(Paths.get("./config/time-and-wind"));
+			Path path = Paths.get("./config/time-and-wind");
+			if(!Files.isDirectory(path)){
+				Files.createDirectory(path);
 			}
 			if(!Files.exists(Paths.get("./config/time-and-wind/time-data.json"))){
 				IOManager.genTimeData();
 			}
 			if(!Files.exists(Paths.get("./config/time-and-wind/config.json"))){
 				IOManager.generateModConfig();
-			}
-			if(!Files.exists(Paths.get("./config/time-and-wind/system-time-data.json"))){
-				IOManager.generateSysTimeCfg();
 			}
 			if(!Files.exists(Paths.get("./config/time-and-wind/system-time-data-global.json"))){
 				IOManager.generateSysTimeCfg();
@@ -84,7 +85,7 @@ public class TimeAndWindCT implements ModInitializer {
 	}
 
 	public static void sendConfigSyncPacket(ServerPlayer player){
-		if(!player.getServer().isSingleplayerOwner(player.getGameProfile())) {
+		if(!Objects.requireNonNull(player.getServer()).isSingleplayerOwner(player.getGameProfile())) {
 			FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
 
 			String cfgJson = new Gson().toJson(TimeAndWindCT.CONFIG);

@@ -59,6 +59,7 @@ public abstract class ServerWorldMixins extends Level implements ITimeOperations
 
 	@Shadow protected abstract void stopWeather();
 
+	@Shadow @Final private ServerLevelData serverLevelData;
 	protected Ticker timeTicker;
 
 	protected boolean enableNightSkipAcceleration = false;
@@ -137,6 +138,18 @@ public abstract class ServerWorldMixins extends Level implements ITimeOperations
 	@Redirect(method = "tickTime", at = @At(value = "INVOKE", target = "net/minecraft/server/level/ServerLevel.setDayTime(J)V"))
 	private void customTickerTAW(ServerLevel world, long timeOfDay) {
 		this.timeTicker.tick(this, enableNightSkipAcceleration, accelerationSpeed);
+		if(enableNightSkipAcceleration && isThundering()){
+			int thunderTime  = this.serverLevelData.getThunderTime();
+			if(thunderTime > 6000){
+				this.serverLevelData.setThunderTime(6000);
+				thunderTime = 6000;
+			}
+			thunderTime -= this.accelerationSpeed;
+			this.serverLevelData.setThunderTime(thunderTime);
+			if(thunderTime < 1){
+				stopWeather();
+			}
+		}
 	}
 
 	@Override

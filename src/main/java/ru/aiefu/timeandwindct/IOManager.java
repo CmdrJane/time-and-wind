@@ -95,14 +95,14 @@ public class IOManager {
             }
         } catch (IOException e){
             e.printStackTrace();
-            config = new ModConfig(true, false, false,
-                    true, 30, true, 50);
+            config = new ModConfig(false, false, false,
+                    false, 30, true, 50);
         }
         return config;
     }
 
     public static ModConfig patchModConfigV1(ModConfig config){
-        return new ModConfig(config.patchSkyAngle, config.syncWithSystemTime,false, true, 30, true, 50);
+        return new ModConfig(config.patchSkyAngle, config.syncWithSystemTime,false, false, 30, false, 50);
     }
 
     public static void updateTimeData(String id, int dayD, int nightD){

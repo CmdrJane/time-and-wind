@@ -10,7 +10,7 @@
   ],
   "contact": {
     "homepage": "https://www.curseforge.com/minecraft/mc-mods/time-wind",
-    "sources": "https://github.com/CmdrJane/time-and-wind/tree/1.19.4"
+    "sources": "https://github.com/CmdrJane/time-and-wind/tree/1.20"
   },
 
   "license": "GPL-v3",
@@ -30,9 +30,9 @@
   ],
 
   "depends": {
-    "fabricloader": ">=0.14.9",
-    "fabric": ">=0.76.0",
-    "minecraft": "1.19.4",
+    "fabricloader": ">=0.14.21",
+    "fabric": ">=0.83.0",
+    "minecraft": ">=1.20",
     "java": ">=17"
   },
   "suggests": {

@@ -37,7 +37,7 @@ public abstract class ServerPlayerMixins extends Player{
     private Either<Player.BedSleepingProblem, Unit> patchSleepMechanics(BlockPos pos){
         if (!this.isCreative()) {
             Vec3 vec3d = Vec3.atBottomCenterOf(pos);
-            List<Monster> list = this.level.getEntitiesOfClass(Monster.class, new AABB(vec3d.x() - 8.0D, vec3d.y() - 5.0D, vec3d.z() - 8.0D, vec3d.x() + 8.0D, vec3d.y() + 5.0D, vec3d.z() + 8.0D), (hostileEntity) -> hostileEntity.isPreventingPlayerRest(this));
+            List<Monster> list = this.level().getEntitiesOfClass(Monster.class, new AABB(vec3d.x() - 8.0D, vec3d.y() - 5.0D, vec3d.z() - 8.0D, vec3d.x() + 8.0D, vec3d.y() + 5.0D, vec3d.z() + 8.0D), (hostileEntity) -> hostileEntity.isPreventingPlayerRest(this));
             if (!list.isEmpty()) {
                 return Either.left(Player.BedSleepingProblem.NOT_SAFE);
             }
@@ -47,7 +47,7 @@ public abstract class ServerPlayerMixins extends Player{
             this.awardStat(Stats.SLEEP_IN_BED);
             CriteriaTriggers.SLEPT_IN_BED.trigger((ServerPlayer) (Object)this);
         });
-        ((ServerLevel)this.level).updateSleepingPlayerList();
+        ((ServerLevel)this.level()).updateSleepingPlayerList();
         return either;
     }
 }

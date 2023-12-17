@@ -28,7 +28,7 @@ public class MinecraftTimeUnit {
             if(skip) return;
             ticksToAdd += 1;
         }
-        timeLevel.setTimeOfDayTAW(timeLevel.getTimeOfDayTAW() + ticksToAdd);
+        this.timeLevel.setTimeOfDayTAW(timeLevel.getTimeOfDayTAW() + ticksToAdd);
     }
 
     public ITimeOperations getTimeLevel(){
@@ -40,6 +40,6 @@ public class MinecraftTimeUnit {
     }
 
     public void accelerate(int val){
-        timeLevel.setTimeOfDayTAW(timeLevel.getTimeOfDayTAW() + val);
+        this.timeLevel.setTimeOfDayTAW(this.timeLevel.getTimeOfDayTAW() + val);
     }
 }

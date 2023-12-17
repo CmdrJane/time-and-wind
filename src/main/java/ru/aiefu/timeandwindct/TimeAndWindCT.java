@@ -35,9 +35,9 @@ public class TimeAndWindCT implements ModInitializer {
 	public void onInitialize() {
 		craftPaths();
 		ServerLifecycleEvents.SERVER_STARTING.register(server -> {
-					IOManager.readTimeData();
-					systemTimeConfig = IOManager.readGlobalSysTimeCfg();
-					sysTimeMap = IOManager.readSysTimeCfg();
+					ConfigurationManager.readTimeData();
+					systemTimeConfig = ConfigurationManager.readGlobalSysTimeCfg();
+					sysTimeMap = ConfigurationManager.readSysTimeCfg();
 		});
 		ServerLifecycleEvents.SERVER_STARTED.register(server -> {
 			if(CONFIG.syncWithSystemTime) server.getGameRules().getRule(GameRules.RULE_DOINSOMNIA).set(false, server);
@@ -48,27 +48,23 @@ public class TimeAndWindCT implements ModInitializer {
 
 	public void craftPaths(){
 		try{
-			Path dir = Paths.get("./config");
-			if(!Files.isDirectory(dir)){
-				Files.createDirectory(dir);
-			}
 			Path path = Paths.get("./config/time-and-wind");
 			if(!Files.isDirectory(path)){
-				Files.createDirectory(path);
+				Files.createDirectories(path);
 			}
 			if(!Files.exists(Paths.get("./config/time-and-wind/time-data.json"))){
-				IOManager.genTimeData();
+				ConfigurationManager.genTimeData();
 			}
 			if(!Files.exists(Paths.get("./config/time-and-wind/config.json"))){
-				IOManager.generateModConfig();
+				ConfigurationManager.generateModConfig();
 			}
 			if(!Files.exists(Paths.get("./config/time-and-wind/system-time-data-global.json"))){
-				IOManager.generateSysTimeCfg();
+				ConfigurationManager.generateSysTimeCfg();
 			}
 			if(!Files.exists(Paths.get("./config/time-and-wind/system-time-data.json"))){
-				IOManager.generateMapSysTime();
+				ConfigurationManager.generateMapSysTime();
 			}
-			CONFIG = IOManager.readModConfig();
+			CONFIG = ConfigurationManager.readModConfig();
 		}
 		catch (IOException e){
 			e.printStackTrace();

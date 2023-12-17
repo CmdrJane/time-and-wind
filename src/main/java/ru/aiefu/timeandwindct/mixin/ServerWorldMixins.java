@@ -76,7 +76,7 @@ public abstract class ServerWorldMixins extends Level implements ITimeOperations
 			if(TimeAndWindCT.CONFIG.systemTimePerDimensions && TimeAndWindCT.sysTimeMap.containsKey(worldId)) this.timeTicker = new SystemTimeTicker(this, TimeAndWindCT.sysTimeMap.get(worldId));
 			else this.timeTicker = new SystemTimeTicker(this, TimeAndWindCT.systemTimeConfig);
 		}
-		else if (TimeAndWindCT.timeDataMap.containsKey(worldId)) {
+		else if (TimeAndWindCT.timeDataMap != null && TimeAndWindCT.timeDataMap.containsKey(worldId)) {
 			TimeDataStorage storage = TimeAndWindCT.timeDataMap.get(worldId);
 			this.timeTicker = new TimeTicker(storage.dayDuration, storage.nightDuration, this);
 		} else this.timeTicker = new DefaultTicker();

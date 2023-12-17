@@ -14,8 +14,7 @@
   ],
   "client": [
     "ClientWorldMixins",
-    "IntegratedServerMixins",
-    "WorldRendererMixins"
+    "IntegratedServerMixins"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -4,6 +4,7 @@ import net.minecraft.world.level.dimension.DimensionType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -15,6 +16,7 @@ import java.util.OptionalLong;
 public class DimensionMixins {
     @Shadow @Final private OptionalLong fixedTime;
 
+    @Unique
     private final double factor = 1.0D / 24000D;
 
     @Inject(method = "timeOfDay", at =@At("HEAD"), cancellable = true)

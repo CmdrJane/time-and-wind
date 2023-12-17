@@ -12,6 +12,7 @@ import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.storage.WritableLevelData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -36,10 +37,14 @@ public abstract class ClientWorldMixins extends Level implements ITimeOperations
 
     @Shadow public abstract void setDayTime(long l);
 
+    @Unique
     protected Ticker timeTicker;
 
+    @Unique
     private boolean skipState = false;
+    @Unique
     private int speed = 0;
+    @Unique
     private float prevSkyAngle = 0;
 
     @Inject(method = "<init>", at = @At("TAIL"))

@@ -9,6 +9,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -19,6 +20,7 @@ import ru.aiefu.timeandwindct.TimeAndWindCT;
 @Mixin(Player.class)
 public abstract class PlayerMixins extends LivingEntity {
 
+    @Unique
     private int restTimer = 0;
 
     protected PlayerMixins(EntityType<? extends LivingEntity> entityType, Level world) {

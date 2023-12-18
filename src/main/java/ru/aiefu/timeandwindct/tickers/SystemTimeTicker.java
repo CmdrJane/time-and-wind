@@ -41,29 +41,29 @@ public class SystemTimeTicker implements Ticker{
         this.nightMod = nightF / 50;
 
         int startingTick = calculateCurrentTick();
-        world.setTimeOfDayTAW(unwrapTime(startingTick, world.getTimeOfDayTAW()));
+        world.time_and_wind_custom_ticker$setTimeOfDayTAW(unwrapTime(startingTick, world.time_and_wind_custom_ticker$getTimeOfDayTAW()));
     }
 
     public void tick(ITimeOperations world, boolean nskip, int acceleration){
         ++ticks;
-        long time = world.getTimeOfDayTAW();
+        long time = world.time_and_wind_custom_ticker$getTimeOfDayTAW();
         tickMod = time % 24000L < 12000 ? dayMod : nightMod;
         if(ticks % tickMod == 0){
-            world.setTimeOfDayTAW(time + 1L);
+            world.time_and_wind_custom_ticker$setTimeOfDayTAW(time + 1L);
         }
-        if(!world.isClient() && ticks % 6000 == 0){
+        if(!world.time_and_wind_custom_ticker$isClient() && ticks % 6000 == 0){
             TimeAndWindCT.LOGGER.info("Checking if time corrections is needed...");
             int targetTicks = calculateCurrentTick();
             int timeTicks = (int) (time % 24000L);
             if(targetTicks != timeTicks){
-                world.setTimeOfDayTAW(unwrapTime(targetTicks, time));
+                world.time_and_wind_custom_ticker$setTimeOfDayTAW(unwrapTime(targetTicks, time));
                 TimeAndWindCT.LOGGER.info("Time corrected");
             } else TimeAndWindCT.LOGGER.info("Skipping correction");
         }
     }
 
     public void updateTime(ITimeOperations world){
-        world.setTimeOfDayTAW(unwrapTime(calculateCurrentTick(), world.getTimeOfDayTAW()));
+        world.time_and_wind_custom_ticker$setTimeOfDayTAW(unwrapTime(calculateCurrentTick(), world.time_and_wind_custom_ticker$getTimeOfDayTAW()));
     }
 
     private int calculateCurrentTick(){

@@ -12,6 +12,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.RandomSequences;
+import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -72,13 +73,13 @@ public abstract class ServerWorldMixins extends Level implements ITimeOperations
 	private boolean shouldUpdateNSkip = true;
 
 	@Inject(method = "<init>", at = @At("TAIL"))
-	private void attachTimeDataTAW(MinecraftServer minecraftServer, Executor executor, LevelStorageSource.LevelStorageAccess levelStorageAccess, ServerLevelData serverLevelData, ResourceKey resourceKey, LevelStem levelStem, ChunkProgressListener chunkProgressListener, boolean bl, long l, List list, boolean bl2, RandomSequences randomSequences, CallbackInfo ci){
-		String worldId = this.dimension().location().toString();
-		if(this.dimensionType().hasFixedTime()){
+	private void attachTimeDataTAW(MinecraftServer minecraftServer, Executor executor, LevelStorageSource.LevelStorageAccess levelStorageAccess, ServerLevelData serverLevelData, ResourceKey<Level> resourceKey, LevelStem levelStem, ChunkProgressListener chunkProgressListener, boolean bl, long l, List<CustomSpawner> list, boolean bl2, RandomSequences randomSequences, CallbackInfo ci){
+		String worldId = resourceKey.location().toString();
+		if(levelStem.type().value().hasFixedTime()){
 			this.timeTicker = new DefaultTicker();
 		}
 		else if(TimeAndWindCT.CONFIG.syncWithSystemTime){
-			if(TimeAndWindCT.CONFIG.systemTimePerDimensions && TimeAndWindCT.sysTimeMap.containsKey(worldId)) this.timeTicker = new SystemTimeTicker(this, TimeAndWindCT.sysTimeMap.get(worldId));
+			if(TimeAndWindCT.CONFIG.systemTimePerDimensions && TimeAndWindCT.sysTimeMap != null && TimeAndWindCT.sysTimeMap.containsKey(worldId)) this.timeTicker = new SystemTimeTicker(this, TimeAndWindCT.sysTimeMap.get(worldId));
 			else this.timeTicker = new SystemTimeTicker(this, TimeAndWindCT.systemTimeConfig);
 		}
 		else if (TimeAndWindCT.timeDataMap != null && TimeAndWindCT.timeDataMap.containsKey(worldId)) {
@@ -156,47 +157,47 @@ public abstract class ServerWorldMixins extends Level implements ITimeOperations
 	}
 
 	@Override
-	public void wakeUpAllPlayersTAW() {
+	public void time_and_wind_custom_ticker$wakeUpAllPlayersTAW() {
 		wakeUpAllPlayers();
 	}
 
 	@Override
-	public Ticker getTimeTicker() {
+	public Ticker time_and_wind_custom_ticker$getTimeTicker() {
 		return this.timeTicker;
 	}
 
 	@Override
-	public void setTimeTicker(Ticker timeTicker) {
+	public void time_and_wind_custom_ticker$setTimeTicker(Ticker timeTicker) {
 		this.timeTicker = timeTicker;
 	}
 
 	@Override
-	public void setTimeOfDayTAW(long time) {
+	public void time_and_wind_custom_ticker$setTimeOfDayTAW(long time) {
 		this.setDayTime(time);
 	}
 
 	@Override
-	public long getTimeTAW() {
+	public long time_and_wind_custom_ticker$getTimeTAW() {
 		return this.levelData.getGameTime();
 	}
 
 	@Override
-	public long getTimeOfDayTAW() {
+	public long time_and_wind_custom_ticker$getTimeOfDayTAW() {
 		return this.levelData.getDayTime();
 	}
 
 	@Override
-	public boolean isClient() {
+	public boolean time_and_wind_custom_ticker$isClient() {
 		return this.isClientSide();
 	}
 
 	@Override
-	public void setSkipState(boolean bl) {
+	public void time_and_wind_custom_ticker$setSkipState(boolean bl) {
 		this.enableNightSkipAcceleration = bl;
 	}
 
 	@Override
-	public void setSpeed(int speed) {
+	public void time_and_wind_custom_ticker$setSpeed(int speed) {
 		this.accelerationSpeed = speed;
 	}
 }

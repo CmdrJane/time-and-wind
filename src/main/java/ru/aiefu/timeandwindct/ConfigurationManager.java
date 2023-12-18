@@ -13,10 +13,10 @@ import java.io.IOException;
 import java.util.HashMap;
 
 public class ConfigurationManager {
-    public static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    public static final Gson gson_pretty = new GsonBuilder().setPrettyPrinting().create();
     public static void genTimeData(){
         try(FileWriter writer = getFileWriter("./config/time-and-wind/time-data.json")) {
-            gson.toJson(new HashMapOf<>("minecraft:overworld", new TimeDataStorage()), writer);
+            gson_pretty.toJson(new HashMapOf<>("minecraft:overworld", new TimeDataStorage()), writer);
         } catch (IOException e){
             e.printStackTrace();
         }
@@ -24,7 +24,7 @@ public class ConfigurationManager {
 
     public static void generateSysTimeCfg(){
         try(FileWriter writer = getFileWriter("./config/time-and-wind/system-time-data-global.json")) {
-            gson.toJson(new SystemTimeConfig("5:00", "20:00", "3:00"), writer);
+            gson_pretty.toJson(new SystemTimeConfig("5:00", "20:00", "3:00"), writer);
         } catch (IOException e){
             e.printStackTrace();
         }
@@ -32,7 +32,7 @@ public class ConfigurationManager {
 
     public static void generateMapSysTime(){
         try(FileWriter writer = getFileWriter("./config/time-and-wind/system-time-data.json")) {
-            gson.toJson(new HashMapOf<>("minecraft:overworld", new SystemTimeConfig("5:00", "20:00", "3:00")), writer);
+            gson_pretty.toJson(new HashMapOf<>("minecraft:overworld", new SystemTimeConfig("5:00", "20:00", "3:00")), writer);
         } catch (IOException e){
             e.printStackTrace();
         }
@@ -42,7 +42,7 @@ public class ConfigurationManager {
 
     public static void updateModConfig(ModConfig config){
         try(FileWriter writer = getFileWriter("./config/time-and-wind/config.json")) {
-            gson.toJson(config, writer);
+            gson_pretty.toJson(config, writer);
         } catch (IOException e){
             e.printStackTrace();
         }
@@ -51,7 +51,7 @@ public class ConfigurationManager {
     public static void updateMapSysTime(String worldId, String sunrise, String sunset, String timeZone){
         TimeAndWindCT.sysTimeMap.put(worldId, new SystemTimeConfig(sunrise, sunset, timeZone));
         try(FileWriter writer = getFileWriter("./config/time-and-wind/system-time-data.json")) {
-            gson.toJson(TimeAndWindCT.sysTimeMap, writer);
+            gson_pretty.toJson(TimeAndWindCT.sysTimeMap, writer);
         } catch (IOException e){
             e.printStackTrace();
         }
@@ -60,7 +60,7 @@ public class ConfigurationManager {
     public static void updateGlobalSysTimeCfg(String sunrise, String sunset, String timezone){
         TimeAndWindCT.systemTimeConfig = new SystemTimeConfig(sunrise, sunset, timezone);
         try(FileWriter writer = getFileWriter("./config/time-and-wind/system-time-data-global.json")) {
-            gson.toJson(TimeAndWindCT.systemTimeConfig, writer);
+            gson_pretty.toJson(TimeAndWindCT.systemTimeConfig, writer);
         } catch (IOException e){
             e.printStackTrace();
         }
@@ -69,7 +69,7 @@ public class ConfigurationManager {
     public static SystemTimeConfig readGlobalSysTimeCfg(){
         SystemTimeConfig config;
         try {
-            config = gson.fromJson(new FileReader("./config/time-and-wind/system-time-data-global.json"), SystemTimeConfig.class);
+            config = gson_pretty.fromJson(new FileReader("./config/time-and-wind/system-time-data-global.json"), SystemTimeConfig.class);
         } catch (IOException e){
             e.printStackTrace();
             config = new SystemTimeConfig("7:00", "19:00", "local");
@@ -80,7 +80,7 @@ public class ConfigurationManager {
     public static HashMap<String, SystemTimeConfig> readSysTimeCfg(){
         HashMap<String, SystemTimeConfig> map;
         try {
-            map = gson.fromJson(new FileReader("./config/time-and-wind/system-time-data.json"), new TypeToken<HashMap<String, SystemTimeConfig>>(){}.getType());
+            map = gson_pretty.fromJson(new FileReader("./config/time-and-wind/system-time-data.json"), new TypeToken<HashMap<String, SystemTimeConfig>>(){}.getType());
         } catch (IOException e){
             e.printStackTrace();
             map = new HashMapOf<>("minecraft:overworld", new SystemTimeConfig("5:00", "20:00", "3:00"));
@@ -90,7 +90,7 @@ public class ConfigurationManager {
 
     public static void generateModConfig(){
         try(FileWriter writer = getFileWriter("./config/time-and-wind/config.json")){
-            gson.toJson(new ModConfig(false, false, false,
+            gson_pretty.toJson(new ModConfig(false, false, false,
                     false, 30, true, 50), writer);
         } catch (IOException e){
             e.printStackTrace();
@@ -100,11 +100,11 @@ public class ConfigurationManager {
     public static ModConfig readModConfig(){
         ModConfig config;
         try {
-            config = gson.fromJson(new FileReader("./config/time-and-wind/config.json"), ModConfig.class);
+            config = gson_pretty.fromJson(new FileReader("./config/time-and-wind/config.json"), ModConfig.class);
             if(config.config_ver < 3){
                 config = patchModConfigV1(config);
                 try(FileWriter writer = getFileWriter("./config/time-and-wind/config.json")) {
-                    gson.toJson(config, writer);
+                    gson_pretty.toJson(config, writer);
                 } catch (IOException e){
                     e.printStackTrace();
                 }
@@ -124,7 +124,7 @@ public class ConfigurationManager {
     public static void updateTimeData(String id, int dayD, int nightD){
         TimeAndWindCT.timeDataMap.put(id, new TimeDataStorage(dayD, nightD));
         try(FileWriter writer = getFileWriter("./config/time-and-wind/time-data.json")) {
-            gson.toJson(TimeAndWindCT.timeDataMap, writer);
+            gson_pretty.toJson(TimeAndWindCT.timeDataMap, writer);
         } catch (IOException e){
             e.printStackTrace();
         }
@@ -132,7 +132,7 @@ public class ConfigurationManager {
 
     public static void updateTimeData() {
         try(FileWriter writer = getFileWriter("./config/time-and-wind/time-data.json")) {
-            gson.toJson(TimeAndWindCT.timeDataMap, writer);
+            gson_pretty.toJson(TimeAndWindCT.timeDataMap, writer);
         } catch (IOException e){
             e.printStackTrace();
         }
@@ -142,7 +142,7 @@ public class ConfigurationManager {
         HashMap<String, TimeDataStorage> timeDataMap;
         int result;
         try {
-            timeDataMap = gson.fromJson(new FileReader("./config/time-and-wind/time-data.json"), new TypeToken<HashMap<String, TimeDataStorage>>(){}.getType());
+            timeDataMap = gson_pretty.fromJson(new FileReader("./config/time-and-wind/time-data.json"), new TypeToken<HashMap<String, TimeDataStorage>>(){}.getType());
             result = 1;
         } catch (IOException e){
             e.printStackTrace();

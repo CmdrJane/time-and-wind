@@ -172,13 +172,13 @@ public class TAWCommands {
                 String id = serverWorld.dimension().location().toString();
                 if(TimeAndWindCT.CONFIG.syncWithSystemTime){
                     if(TimeAndWindCT.CONFIG.systemTimePerDimensions && TimeAndWindCT.sysTimeMap.containsKey(id))
-                    ((ITimeOperations) serverWorld).setTimeTicker(new SystemTimeTicker((ITimeOperations) serverWorld, TimeAndWindCT.sysTimeMap.get(id)));
-                    else ((ITimeOperations) serverWorld).setTimeTicker(new SystemTimeTicker((ITimeOperations) serverWorld, TimeAndWindCT.systemTimeConfig));
+                    ((ITimeOperations) serverWorld).time_and_wind_custom_ticker$setTimeTicker(new SystemTimeTicker((ITimeOperations) serverWorld, TimeAndWindCT.sysTimeMap.get(id)));
+                    else ((ITimeOperations) serverWorld).time_and_wind_custom_ticker$setTimeTicker(new SystemTimeTicker((ITimeOperations) serverWorld, TimeAndWindCT.systemTimeConfig));
                 }
                 else if (TimeAndWindCT.timeDataMap.containsKey(id)) {
                     TimeDataStorage storage = TimeAndWindCT.timeDataMap.get(id);
-                    ((ITimeOperations) serverWorld).setTimeTicker(new TimeTicker(storage.dayDuration, storage.nightDuration, serverWorld));
-                } else ((ITimeOperations) serverWorld).setTimeTicker(new DefaultTicker());
+                    ((ITimeOperations) serverWorld).time_and_wind_custom_ticker$setTimeTicker(new TimeTicker(storage.dayDuration, storage.nightDuration, serverWorld));
+                } else ((ITimeOperations) serverWorld).time_and_wind_custom_ticker$setTimeTicker(new DefaultTicker());
             }
             for(ServerPlayer player : server.getPlayerList().getPlayers()){
                TimeAndWindCT.sendConfigSyncPacket(player);
@@ -210,7 +210,7 @@ public class TAWCommands {
             List<String> ids = new ArrayList<>();
             source.getServer().getAllLevels().forEach(serverWorld -> ids.add(serverWorld.dimension().location().toString()));
             try(FileWriter writer = ConfigurationManager.getFileWriter("./taw-worlds-ids.json")) {
-                ConfigurationManager.gson.toJson(ids, writer);
+                ConfigurationManager.gson_pretty.toJson(ids, writer);
             } catch (IOException e){
                 e.printStackTrace();
             }
@@ -245,7 +245,7 @@ public class TAWCommands {
 
     private static int getTimeChecker(CommandSourceStack source) throws CommandSyntaxException {
         if(TimeAndWindCT.debugMode || source.hasPermission(4) || source.getServer().isSingleplayerOwner(source.getPlayerOrException().getGameProfile())) {
-            Ticker t = ((ITimeOperations) source.getLevel()).getTimeTicker();
+            Ticker t = ((ITimeOperations) source.getLevel()).time_and_wind_custom_ticker$getTimeTicker();
             if(t instanceof TimeTicker ticker) {
                 source.sendSuccess(() -> Component.literal("Day: " + ticker.getDayD() + " Night: " + ticker.getNightD()), false);
                 source.sendSuccess(() -> Component.literal("Day Mod: " + ticker.getDayMod() + " Night Mod: " + ticker.getNightMod()), false);

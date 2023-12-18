@@ -1,6 +1,5 @@
 package ru.aiefu.timeandwindct;
 
-import com.google.gson.Gson;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
@@ -25,8 +24,8 @@ public class TimeAndWindCTClient implements ClientModInitializer {
     public void onInitializeClient() {
         ClientPlayNetworking.registerGlobalReceiver(NetworkPacketsID.SYNC_CONFIG, (client, handler, buf, responseSender) -> {
             if(buf.readableBytes() > 0 ){
-                TimeAndWindCT.CONFIG = new Gson().fromJson(buf.readUtf(), ModConfig.class);
-                TimeAndWindCT.systemTimeConfig = new Gson().fromJson(buf.readUtf(), SystemTimeConfig.class);
+                TimeAndWindCT.CONFIG = ConfigurationManager.gson_pretty.fromJson(buf.readUtf(), ModConfig.class);
+                TimeAndWindCT.systemTimeConfig = ConfigurationManager.gson_pretty.fromJson(buf.readUtf(), SystemTimeConfig.class);
 
                 HashMap<String, TimeDataStorage> map = (HashMap<String, TimeDataStorage>) buf.readMap(FriendlyByteBuf::readUtf, packetByteBuf -> new TimeDataStorage(packetByteBuf.readInt(), packetByteBuf.readInt()));
                 HashMap<String, SystemTimeConfig> sysMap = (HashMap<String, SystemTimeConfig>) buf.readMap(FriendlyByteBuf::readUtf, packetByteBuf -> new SystemTimeConfig(buf.readUtf(), buf.readUtf(), buf.readUtf()));
@@ -40,16 +39,16 @@ public class TimeAndWindCTClient implements ClientModInitializer {
                     ITimeOperations timeOps = (ITimeOperations) clientWorld;
                     if(TimeAndWindCT.CONFIG.syncWithSystemTime){
                         if(TimeAndWindCT.CONFIG.systemTimePerDimensions && sysMap.containsKey(worldId)) {
-                            timeOps.setTimeTicker(new SystemTimeTicker((ITimeOperations) clientWorld, sysMap.get(worldId)));
-                        } else timeOps.setTimeTicker(new SystemTimeTicker((ITimeOperations) clientWorld, TimeAndWindCT.systemTimeConfig));
+                            timeOps.time_and_wind_custom_ticker$setTimeTicker(new SystemTimeTicker((ITimeOperations) clientWorld, sysMap.get(worldId)));
+                        } else timeOps.time_and_wind_custom_ticker$setTimeTicker(new SystemTimeTicker((ITimeOperations) clientWorld, TimeAndWindCT.systemTimeConfig));
                         TimeAndWindCT.LOGGER.info("[Time & Wind] System time ticker synchronized");
                     }
                     else {
                          if (map.containsKey(worldId)) {
                             TimeDataStorage storage = map.get(worldId);
-                            timeOps.setTimeTicker(new TimeTicker(storage.dayDuration, storage.nightDuration, clientWorld));
+                            timeOps.time_and_wind_custom_ticker$setTimeTicker(new TimeTicker(storage.dayDuration, storage.nightDuration, clientWorld));
                              TimeAndWindCT.LOGGER.info("[Time & Wind] Custom time ticker for world " + worldId + " synchronized");
-                        } else timeOps.setTimeTicker(new DefaultTicker());
+                        } else timeOps.time_and_wind_custom_ticker$setTimeTicker(new DefaultTicker());
                     }
                 }
             }
@@ -57,7 +56,7 @@ public class TimeAndWindCTClient implements ClientModInitializer {
         ClientPlayNetworking.registerGlobalReceiver(NetworkPacketsID.CFG_DEBUG_INFO, (client, handler, buf, responseSender) -> {
             if(client.level != null && client.player != null) {
                 String worldId = client.level.dimension().location().toString();
-                if (((ITimeOperations) client.level).getTimeTicker() instanceof SystemTimeTicker) {
+                if (((ITimeOperations) client.level).time_and_wind_custom_ticker$getTimeTicker() instanceof SystemTimeTicker) {
                     return;
                 }
                 if(TimeAndWindCT.timeDataMap == null){
@@ -85,13 +84,13 @@ public class TimeAndWindCTClient implements ClientModInitializer {
                 ITimeOperations timeOps = (ITimeOperations) clientWorld;
                 if (TimeAndWindCT.CONFIG.syncWithSystemTime) {
                     if(TimeAndWindCT.CONFIG.systemTimePerDimensions && TimeAndWindCT.sysTimeMap.containsKey(worldId)) {
-                        timeOps.setTimeTicker(new SystemTimeTicker((ITimeOperations) clientWorld, TimeAndWindCT.sysTimeMap.get(worldId)));
-                    } else timeOps.setTimeTicker(new SystemTimeTicker((ITimeOperations) clientWorld, TimeAndWindCT.systemTimeConfig));
+                        timeOps.time_and_wind_custom_ticker$setTimeTicker(new SystemTimeTicker((ITimeOperations) clientWorld, TimeAndWindCT.sysTimeMap.get(worldId)));
+                    } else timeOps.time_and_wind_custom_ticker$setTimeTicker(new SystemTimeTicker((ITimeOperations) clientWorld, TimeAndWindCT.systemTimeConfig));
                 }
                 else if (TimeAndWindCT.timeDataMap != null && TimeAndWindCT.timeDataMap.containsKey(worldId)) {
                     TimeDataStorage storage = TimeAndWindCT.timeDataMap.get(worldId);
-                    timeOps.setTimeTicker(new TimeTicker(storage.dayDuration, storage.nightDuration, clientWorld));
-                } else timeOps.setTimeTicker(new DefaultTicker());
+                    timeOps.time_and_wind_custom_ticker$setTimeTicker(new TimeTicker(storage.dayDuration, storage.nightDuration, clientWorld));
+                } else timeOps.time_and_wind_custom_ticker$setTimeTicker(new DefaultTicker());
                 TimeAndWindCT.LOGGER.info("[Time & Wind] Timedata reloaded on client");
             }
         });
@@ -100,8 +99,8 @@ public class TimeAndWindCTClient implements ClientModInitializer {
                 ClientLevel world = Minecraft.getInstance().level;
                 if(world != null){
                     ITimeOperations ops = (ITimeOperations) world;
-                    ops.setSkipState(buf.readBoolean());
-                    ops.setSpeed(buf.readInt());
+                    ops.time_and_wind_custom_ticker$setSkipState(buf.readBoolean());
+                    ops.time_and_wind_custom_ticker$setSpeed(buf.readInt());
                 }
             }
         });

@@ -1,6 +1,5 @@
 package ru.aiefu.timeandwindct;
 
-import com.google.gson.Gson;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -15,9 +14,8 @@ import ru.aiefu.timeandwindct.config.ModConfig;
 import ru.aiefu.timeandwindct.config.SystemTimeConfig;
 import ru.aiefu.timeandwindct.config.TimeDataStorage;
 
-import java.io.IOException;
+import java.io.File;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Objects;
@@ -47,28 +45,21 @@ public class TimeAndWindCT implements ModInitializer {
 	}
 
 	public void craftPaths(){
-		try{
-			Path path = Paths.get("./config/time-and-wind");
-			if(!Files.isDirectory(path)){
-				Files.createDirectories(path);
-			}
-			if(!Files.exists(Paths.get("./config/time-and-wind/time-data.json"))){
-				ConfigurationManager.genTimeData();
-			}
-			if(!Files.exists(Paths.get("./config/time-and-wind/config.json"))){
-				ConfigurationManager.generateModConfig();
-			}
-			if(!Files.exists(Paths.get("./config/time-and-wind/system-time-data-global.json"))){
-				ConfigurationManager.generateSysTimeCfg();
-			}
-			if(!Files.exists(Paths.get("./config/time-and-wind/system-time-data.json"))){
-				ConfigurationManager.generateMapSysTime();
-			}
-			CONFIG = ConfigurationManager.readModConfig();
+		File file = new File("./config/time-and-wind");
+		file.mkdirs();
+		if(!Files.exists(Paths.get("./config/time-and-wind/time-data.json"))){
+			ConfigurationManager.genTimeData();
 		}
-		catch (IOException e){
-			e.printStackTrace();
+		if(!Files.exists(Paths.get("./config/time-and-wind/config.json"))){
+			ConfigurationManager.generateModConfig();
 		}
+		if(!Files.exists(Paths.get("./config/time-and-wind/system-time-data-global.json"))){
+			ConfigurationManager.generateSysTimeCfg();
+		}
+		if(!Files.exists(Paths.get("./config/time-and-wind/system-time-data.json"))){
+			ConfigurationManager.generateMapSysTime();
+		}
+		CONFIG = ConfigurationManager.readModConfig();
 	}
 
 	public static String getFormattedTime(long ms){
@@ -84,8 +75,8 @@ public class TimeAndWindCT implements ModInitializer {
 		if(!Objects.requireNonNull(player.getServer()).isSingleplayerOwner(player.getGameProfile())) {
 			FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
 
-			String cfgJson = new Gson().toJson(TimeAndWindCT.CONFIG);
-			String cfgsJson = new Gson().toJson(TimeAndWindCT.systemTimeConfig);
+			String cfgJson = ConfigurationManager.gson_pretty.toJson(TimeAndWindCT.CONFIG);
+			String cfgsJson = ConfigurationManager.gson_pretty.toJson(TimeAndWindCT.systemTimeConfig);
 
 			buf.writeUtf(cfgJson);
 			buf.writeUtf(cfgsJson);

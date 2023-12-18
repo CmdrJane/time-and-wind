@@ -45,16 +45,15 @@ public abstract class ClientWorldMixins extends Level implements ITimeOperations
     @Unique
     private int speed = 0;
     @Unique
-    private float prevSkyAngle = 0;
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void attachTimeDataTAW(ClientPacketListener clientPacketListener, ClientLevel.ClientLevelData clientLevelData, ResourceKey resourceKey, Holder holder, int i, int j, Supplier supplier, LevelRenderer levelRenderer, boolean bl, long l, CallbackInfo ci){
-        String worldId = this.dimension().location().toString();
-        if(this.dimensionType().hasFixedTime()){
+    private void attachTimeDataTAW(ClientPacketListener clientPacketListener, ClientLevel.ClientLevelData clientLevelData, ResourceKey<Level> resourceKey, Holder<DimensionType> holder, int i, int j, Supplier<ProfilerFiller> supplier, LevelRenderer levelRenderer, boolean bl, long l, CallbackInfo ci){
+        String worldId = resourceKey.location().toString();
+        if(holder.value().hasFixedTime()){
             this.timeTicker = new DefaultTicker();
         }
         else if(TimeAndWindCT.CONFIG.syncWithSystemTime){
-            if(TimeAndWindCT.CONFIG.systemTimePerDimensions && TimeAndWindCT.sysTimeMap.containsKey(worldId)) this.timeTicker = new SystemTimeTicker(this, TimeAndWindCT.sysTimeMap.get(worldId));
+            if(TimeAndWindCT.CONFIG.systemTimePerDimensions && TimeAndWindCT.sysTimeMap != null && TimeAndWindCT.sysTimeMap.containsKey(worldId)) this.timeTicker = new SystemTimeTicker(this, TimeAndWindCT.sysTimeMap.get(worldId));
             else this.timeTicker = new SystemTimeTicker(this, TimeAndWindCT.systemTimeConfig);
         }
         else if (TimeAndWindCT.timeDataMap != null && TimeAndWindCT.timeDataMap.containsKey(worldId)) {
@@ -65,55 +64,50 @@ public abstract class ClientWorldMixins extends Level implements ITimeOperations
 
     @Redirect(method = "tickTime", at = @At(value = "INVOKE", target = "net/minecraft/client/multiplayer/ClientLevel.setDayTime(J)V"))
     private void customTickerTAW(ClientLevel clientWorld, long timeOfDay) {
-        this.prevSkyAngle = getTimeOfDay(1.0F);
-        timeTicker.tick(this, skipState, speed);
+        this.timeTicker.tick(this, skipState, speed);
     }
 
     @Override
-    public Ticker getTimeTicker() {
+    public Ticker time_and_wind_custom_ticker$getTimeTicker() {
         return this.timeTicker;
     }
 
     @Override
-    public void setTimeTicker(Ticker timeTicker) {
+    public void time_and_wind_custom_ticker$setTimeTicker(Ticker timeTicker) {
         this.timeTicker = timeTicker;
     }
 
     @Override
-    public void setTimeOfDayTAW(long time) {
+    public void time_and_wind_custom_ticker$setTimeOfDayTAW(long time) {
         this.setDayTime(time);
     }
 
     @Override
-    public long getTimeTAW() {
+    public long time_and_wind_custom_ticker$getTimeTAW() {
         return this.levelData.getGameTime();
     }
 
     @Override
-    public long getTimeOfDayTAW() {
+    public long time_and_wind_custom_ticker$getTimeOfDayTAW() {
         return this.levelData.getDayTime();
     }
 
-    public boolean isClient() {
+    public boolean time_and_wind_custom_ticker$isClient() {
         return this.isClientSide();
     }
 
     @Override
-    public void setSkipState(boolean bl) {
+    public void time_and_wind_custom_ticker$setSkipState(boolean bl) {
         this.skipState = bl;
     }
 
     @Override
-    public void setSpeed(int speed) {
+    public void time_and_wind_custom_ticker$setSpeed(int speed) {
         this.speed = speed;
     }
 
-    public float getPrevSkyAngle(){
-        return prevSkyAngle;
-    }
-
     @Override
-    public void wakeUpAllPlayersTAW() {
+    public void time_and_wind_custom_ticker$wakeUpAllPlayersTAW() {
         skipState = false;
     }
 }

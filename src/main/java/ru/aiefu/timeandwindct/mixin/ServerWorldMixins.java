@@ -58,7 +58,8 @@ public abstract class ServerWorldMixins extends Level implements ITimeOperations
 	@Shadow @Final
 	List<ServerPlayer> players;
 
-	@Shadow protected abstract void resetWeatherCycle();
+	@Shadow
+	public abstract void resetWeatherCycle();
 
 	@Unique
 	protected Ticker timeTicker;

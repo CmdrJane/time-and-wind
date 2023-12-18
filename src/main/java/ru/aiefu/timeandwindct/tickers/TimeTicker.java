@@ -17,13 +17,10 @@ public class TimeTicker implements Ticker {
     private int nightTicksToAdd;
     private boolean nightAction;
 
-    private final Level level;
     private final ITimeOperations timeLevel;
     private float fraction;
 
     public TimeTicker(int dayD, int nightD, Level level){
-
-        this.level = level;
         this.timeLevel = (ITimeOperations) level;
 
         this.dayD = dayD;
@@ -45,20 +42,19 @@ public class TimeTicker implements Ticker {
     }
 
 
-    public void tick(ITimeOperations world, boolean nskip, int acceleration) {
-        if(nskip){
-            this.accelerate(acceleration);
-            if(this.level.isDay()){
-                this.timeLevel.time_and_wind_custom_ticker$wakeUpAllPlayersTAW();
-            }
-        }
-        else if(this.isDay()){
+    public void tick(ITimeOperations world) {
+        if(this.isDay()){
             if(this.timeLevel.time_and_wind_custom_ticker$getTimeTAW() % this.dayMod == 0){
                 this.update(this.dayTicksToAdd, this.dayFraction, this.dayAction);
             }
         } else if(this.timeLevel.time_and_wind_custom_ticker$getTimeTAW() % this.nightMod == 0){
             this.update(this.nightTicksToAdd, this.nightFraction, this.nightAction);
         }
+    }
+
+    @Override
+    public void accelerate(Level level, int speed) {
+        this.timeLevel.time_and_wind_custom_ticker$setTimeOfDayTAW(this.timeLevel.time_and_wind_custom_ticker$getTimeOfDayTAW() + speed);
     }
 
     public boolean isDay(){
@@ -73,10 +69,6 @@ public class TimeTicker implements Ticker {
             ticksToAdd += 1;
         }
         this.timeLevel.time_and_wind_custom_ticker$setTimeOfDayTAW(this.timeLevel.time_and_wind_custom_ticker$getTimeOfDayTAW() + ticksToAdd);
-    }
-
-    public void accelerate(int val){
-        this.timeLevel.time_and_wind_custom_ticker$setTimeOfDayTAW(this.timeLevel.time_and_wind_custom_ticker$getTimeOfDayTAW() + val);
     }
 
     private float getFactor(int duration, boolean bl){

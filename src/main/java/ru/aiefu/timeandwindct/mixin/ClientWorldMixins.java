@@ -62,7 +62,10 @@ public abstract class ClientWorldMixins extends Level implements ITimeOperations
 
     @Redirect(method = "tickTime", at = @At(value = "INVOKE", target = "net/minecraft/client/multiplayer/ClientLevel.setDayTime(J)V"))
     private void customTickerTAW(ClientLevel clientWorld, long timeOfDay) {
-        this.timeTicker.tick(this, skipState, speed);
+        this.timeTicker.tick(this);
+        if(skipState){
+            this.timeTicker.accelerate((ClientLevel)(Object) this, speed);
+        }
     }
 
     @Override

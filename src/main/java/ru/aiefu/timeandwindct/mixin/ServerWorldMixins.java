@@ -10,6 +10,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.progress.ChunkProgressListener;
+import net.minecraft.server.players.SleepStatus;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.RandomSequences;
 import net.minecraft.world.level.CustomSpawner;
@@ -27,6 +28,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import ru.aiefu.timeandwindct.ITimeOperations;
 import ru.aiefu.timeandwindct.NetworkPacketsID;
@@ -44,31 +46,28 @@ import java.util.function.Supplier;
 @Mixin(ServerLevel.class)
 public abstract class ServerWorldMixins extends Level implements ITimeOperations {
 
-	@Shadow @Final
-	List<ServerPlayer> players;
-
 	protected ServerWorldMixins(WritableLevelData writableLevelData, ResourceKey<Level> resourceKey, RegistryAccess registryAccess, Holder<DimensionType> holder, Supplier<ProfilerFiller> supplier, boolean bl, boolean bl2, long l, int i) {
 		super(writableLevelData, resourceKey, registryAccess, holder, supplier, bl, bl2, l, i);
 	}
 
-
 	@Shadow public abstract void setDayTime(long l);
-
-	@Shadow protected abstract void resetWeatherCycle();
 
 	@Shadow protected abstract void wakeUpAllPlayers();
 
-	@Shadow @Final private ServerLevelData serverLevelData;
+	@Shadow @Final private SleepStatus sleepStatus;
+	@Shadow @Final
+	List<ServerPlayer> players;
+
+	@Shadow protected abstract void resetWeatherCycle();
+
 	@Unique
 	protected Ticker timeTicker;
 
 	@Unique
-	protected boolean enableNightSkipAcceleration = false;
-	@Unique
-	protected int accelerationSpeed = 0;
+	private boolean shouldUpdate = true;
 
 	@Unique
-	private boolean shouldUpdateNSkip = true;
+	private boolean skipState = false;
 
 	@Inject(method = "<init>", at = @At("TAIL"))
 	private void attachTimeDataTAW(MinecraftServer minecraftServer, Executor executor, LevelStorageSource.LevelStorageAccess levelStorageAccess, ServerLevelData serverLevelData, ResourceKey<Level> resourceKey, LevelStem levelStem, ChunkProgressListener chunkProgressListener, boolean bl, long l, List<CustomSpawner> list, boolean bl2, RandomSequences randomSequences, CallbackInfo ci){
@@ -86,77 +85,75 @@ public abstract class ServerWorldMixins extends Level implements ITimeOperations
 		} else this.timeTicker = new DefaultTicker();
 	}
 
-	@Inject(method = "updateSleepingPlayerList", at =@At("HEAD"), cancellable = true)
-	private void patchNightSkip(CallbackInfo ci){
-		if(TimeAndWindCT.CONFIG.syncWithSystemTime){
-			ci.cancel();
-		} else if (TimeAndWindCT.CONFIG.enableNightSkipAcceleration){
-			List<ServerPlayer> totalPlayers = this.players.stream().filter(player -> !player.isSpectator() || !player.isCreative()).toList();
-			if(totalPlayers.size() > 0) {
-				int sleepingPlayers = (int) totalPlayers.stream().filter(ServerPlayer::isSleeping).count();
-				int threshold = TimeAndWindCT.CONFIG.enableThreshold ? totalPlayers.size() / 100 * TimeAndWindCT.CONFIG.thresholdPercentage : 0;
-				if (sleepingPlayers > threshold) {
-					enableNightSkipAcceleration = true;
-					this.accelerationSpeed = TimeAndWindCT.CONFIG.accelerationSpeed;
-				} else enableNightSkipAcceleration = false;
-			} else enableNightSkipAcceleration = false;
-			if(this.shouldUpdateNSkip) {
-				FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
-				buf.writeBoolean(enableNightSkipAcceleration);
-				buf.writeInt(accelerationSpeed);
-				this.players.forEach(player -> ServerPlayNetworking.send(player, NetworkPacketsID.NIGHT_SKIP_INFO, buf));
+	@Redirect(method = "tick", at =@At(value = "INVOKE", target = "net/minecraft/server/players/SleepStatus.areEnoughDeepSleeping (ILjava/util/List;)Z", ordinal = 0),
+			slice = @Slice(from = @At(value = "INVOKE", target = "net/minecraft/server/level/ServerLevel.advanceWeatherCycle ()V", ordinal = 0),
+					to = @At(value = "INVOKE", target = "net/minecraft/server/level/ServerLevel.wakeUpAllPlayers ()V", ordinal = 0)))
+	private boolean blockSleepCheckTAW(SleepStatus instance, int i, List<ServerPlayer> list){
+		return !(TimeAndWindCT.CONFIG.syncWithSystemTime || TimeAndWindCT.CONFIG.enableNightSkipAcceleration);
+	}
+
+	@Inject(method = "updateSleepingPlayerList", at = @At("TAIL"))
+	private void syncSkipStateTAW(CallbackInfo ci){
+		int i = this.getGameRules().getInt(GameRules.RULE_PLAYERS_SLEEPING_PERCENTAGE);
+		if(this.canAccelerate()){
+			if(this.sleepStatus.areEnoughSleeping(i)){
+				if(!skipState){
+					skipState = true;
+					if(shouldUpdate) this.broadcastSkipState(true);
+				}
+			} else{
+				if(skipState){
+					skipState = false;
+					if(shouldUpdate) this.broadcastSkipState(false);
+				}
 			}
-			ci.cancel();
 		}
 	}
 
 	@Inject(method = "addPlayer", at =@At("HEAD"))
 	private void onPlayerJoin(ServerPlayer player, CallbackInfo ci){
-		FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
-		buf.writeBoolean(enableNightSkipAcceleration);
-		buf.writeInt(accelerationSpeed);
-		ServerPlayNetworking.send(player, NetworkPacketsID.NIGHT_SKIP_INFO, buf);
-	}
-
-	@Inject(method = "wakeUpAllPlayers", at =@At("HEAD"))
-	private void preventPacketsSpam(CallbackInfo ci){
-		this.enableNightSkipAcceleration = false;
-		this.shouldUpdateNSkip = false;
-	}
-
-	@Inject(method = "wakeUpAllPlayers", at =@At("TAIL"))
-	private void preventPacketsSpamEnd(CallbackInfo ci){
-		FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
-		buf.writeBoolean(enableNightSkipAcceleration);
-		buf.writeInt(accelerationSpeed);
-		this.players.forEach(player -> ServerPlayNetworking.send(player, NetworkPacketsID.NIGHT_SKIP_INFO, buf));
-		this.shouldUpdateNSkip = true;
-
-		if (this.getGameRules().getBoolean(GameRules.RULE_WEATHER_CYCLE) && this.isRaining()) {
-			this.resetWeatherCycle();
+		if(this.canAccelerate()){
+			FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+			buf.writeBoolean(skipState);
+			buf.writeInt(TimeAndWindCT.CONFIG.accelerationSpeed);
+			ServerPlayNetworking.send(player, NetworkPacketsID.NIGHT_SKIP_INFO, buf);
 		}
 	}
 
 	@Redirect(method = "tickTime", at = @At(value = "INVOKE", target = "net/minecraft/server/level/ServerLevel.setDayTime(J)V"))
 	private void customTickerTAW(ServerLevel world, long timeOfDay) {
-		this.timeTicker.tick(this, enableNightSkipAcceleration, accelerationSpeed);
-		if(enableNightSkipAcceleration && isThundering()){
-			int thunderTime  = this.serverLevelData.getThunderTime();
-			if(thunderTime > 6000){
-				this.serverLevelData.setThunderTime(6000);
-				thunderTime = 6000;
-			}
-			thunderTime -= this.accelerationSpeed;
-			this.serverLevelData.setThunderTime(thunderTime);
-			if(thunderTime < 1){
+		this.timeTicker.tick(this);
+		if(this.skipState){
+			this.timeTicker.accelerate((ServerLevel) (Object) this, TimeAndWindCT.CONFIG.accelerationSpeed);
+			if(this.isDay()){
+				this.skipState = false;
+				this.shouldUpdate = false;
+				this.broadcastSkipState(false);
+				this.wakeUpAllPlayers();
 				this.resetWeatherCycle();
+				this.shouldUpdate = true;
 			}
 		}
 	}
 
+	@Unique
+	private void broadcastSkipState(boolean bl){
+		this.players.forEach(p -> {
+			FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+			buf.writeBoolean(bl);
+			buf.writeInt(TimeAndWindCT.CONFIG.accelerationSpeed);
+			ServerPlayNetworking.send(p, NetworkPacketsID.NIGHT_SKIP_INFO, buf);
+		});
+	}
+
+	@Unique
+	private boolean canAccelerate(){
+		return TimeAndWindCT.CONFIG.enableNightSkipAcceleration && !TimeAndWindCT.CONFIG.syncWithSystemTime;
+	}
+
 	@Override
 	public void time_and_wind_custom_ticker$wakeUpAllPlayersTAW() {
-		wakeUpAllPlayers();
+		this.wakeUpAllPlayers();
 	}
 
 	@Override
@@ -191,11 +188,11 @@ public abstract class ServerWorldMixins extends Level implements ITimeOperations
 
 	@Override
 	public void time_and_wind_custom_ticker$setSkipState(boolean bl) {
-		this.enableNightSkipAcceleration = bl;
+
 	}
 
 	@Override
 	public void time_and_wind_custom_ticker$setSpeed(int speed) {
-		this.accelerationSpeed = speed;
+
 	}
 }

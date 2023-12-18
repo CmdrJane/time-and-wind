@@ -1,5 +1,6 @@
 package ru.aiefu.timeandwindct.tickers;
 
+import net.minecraft.world.level.Level;
 import ru.aiefu.timeandwindct.ITimeOperations;
 import ru.aiefu.timeandwindct.TimeAndWindCT;
 import ru.aiefu.timeandwindct.config.SystemTimeConfig;
@@ -44,7 +45,7 @@ public class SystemTimeTicker implements Ticker{
         world.time_and_wind_custom_ticker$setTimeOfDayTAW(unwrapTime(startingTick, world.time_and_wind_custom_ticker$getTimeOfDayTAW()));
     }
 
-    public void tick(ITimeOperations world, boolean nskip, int acceleration){
+    public void tick(ITimeOperations world){
         ++ticks;
         long time = world.time_and_wind_custom_ticker$getTimeOfDayTAW();
         tickMod = time % 24000L < 12000 ? dayMod : nightMod;
@@ -60,6 +61,11 @@ public class SystemTimeTicker implements Ticker{
                 TimeAndWindCT.LOGGER.info("Time corrected");
             } else TimeAndWindCT.LOGGER.info("Skipping correction");
         }
+    }
+
+    @Override
+    public void accelerate(Level level, int speed) {
+
     }
 
     public void updateTime(ITimeOperations world){

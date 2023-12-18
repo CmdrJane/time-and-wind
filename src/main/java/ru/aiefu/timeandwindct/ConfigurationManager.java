@@ -91,7 +91,7 @@ public class ConfigurationManager {
     public static void generateModConfig(){
         try(FileWriter writer = getFileWriter("./config/time-and-wind/config.json")){
             gson_pretty.toJson(new ModConfig(false, false, false,
-                    false, 30, true, 50), writer);
+                    false, 30), writer);
         } catch (IOException e){
             e.printStackTrace();
         }
@@ -112,13 +112,13 @@ public class ConfigurationManager {
         } catch (IOException e){
             e.printStackTrace();
             config = new ModConfig(true, false, false,
-                    true, 30, true, 50);
+                    true, 30);
         }
         return config;
     }
 
     public static ModConfig patchModConfigV1(ModConfig config){
-        return new ModConfig(config.patchSkyAngle, config.syncWithSystemTime,false, true, 30, true, 50);
+        return new ModConfig(config.patchSkyAngle, config.syncWithSystemTime,false, true, 30);
     }
 
     public static void updateTimeData(String id, int dayD, int nightD){

@@ -9,7 +9,6 @@
     "PlayerMixins",
     "ServerPlayerMixins",
     "ServerWorldMixins",
-    "SleepManagerMixins",
     "TimeCommandMixins"
   ],
   "client": [

@@ -30,7 +30,6 @@ import java.util.function.Supplier;
 @Mixin(ClientLevel.class)
 public abstract class ClientWorldMixins extends Level implements ITimeOperations {
 
-
     protected ClientWorldMixins(WritableLevelData writableLevelData, ResourceKey<Level> resourceKey, RegistryAccess registryAccess, Holder<DimensionType> holder, Supplier<ProfilerFiller> supplier, boolean bl, boolean bl2, long l, int i) {
         super(writableLevelData, resourceKey, registryAccess, holder, supplier, bl, bl2, l, i);
     }
@@ -44,7 +43,6 @@ public abstract class ClientWorldMixins extends Level implements ITimeOperations
     private boolean skipState = false;
     @Unique
     private int speed = 0;
-    @Unique
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void attachTimeDataTAW(ClientPacketListener clientPacketListener, ClientLevel.ClientLevelData clientLevelData, ResourceKey<Level> resourceKey, Holder<DimensionType> holder, int i, int j, Supplier<ProfilerFiller> supplier, LevelRenderer levelRenderer, boolean bl, long l, CallbackInfo ci){
@@ -92,6 +90,7 @@ public abstract class ClientWorldMixins extends Level implements ITimeOperations
         return this.levelData.getDayTime();
     }
 
+    @Override
     public boolean time_and_wind_custom_ticker$isClient() {
         return this.isClientSide();
     }

@@ -44,8 +44,6 @@ import java.util.function.Supplier;
 @Mixin(ServerLevel.class)
 public abstract class ServerWorldMixins extends Level implements ITimeOperations {
 
-
-
 	@Shadow @Final
 	List<ServerPlayer> players;
 

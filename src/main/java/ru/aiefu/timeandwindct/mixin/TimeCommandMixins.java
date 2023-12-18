@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import ru.aiefu.timeandwindct.TimeAndWindCT;
 
 @Mixin(TimeCommand.class)
-public class TimeCommandMixins {
+public class  TimeCommandMixins {
     @Inject(method = "setTime", at =@At("HEAD"), cancellable = true)
     private static void disableTimeSetTAW(CommandSourceStack source, int time, CallbackInfoReturnable<Integer> cir){
         if(TimeAndWindCT.CONFIG.syncWithSystemTime){

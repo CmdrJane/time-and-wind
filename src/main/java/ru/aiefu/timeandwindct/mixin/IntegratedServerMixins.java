@@ -43,7 +43,7 @@ public abstract class IntegratedServerMixins extends MinecraftServer {
             } else if (shouldUpdate) {
                 shouldUpdate = false;
                 this.getAllLevels().forEach(serverWorld -> {
-                    Ticker t = ((ITimeOperations) serverWorld).getTimeTicker();
+                    Ticker t = ((ITimeOperations) serverWorld).time_and_wind_custom_ticker$getTimeTicker();
                     if (t instanceof SystemTimeTicker) {
                         ((SystemTimeTicker) t).updateTime((ITimeOperations) serverWorld);
                     }

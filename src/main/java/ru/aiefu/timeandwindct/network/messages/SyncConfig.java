@@ -1,104 +1,79 @@
 package ru.aiefu.timeandwindct.network.messages;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
+import com.google.common.collect.Maps;
 import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.network.NetworkEvent;
-import ru.aiefu.timeandwindct.ITimeOperations;
+import ru.aiefu.timeandwindct.ConfigurationManager;
 import ru.aiefu.timeandwindct.TimeAndWindCT;
-import ru.aiefu.timeandwindct.config.ModConfig;
 import ru.aiefu.timeandwindct.config.SystemTimeConfig;
 import ru.aiefu.timeandwindct.config.TimeDataStorage;
-import ru.aiefu.timeandwindct.tickers.DefaultTicker;
-import ru.aiefu.timeandwindct.tickers.SystemTimeTicker;
-import ru.aiefu.timeandwindct.tickers.TimeTicker;
+import ru.aiefu.timeandwindct.network.ClientNetworkHandler;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Supplier;
 
 public class SyncConfig implements ITAWPacket{
 
+    protected String cfgJson;
+    protected String sysTimeJson;
+
+    protected HashMap<String, TimeDataStorage> timeMap;
+    protected HashMap<String, SystemTimeConfig> sysTimeMap;
+
     public SyncConfig(){
+
     }
 
     public SyncConfig(PacketBuffer buf){
         if(buf.readableBytes() > 0 ){
-            boolean skyAnglePatch = buf.readBoolean();
-            boolean syncWithSysTime = buf.readBoolean();
-            boolean nightSkip = buf.readBoolean();
-            int speed = buf.readInt();
-            boolean threshold = buf.readBoolean();
-            int percentage = buf.readInt();
-            boolean flatS = buf.readBoolean();
-            String sunrise = buf.readUtf();
-            String sunset = buf.readUtf();
-            String timeZone = buf.readUtf();
-            CompoundNBT nbtCMP = buf.readNbt();
+            this.cfgJson = buf.readUtf();
+            this.sysTimeJson = buf.readUtf();
 
-            TimeAndWindCT.CONFIG = new ModConfig(skyAnglePatch, syncWithSysTime, nightSkip, speed, threshold, percentage, flatS);
-            TimeAndWindCT.systemTimeConfig = new SystemTimeConfig(sunrise, sunset, timeZone);
-
-            ClientWorld clientWorld = Minecraft.getInstance().level;
-            if(clientWorld != null) {
-                ITimeOperations timeOps = (ITimeOperations) clientWorld;
-                if(syncWithSysTime){
-                    timeOps.setTimeTicker(new SystemTimeTicker((ITimeOperations) clientWorld));
-                } else if (nbtCMP != null) {
-                    ListNBT list = nbtCMP.getList("tawConfig", 10);
-                    TimeAndWindCT.timeDataMap = new HashMap<>();
-                    for (int i = 0; i < list.size(); ++i) {
-                        CompoundNBT tag = list.getCompound(i);
-                        String id = tag.getString("id");
-                        long dayD = tag.getLong("dayD");
-                        long nightD = tag.getLong("nightD");
-                        TimeDataStorage storage = new TimeDataStorage(dayD, nightD);
-                        TimeAndWindCT.timeDataMap.put(id, storage);
-                    }
-                    String worldId = clientWorld.dimension().location().toString();
-                    if (TimeAndWindCT.timeDataMap.containsKey(worldId)) {
-                        TimeDataStorage storage = TimeAndWindCT.timeDataMap.get(worldId);
-                        timeOps.setTimeTicker(new TimeTicker(storage.dayDuration, storage.nightDuration));
-                    } else timeOps.setTimeTicker(new DefaultTicker());
-                } else {
-                    timeOps.setTimeTicker(new DefaultTicker());
-                }
+            int i = buf.readVarInt();
+            this.timeMap = Maps.newHashMapWithExpectedSize(i);
+            for (int j = 0; j < i; j++) {
+                this.timeMap.put(buf.readUtf(), new TimeDataStorage(buf.readVarInt(), buf.readVarInt()));
+            }
+            i = buf.readVarInt();
+            this.sysTimeMap = Maps.newHashMapWithExpectedSize(i);
+            for (int j = 0; j < i; j++) {
+                this.sysTimeMap.put(buf.readUtf(), new SystemTimeConfig(buf.readUtf(), buf.readUtf(), buf.readUtf()));
             }
         }
     }
     @Override
     public void encode(PacketBuffer buf) {
-        ModConfig cfg = TimeAndWindCT.CONFIG;
-        SystemTimeConfig scfg = TimeAndWindCT.systemTimeConfig;
-        buf.writeBoolean(cfg.patchSkyAngle);
-        buf.writeBoolean(cfg.syncWithSystemTime);
-        buf.writeBoolean(cfg.enableNightSkipAcceleration);
-        buf.writeInt(cfg.accelerationSpeed);
-        buf.writeBoolean(cfg.enableThreshold);
-        buf.writeInt(cfg.thresholdPercentage);
-        buf.writeBoolean(cfg.flatAcceleration);
-        buf.writeUtf(scfg.sunrise);
-        buf.writeUtf(scfg.sunset);
-        buf.writeUtf(scfg.timeZone);
-        ListNBT listTag = new ListNBT();
-        int i = 0;
-        for (Map.Entry<String, TimeDataStorage> e : TimeAndWindCT.timeDataMap.entrySet()) {
-            CompoundNBT tag = new CompoundNBT();
-            tag.putString("id", e.getKey());
-            TimeDataStorage storage = e.getValue();
-            tag.putLong("dayD", storage.dayDuration);
-            tag.putLong("nightD", storage.nightDuration);
-            listTag.add(i, tag);
-            ++i;
-        }
-        CompoundNBT tag = new CompoundNBT();
-        tag.put("tawConfig", listTag);
-        buf.writeNbt(tag);
+
+        String cfgJson = ConfigurationManager.gson_pretty.toJson(TimeAndWindCT.CONFIG);
+        String cfgsJson = ConfigurationManager.gson_pretty.toJson(TimeAndWindCT.systemTimeConfig);
+
+        buf.writeUtf(cfgJson);
+        buf.writeUtf(cfgsJson);
+
+        HashMap<String, TimeDataStorage> timeMap = TimeAndWindCT.timeDataMap;
+        buf.writeVarInt(timeMap.size());
+        timeMap.forEach((key, value) -> {
+            buf.writeUtf(key);
+            buf.writeVarInt(value.dayDuration);
+            buf.writeVarInt(value.nightDuration);
+        });
+
+        HashMap<String, SystemTimeConfig> sysTime = TimeAndWindCT.sysTimeMap;
+        buf.writeVarInt(sysTime.size());
+        sysTime.forEach((key, value) -> {
+            buf.writeUtf(key);
+            buf.writeUtf(value.sunrise);
+            buf.writeUtf(value.sunset);
+            buf.writeUtf(value.timeZone);
+        });
     }
 
     @Override
     public void handle(Supplier<NetworkEvent.Context> context) {
+        if(FMLEnvironment.dist.isClient()){
+            context.get().enqueueWork(() -> ClientNetworkHandler.handleConfigSyncPacket(cfgJson, sysTimeJson, timeMap, sysTimeMap));
+            context.get().setPacketHandled(true);
+        }
     }
 }

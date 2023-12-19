@@ -1,6 +1,5 @@
 package ru.aiefu.timeandwindct.config;
 
-import javax.annotation.Nonnull;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoField;
 
@@ -27,7 +26,7 @@ public class SystemTimeConfig {
         return parseTimeZone(timeZone);
     }
 
-    private int parseTime(@Nonnull String s){
+    private int parseTime(String s){
         try {
             long timeMs;
             int i = s.indexOf(":");

@@ -11,7 +11,7 @@ import ru.aiefu.timeandwindct.config.SystemTimeConfig;
 import ru.aiefu.timeandwindct.config.TimeDataStorage;
 import ru.aiefu.timeandwindct.network.NetworkHandler;
 
-import java.io.IOException;
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -20,14 +20,16 @@ import java.util.HashMap;
 public class TimeAndWindCT {
 	public static final String MOD_ID = "timeandwindct";
 	public static final Logger LOGGER = LogManager.getLogger();
+
 	public static HashMap<String, TimeDataStorage> timeDataMap;
+	public static HashMap<String, SystemTimeConfig> sysTimeMap;
 
 	public static ModConfig CONFIG;
+
 	public static SystemTimeConfig systemTimeConfig;
 	public static boolean debugMode = false;
 
 	public TimeAndWindCT() {
-		// Register the setup method for modloading
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
 		MinecraftForge.EVENT_BUS.register(new TimeAndWindCTEvents());
 	}
@@ -40,28 +42,21 @@ public class TimeAndWindCT {
 	}
 
 	public void craftPaths(){
-		try{
-			if(!Files.isDirectory(Paths.get("./config"))){
-				Files.createDirectory(Paths.get("./config"));
-			}
-			if(!Files.isDirectory(Paths.get("./config/time-and-wind"))){
-				Files.createDirectory(Paths.get("./config/time-and-wind"));
-			}
-			if(!Files.exists(Paths.get("./config/time-and-wind/time-data.json"))){
-				IOManager.genTimeData();
-			}
-			if(!Files.exists(Paths.get("./config/time-and-wind/config.json"))){
-				IOManager.generateModConfig();
-			}
-			if(!Files.exists(Paths.get("./config/time-and-wind/system-time-data.json"))){
-				IOManager.generateSysTimeCfg();
-			}
-			CONFIG = IOManager.readModConfig();
-			systemTimeConfig = IOManager.readSysTimeCfg();
+		File file = new File("./config/time-and-wind");
+		file.mkdirs();
+		if(!Files.exists(Paths.get("./config/time-and-wind/time-data.json"))){
+			ConfigurationManager.genTimeData();
 		}
-		catch (IOException e){
-			e.printStackTrace();
+		if(!Files.exists(Paths.get("./config/time-and-wind/config.json"))){
+			ConfigurationManager.generateModConfig();
 		}
+		if(!Files.exists(Paths.get("./config/time-and-wind/system-time-data-global.json"))){
+			ConfigurationManager.generateSysTimeCfg();
+		}
+		if(!Files.exists(Paths.get("./config/time-and-wind/system-time-data.json"))){
+			ConfigurationManager.generateMapSysTime();
+		}
+		CONFIG = ConfigurationManager.readModConfig();
 	}
 
 	public static String getFormattedTime(long ms){

@@ -29,7 +29,6 @@ public class NetworkHandler{
         registerPacket(WorldKeyToClipboard.class, WorldKeyToClipboard::new, NetworkDirection.PLAY_TO_CLIENT);
         registerPacket(NightSkip.class, NightSkip::new, NetworkDirection.PLAY_TO_CLIENT);
 
-        registerPacket(ResyncConfig.class, ResyncConfig::new, NetworkDirection.PLAY_TO_SERVER);
     }
 
 
@@ -39,6 +38,12 @@ public class NetworkHandler{
     public static void sendTo(Object msg, ServerPlayerEntity player) {
         if (!(player instanceof FakePlayer)) {
             network.sendTo(msg, player.connection.getConnection(), NetworkDirection.PLAY_TO_CLIENT);
+        }
+    }
+
+    public static void sendTo(Object msg, ServerPlayerEntity player, NetworkDirection direction) {
+        if (!(player instanceof FakePlayer)) {
+            network.sendTo(msg, player.connection.getConnection(), direction);
         }
     }
     public static void sendToServer(Object msg) {

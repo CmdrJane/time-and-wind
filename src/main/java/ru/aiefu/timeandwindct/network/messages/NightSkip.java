@@ -1,17 +1,16 @@
 package ru.aiefu.timeandwindct.network.messages;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.world.ClientWorld;
 import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.network.NetworkEvent;
-import ru.aiefu.timeandwindct.ITimeOperations;
+import ru.aiefu.timeandwindct.network.ClientNetworkHandler;
 
 import java.util.function.Supplier;
 
 public class NightSkip implements ITAWPacket{
 
-    private boolean state;
-    private int speed;
+    private final boolean state;
+    private final int speed;
 
 
     public NightSkip(boolean state, int speed){
@@ -32,11 +31,9 @@ public class NightSkip implements ITAWPacket{
 
     @Override
     public void handle(Supplier<NetworkEvent.Context> context) {
-        ClientWorld clientWorld = Minecraft.getInstance().level;
-        if(clientWorld != null){
-           ITimeOperations ops = ((ITimeOperations)clientWorld);
-           ops.setSkipState(state);
-           ops.setSpeed(speed);
+        if(FMLEnvironment.dist.isClient()){
+            context.get().enqueueWork(() -> ClientNetworkHandler.handleNightSkipPacket(state, speed));
+            context.get().setPacketHandled(true);
         }
     }
 }

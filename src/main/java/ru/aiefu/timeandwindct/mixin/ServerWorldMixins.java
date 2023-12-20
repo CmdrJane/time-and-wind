@@ -83,7 +83,6 @@ public abstract class ServerWorldMixins extends Level implements ITimeOperations
 			TimeDataStorage storage = TimeAndWindCT.timeDataMap.get(worldId);
 			this.timeTicker = new TimeTicker(storage.dayDuration, storage.nightDuration, this);
 		} else this.timeTicker = new DefaultTicker();
-		System.out.println(timeTicker instanceof TimeTicker);
 	}
 
 	@Redirect(method = "tick", at =@At(value = "INVOKE", target = "net/minecraft/server/players/SleepStatus.areEnoughDeepSleeping (ILjava/util/List;)Z", ordinal = 0),

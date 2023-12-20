@@ -1,9 +1,9 @@
 package ru.aiefu.timeandwindct.tickers;
 
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
 import ru.aiefu.timeandwindct.ITimeOperations;
 
 public interface Ticker {
     void tick(ITimeOperations world);
-    void accelerate(World level, int speed);
+    void accelerate(Level level, int speed);
 }

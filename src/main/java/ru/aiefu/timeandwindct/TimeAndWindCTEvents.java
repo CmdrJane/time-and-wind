@@ -1,15 +1,15 @@
 package ru.aiefu.timeandwindct;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.world.GameRules;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.GameRules;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.SleepingTimeCheckEvent;
+import net.minecraftforge.event.server.ServerAboutToStartEvent;
+import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
-import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
 import ru.aiefu.timeandwindct.network.NetworkHandler;
 import ru.aiefu.timeandwindct.network.messages.SyncConfig;
 
@@ -19,14 +19,14 @@ public class TimeAndWindCTEvents {
 
     @SubscribeEvent
     public void playerJoin(PlayerEvent.PlayerLoggedInEvent event){
-        PlayerEntity player = event.getPlayer();
+        Player player = event.getEntity();
         if(!Objects.requireNonNull(player.getServer()).isSingleplayerOwner(player.getGameProfile())){
             TimeAndWindCT.LOGGER.info("[Time & Wind] Sending configuration to player");
-            NetworkHandler.sendTo(new SyncConfig(), (ServerPlayerEntity) event.getPlayer());
+            NetworkHandler.sendToPlayer(new SyncConfig(), (ServerPlayer) event.getEntity());
         }
     }
     @SubscribeEvent
-    public void serverStarting(FMLServerAboutToStartEvent event){
+    public void serverStarting(ServerAboutToStartEvent event){
         TimeAndWindCT.LOGGER.info("Reading time cfg...");
         ConfigurationManager.readTimeData();
         TimeAndWindCT.systemTimeConfig = ConfigurationManager.readGlobalSysTimeCfg();
@@ -34,7 +34,7 @@ public class TimeAndWindCTEvents {
         if(TimeAndWindCT.CONFIG.syncWithSystemTime) event.getServer().getGameRules().getRule(GameRules.RULE_DOINSOMNIA).set(false, event.getServer());
     }
     @SubscribeEvent
-    public void serverStarted(FMLServerStartedEvent e){
+    public void serverStarted(ServerStartedEvent e){
         if(TimeAndWindCT.CONFIG.syncWithSystemTime){
             e.getServer().getGameRules().getRule(GameRules.RULE_DOINSOMNIA).set(false, e.getServer());
         }

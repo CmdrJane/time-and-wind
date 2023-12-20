@@ -1,33 +1,28 @@
 package ru.aiefu.timeandwindct.network.messages;
 
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.event.network.CustomPayloadEvent;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.network.NetworkEvent;
 import ru.aiefu.timeandwindct.network.ClientNetworkHandler;
 
-import java.util.function.Supplier;
-
-public class WorldKeyToClipboard implements ITAWPacket{
+public class WorldKeyToClipboard{
     protected String worldId;
 
     public WorldKeyToClipboard(String string){
         this.worldId = string;
     }
 
-    public WorldKeyToClipboard(PacketBuffer buf){
-        this.worldId = buf.readUtf();
+    public static WorldKeyToClipboard decode(FriendlyByteBuf buf){
+        return new WorldKeyToClipboard(buf.readUtf());
     }
 
-    @Override
-    public void encode(PacketBuffer buf) {
+    public void encode(FriendlyByteBuf buf) {
         buf.writeUtf(worldId);
     }
 
-    @Override
-    public void handle(Supplier<NetworkEvent.Context> context) {
+    public void handle(CustomPayloadEvent.Context context) {
         if(FMLEnvironment.dist.isClient()) {
-            context.get().enqueueWork(() -> ClientNetworkHandler.handleWorldIdToClipboardPacket(worldId));
-            context.get().setPacketHandled(true);
+            ClientNetworkHandler.handleWorldIdToClipboardPacket(worldId);
         }
     }
 }

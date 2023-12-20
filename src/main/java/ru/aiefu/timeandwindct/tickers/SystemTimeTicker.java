@@ -1,6 +1,6 @@
 package ru.aiefu.timeandwindct.tickers;
 
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
 import ru.aiefu.timeandwindct.ITimeOperations;
 import ru.aiefu.timeandwindct.TimeAndWindCT;
 import ru.aiefu.timeandwindct.config.SystemTimeConfig;
@@ -64,7 +64,7 @@ public class SystemTimeTicker implements Ticker{
     }
 
     @Override
-    public void accelerate(World level, int speed) {
+    public void accelerate(Level level, int speed) {
 
     }
 

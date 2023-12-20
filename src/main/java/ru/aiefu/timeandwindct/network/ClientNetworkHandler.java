@@ -1,10 +1,9 @@
 package ru.aiefu.timeandwindct.network;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.util.Util;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.chat.Component;
 import ru.aiefu.timeandwindct.ConfigurationManager;
 import ru.aiefu.timeandwindct.ITimeOperations;
 import ru.aiefu.timeandwindct.TimeAndWindCT;
@@ -28,7 +27,7 @@ public class ClientNetworkHandler {
 
         TimeAndWindCT.LOGGER.info("[Time & Wind] Configuration synchronized");
 
-        ClientWorld clientWorld = Minecraft.getInstance().level;
+        ClientLevel clientWorld = Minecraft.getInstance().level;
         if(clientWorld != null) {
             String worldId = clientWorld.dimension().location().toString();
             ITimeOperations timeOps = (ITimeOperations) clientWorld;
@@ -50,7 +49,7 @@ public class ClientNetworkHandler {
     }
 
     public static void handleNightSkipPacket(boolean state, int speed){
-        ClientWorld clientWorld = Minecraft.getInstance().level;
+        ClientLevel clientWorld = Minecraft.getInstance().level;
         if(clientWorld != null){
             ITimeOperations ops = ((ITimeOperations)clientWorld);
             ops.time_and_wind_custom_ticker$setSkipState(state);
@@ -61,22 +60,22 @@ public class ClientNetworkHandler {
     public static void handleWorldIdToClipboardPacket(String worldId){
         Minecraft client = Minecraft.getInstance();
         client.keyboardHandler.setClipboard(worldId);
-        client.player.displayClientMessage(new StringTextComponent("Also copied this to clipboard"), false);
+        client.player.displayClientMessage(Component.literal("Also copied this to clipboard"), false);
     }
 
     public static void handleConfigDebugInfoPacket(){
-        ClientPlayerEntity player = Minecraft.getInstance().player;
-        String worldId = player.level.dimension().location().toString();
+        LocalPlayer player = Minecraft.getInstance().player;
+        String worldId = player.level().dimension().location().toString();
         if (TimeAndWindCT.timeDataMap.containsKey(worldId)) {
             TimeDataStorage storage = TimeAndWindCT.timeDataMap.get(worldId);
-            Ticker t = ((ITimeOperations)player.level).time_and_wind_custom_ticker$getTimeTicker();
-            if(t instanceof TimeTicker) {
-                TimeTicker ticker = (TimeTicker) t;
-                player.sendMessage(new StringTextComponent("Client config for current world: Day Duration: " + storage.dayDuration + " Night Duration: " + storage.nightDuration), Util.NIL_UUID);
-                player.sendMessage(new StringTextComponent("[C] Day Mod: " + ticker.getDayMod() + " Night Mod: " + ticker.getNightMod()), Util.NIL_UUID);
-                player.sendMessage(new StringTextComponent("[C] Day RE: " + ticker.getDayRoundingError() + " Night RE: " + ticker.getNightRoundingError()), Util.NIL_UUID);
+            Ticker t = ((ITimeOperations)player.level()).time_and_wind_getTimeTicker();
+            if(t instanceof TimeTicker ticker) {
+                player.displayClientMessage(Component.literal("Client config for current world: Day Duration: " + storage.dayDuration + " Night Duration: " + storage.nightDuration), false);
+                player.displayClientMessage(Component.literal("[C] Day Mod: " + ticker.getDayMod() + " Night Mod: " + ticker.getNightMod()), false);
+                player.displayClientMessage(Component.literal("[C] Day RE: " + ticker.getDayRoundingError() + " Night RE: " + ticker.getNightRoundingError()), false);
             }
+            System.out.println("TEST");
         } else
-            player.sendMessage(new StringTextComponent("No Data found for current world on client side"), Util.NIL_UUID);
+            player.displayClientMessage(Component.literal("No Data found for current world on client side"), false);
     }
 }

@@ -1,13 +1,11 @@
 package ru.aiefu.timeandwindct.network.messages;
 
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.event.network.CustomPayloadEvent;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.network.NetworkEvent;
 import ru.aiefu.timeandwindct.network.ClientNetworkHandler;
 
-import java.util.function.Supplier;
-
-public class NightSkip implements ITAWPacket{
+public class NightSkip{
 
     private final boolean state;
     private final int speed;
@@ -18,22 +16,18 @@ public class NightSkip implements ITAWPacket{
         this.speed = speed;
     }
 
-    public NightSkip(PacketBuffer buf){
-        this.state = buf.readBoolean();
-        this.speed = buf.readInt();
+    public static NightSkip decode(FriendlyByteBuf buf){
+        return new NightSkip(buf.readBoolean(), buf.readInt());
     }
 
-    @Override
-    public void encode(PacketBuffer buf) {
+    public void encode(FriendlyByteBuf buf) {
         buf.writeBoolean(state);
         buf.writeInt(speed);
     }
 
-    @Override
-    public void handle(Supplier<NetworkEvent.Context> context) {
+    public void handle(CustomPayloadEvent.Context context) {
         if(FMLEnvironment.dist.isClient()){
-            context.get().enqueueWork(() -> ClientNetworkHandler.handleNightSkipPacket(state, speed));
-            context.get().setPacketHandled(true);
+            ClientNetworkHandler.handleNightSkipPacket(state, speed);
         }
     }
 }

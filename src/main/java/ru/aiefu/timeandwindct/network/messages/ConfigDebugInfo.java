@@ -1,29 +1,26 @@
 package ru.aiefu.timeandwindct.network.messages;
 
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.event.network.CustomPayloadEvent;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.network.NetworkEvent;
 import ru.aiefu.timeandwindct.network.ClientNetworkHandler;
 
-import java.util.function.Supplier;
-
-public class ConfigDebugInfo implements ITAWPacket{
+public class ConfigDebugInfo {
 
     public ConfigDebugInfo(){
     }
 
-    public ConfigDebugInfo(PacketBuffer buf){
+    public static ConfigDebugInfo decode(FriendlyByteBuf buf){
+        return new ConfigDebugInfo();
     }
 
-    @Override
-    public void encode(PacketBuffer buf) {
+
+    public void encode(FriendlyByteBuf buf) {
     }
 
-    @Override
-    public void handle(Supplier<NetworkEvent.Context> context) {
+    public void handle(CustomPayloadEvent.Context context) {
         if(FMLEnvironment.dist.isClient()) {
-            context.get().enqueueWork(ClientNetworkHandler::handleConfigDebugInfoPacket);
-            context.get().setPacketHandled(true);
+            ClientNetworkHandler.handleConfigDebugInfoPacket();
         }
     }
 }

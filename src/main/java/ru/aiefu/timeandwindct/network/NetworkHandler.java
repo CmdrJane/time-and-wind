@@ -1,52 +1,39 @@
 package ru.aiefu.timeandwindct.network;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.fml.network.NetworkDirection;
-import net.minecraftforge.fml.network.NetworkRegistry;
-import net.minecraftforge.fml.network.simple.SimpleChannel;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.network.Channel;
+import net.minecraftforge.network.ChannelBuilder;
+import net.minecraftforge.network.NetworkDirection;
+import net.minecraftforge.network.SimpleChannel;
 import ru.aiefu.timeandwindct.TimeAndWindCT;
-import ru.aiefu.timeandwindct.network.messages.*;
+import ru.aiefu.timeandwindct.network.messages.ConfigDebugInfo;
+import ru.aiefu.timeandwindct.network.messages.NightSkip;
+import ru.aiefu.timeandwindct.network.messages.SyncConfig;
+import ru.aiefu.timeandwindct.network.messages.WorldKeyToClipboard;
 
-import javax.annotation.Nullable;
-import java.util.Optional;
-import java.util.function.Function;
+
 
 public class NetworkHandler{
-    private static final String PROTOCOL_VERSION = Integer.toString(1);
-    public static final SimpleChannel network = NetworkRegistry.ChannelBuilder.named(new ResourceLocation(TimeAndWindCT.MOD_ID, "main"))
-            .clientAcceptedVersions(PROTOCOL_VERSION::equals)
-            .serverAcceptedVersions(PROTOCOL_VERSION::equals)
-            .networkProtocolVersion(() -> PROTOCOL_VERSION)
-            .simpleChannel();
+    private static final int PROTOCOL_VERSION = 1;
+    public static final SimpleChannel network = ChannelBuilder.named(new ResourceLocation(TimeAndWindCT.MOD_ID, "main"))
+            .clientAcceptedVersions(Channel.VersionTest.exact(PROTOCOL_VERSION))
+            .serverAcceptedVersions(Channel.VersionTest.exact(PROTOCOL_VERSION))
+            .networkProtocolVersion(PROTOCOL_VERSION).simpleChannel();
     private static int id = 0;
 
     public static void setup(){
-        registerPacket(SyncConfig.class, SyncConfig::new, NetworkDirection.PLAY_TO_CLIENT);
-        registerPacket(ConfigDebugInfo.class, ConfigDebugInfo::new, NetworkDirection.PLAY_TO_CLIENT);
-        registerPacket(WorldKeyToClipboard.class, WorldKeyToClipboard::new, NetworkDirection.PLAY_TO_CLIENT);
-        registerPacket(NightSkip.class, NightSkip::new, NetworkDirection.PLAY_TO_CLIENT);
-
+        network.messageBuilder(SyncConfig.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(SyncConfig::encode).decoder(SyncConfig::decode).consumerMainThread(SyncConfig::handle).add();
+        network.messageBuilder(NightSkip.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(NightSkip::encode).decoder(NightSkip::decode).consumerMainThread(NightSkip::handle).add();
+        network.messageBuilder(ConfigDebugInfo.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(ConfigDebugInfo::encode).decoder(ConfigDebugInfo::decode).consumerMainThread(ConfigDebugInfo::handle).add();
+        network.messageBuilder(WorldKeyToClipboard.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(WorldKeyToClipboard::encode).decoder(WorldKeyToClipboard::decode).consumerMainThread(WorldKeyToClipboard::handle).add();
     }
 
-
-    public static <MSG extends ITAWPacket> void registerPacket(Class<MSG> clazz, Function<PacketBuffer, MSG> decoder, @Nullable NetworkDirection direction) {
-        network.registerMessage(id++, clazz, ITAWPacket::encode, decoder, ITAWPacket::handle, Optional.ofNullable(direction));
-    }
-    public static void sendTo(Object msg, ServerPlayerEntity player) {
-        if (!(player instanceof FakePlayer)) {
-            network.sendTo(msg, player.connection.getConnection(), NetworkDirection.PLAY_TO_CLIENT);
-        }
-    }
-
-    public static void sendTo(Object msg, ServerPlayerEntity player, NetworkDirection direction) {
-        if (!(player instanceof FakePlayer)) {
-            network.sendTo(msg, player.connection.getConnection(), direction);
-        }
-    }
-    public static void sendToServer(Object msg) {
-        network.sendToServer(msg);
+    public static void sendToPlayer(Object packet, ServerPlayer player){
+        network.send(packet, player.connection.getConnection());
     }
 }

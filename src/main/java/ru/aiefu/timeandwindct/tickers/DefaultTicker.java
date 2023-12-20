@@ -1,6 +1,6 @@
 package ru.aiefu.timeandwindct.tickers;
 
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
 import ru.aiefu.timeandwindct.ITimeOperations;
 
 public class DefaultTicker implements Ticker{
@@ -11,7 +11,7 @@ public class DefaultTicker implements Ticker{
     }
 
     @Override
-    public void accelerate(World level, int speed) {
+    public void accelerate(Level level, int speed) {
         ((ITimeOperations)level).time_and_wind_custom_ticker$setTimeOfDayTAW(((ITimeOperations) level).time_and_wind_custom_ticker$getTimeOfDayTAW() + speed);
     }
 }

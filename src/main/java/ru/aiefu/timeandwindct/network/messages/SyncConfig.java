@@ -1,9 +1,9 @@
 package ru.aiefu.timeandwindct.network.messages;
 
 import com.google.common.collect.Maps;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.event.network.CustomPayloadEvent;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.network.NetworkEvent;
 import ru.aiefu.timeandwindct.ConfigurationManager;
 import ru.aiefu.timeandwindct.TimeAndWindCT;
 import ru.aiefu.timeandwindct.config.SystemTimeConfig;
@@ -11,9 +11,8 @@ import ru.aiefu.timeandwindct.config.TimeDataStorage;
 import ru.aiefu.timeandwindct.network.ClientNetworkHandler;
 
 import java.util.HashMap;
-import java.util.function.Supplier;
 
-public class SyncConfig implements ITAWPacket{
+public class SyncConfig {
 
     protected String cfgJson;
     protected String sysTimeJson;
@@ -22,28 +21,33 @@ public class SyncConfig implements ITAWPacket{
     protected HashMap<String, SystemTimeConfig> sysTimeMap;
 
     public SyncConfig(){
-
     }
 
-    public SyncConfig(PacketBuffer buf){
-        if(buf.readableBytes() > 0 ){
-            this.cfgJson = buf.readUtf();
-            this.sysTimeJson = buf.readUtf();
+    public SyncConfig(String cfgJson, String sysTimeJson, HashMap<String, TimeDataStorage> timeMap, HashMap<String, SystemTimeConfig> sysTimeMap) {
+        this.cfgJson = cfgJson;
+        this.sysTimeJson = sysTimeJson;
+        this.timeMap = timeMap;
+        this.sysTimeMap = sysTimeMap;
+    }
 
-            int i = buf.readVarInt();
-            this.timeMap = Maps.newHashMapWithExpectedSize(i);
-            for (int j = 0; j < i; j++) {
-                this.timeMap.put(buf.readUtf(), new TimeDataStorage(buf.readVarInt(), buf.readVarInt()));
-            }
-            i = buf.readVarInt();
-            this.sysTimeMap = Maps.newHashMapWithExpectedSize(i);
-            for (int j = 0; j < i; j++) {
-                this.sysTimeMap.put(buf.readUtf(), new SystemTimeConfig(buf.readUtf(), buf.readUtf(), buf.readUtf()));
-            }
+    public static SyncConfig decode(FriendlyByteBuf buf){
+        String cfgJson = buf.readUtf();
+        String sysTimeJson = buf.readUtf();
+
+        int i = buf.readVarInt();
+        HashMap<String, TimeDataStorage> timeMap = Maps.newHashMapWithExpectedSize(i);
+        for (int j = 0; j < i; j++) {
+            timeMap.put(buf.readUtf(), new TimeDataStorage(buf.readVarInt(), buf.readVarInt()));
         }
+        i = buf.readVarInt();
+        HashMap<String, SystemTimeConfig> sysTimeMap = Maps.newHashMapWithExpectedSize(i);
+        for (int j = 0; j < i; j++) {
+            sysTimeMap.put(buf.readUtf(), new SystemTimeConfig(buf.readUtf(), buf.readUtf(), buf.readUtf()));
+        }
+        return new SyncConfig(cfgJson, sysTimeJson, timeMap, sysTimeMap);
     }
-    @Override
-    public void encode(PacketBuffer buf) {
+
+    public void encode(FriendlyByteBuf buf) {
 
         String cfgJson = ConfigurationManager.gson_pretty.toJson(TimeAndWindCT.CONFIG);
         String cfgsJson = ConfigurationManager.gson_pretty.toJson(TimeAndWindCT.systemTimeConfig);
@@ -69,11 +73,9 @@ public class SyncConfig implements ITAWPacket{
         });
     }
 
-    @Override
-    public void handle(Supplier<NetworkEvent.Context> context) {
+    public void handle(CustomPayloadEvent.Context ctx) {
         if(FMLEnvironment.dist.isClient()){
-            context.get().enqueueWork(() -> ClientNetworkHandler.handleConfigSyncPacket(cfgJson, sysTimeJson, timeMap, sysTimeMap));
-            context.get().setPacketHandled(true);
+            ClientNetworkHandler.handleConfigSyncPacket(cfgJson, sysTimeJson, timeMap, sysTimeMap);
         }
     }
 }

@@ -3,7 +3,7 @@ package ru.aiefu.timeandwindct;
 import ru.aiefu.timeandwindct.tickers.Ticker;
 
 public interface ITimeOperations {
-    Ticker time_and_wind_custom_ticker$getTimeTicker();
+    Ticker time_and_wind_getTimeTicker();
     void time_and_wind_custom_ticker$setTimeTicker(Ticker timeTicker);
     void time_and_wind_custom_ticker$setTimeOfDayTAW(long time);
     long time_and_wind_custom_ticker$getTimeTAW();

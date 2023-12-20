@@ -1,13 +1,15 @@
 package ru.aiefu.timeandwindct.mixin;
 
-import net.minecraft.client.network.play.ClientPlayNetHandler;
-import net.minecraft.client.renderer.WorldRenderer;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.profiler.IProfiler;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.world.DimensionType;
-import net.minecraft.world.World;
-import net.minecraft.world.storage.ISpawnWorldInfo;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.core.Holder;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.storage.WritableLevelData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -25,12 +27,11 @@ import ru.aiefu.timeandwindct.tickers.TimeTicker;
 
 import java.util.function.Supplier;
 
-@Mixin(ClientWorld.class)
-public abstract class ClientWorldMixins extends World implements ITimeOperations {
+@Mixin(ClientLevel.class)
+public abstract class ClientWorldMixins extends Level implements ITimeOperations {
 
-
-    protected ClientWorldMixins(ISpawnWorldInfo p_i241925_1_, RegistryKey<World> p_i241925_2_, DimensionType p_i241925_3_, Supplier<IProfiler> p_i241925_4_, boolean p_i241925_5_, boolean p_i241925_6_, long p_i241925_7_) {
-        super(p_i241925_1_, p_i241925_2_, p_i241925_3_, p_i241925_4_, p_i241925_5_, p_i241925_6_, p_i241925_7_);
+    protected ClientWorldMixins(WritableLevelData writableLevelData, ResourceKey<Level> resourceKey, RegistryAccess registryAccess, Holder<DimensionType> holder, Supplier<ProfilerFiller> supplier, boolean bl, boolean bl2, long l, int i) {
+        super(writableLevelData, resourceKey, registryAccess, holder, supplier, bl, bl2, l, i);
     }
 
     @Shadow public abstract void setDayTime(long l);
@@ -44,9 +45,9 @@ public abstract class ClientWorldMixins extends World implements ITimeOperations
     private int speed = 0;
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void attachTimeDataTAW(ClientPlayNetHandler p_i242067_1_, ClientWorld.ClientWorldInfo p_i242067_2_, RegistryKey<World> key, DimensionType type, int p_i242067_5_, Supplier<IProfiler> p_i242067_6_, WorldRenderer p_i242067_7_, boolean p_i242067_8_, long p_i242067_9_, CallbackInfo ci){
-        String worldId = key.location().toString();
-        if(type.hasFixedTime()){
+    private void attachTimeDataTAW(ClientPacketListener clientPacketListener, ClientLevel.ClientLevelData clientLevelData, ResourceKey<Level> resourceKey, Holder<DimensionType> holder, int i, int j, Supplier<ProfilerFiller> supplier, LevelRenderer levelRenderer, boolean bl, long l, CallbackInfo ci){
+        String worldId = resourceKey.location().toString();
+        if(holder.value().hasFixedTime()){
             this.timeTicker = new DefaultTicker();
         }
         else if(TimeAndWindCT.CONFIG.syncWithSystemTime){
@@ -59,16 +60,16 @@ public abstract class ClientWorldMixins extends World implements ITimeOperations
         } else this.timeTicker = new DefaultTicker();
     }
 
-    @Redirect(method = "tickTime", at = @At(value = "INVOKE", target = "net/minecraft/client/world/ClientWorld.setDayTime (J)V"))
-    private void customTickerTAW(ClientWorld instance, long p_72877_1_) {
+    @Redirect(method = "tickTime", at = @At(value = "INVOKE", target = "net/minecraft/client/multiplayer/ClientLevel.setDayTime(J)V"))
+    private void customTickerTAW(ClientLevel clientWorld, long timeOfDay) {
         this.timeTicker.tick(this);
         if(skipState){
-            this.timeTicker.accelerate((ClientWorld)(Object) this, speed);
+            this.timeTicker.accelerate((ClientLevel)(Object) this, speed);
         }
     }
 
     @Override
-    public Ticker time_and_wind_custom_ticker$getTimeTicker() {
+    public Ticker time_and_wind_getTimeTicker() {
         return this.timeTicker;
     }
 

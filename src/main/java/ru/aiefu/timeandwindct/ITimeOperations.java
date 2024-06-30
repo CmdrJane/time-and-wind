@@ -9,7 +9,7 @@ public interface ITimeOperations {
     long time_and_wind_custom_ticker$getTimeTAW();
     long time_and_wind_custom_ticker$getTimeOfDayTAW();
     boolean time_and_wind_custom_ticker$isClient();
-    void time_and_wind_custom_ticker$setSkipState(boolean bl);
+    void time_and_wind_custom_ticker$setSkipState(boolean skipState);
     void time_and_wind_custom_ticker$setSpeed(int speed);
     void time_and_wind_custom_ticker$wakeUpAllPlayersTAW();
 }

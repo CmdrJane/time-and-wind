@@ -9,8 +9,13 @@ public class ModConfig {
 
     public int config_ver = 3;
 
-    public ModConfig(boolean patchSkyAngle, boolean syncWithSystemTime, boolean systemTimePerDimensions, boolean enableNightSkipAcceleration,
-                     int accelerationSpeed){
+    public ModConfig(
+        boolean patchSkyAngle,
+        boolean syncWithSystemTime,
+        boolean systemTimePerDimensions,
+        boolean enableNightSkipAcceleration,
+        int accelerationSpeed
+    ) {
         this.patchSkyAngle = patchSkyAngle;
         this.syncWithSystemTime = syncWithSystemTime;
         this.systemTimePerDimensions = systemTimePerDimensions;
@@ -18,7 +23,13 @@ public class ModConfig {
         this.accelerationSpeed = accelerationSpeed;
     }
 
-    public ModConfig copy(){
-        return new ModConfig(patchSkyAngle, syncWithSystemTime, systemTimePerDimensions, enableNightSkipAcceleration, accelerationSpeed);
+    public ModConfig copy() {
+        return new ModConfig(
+            patchSkyAngle,
+            syncWithSystemTime,
+            systemTimePerDimensions,
+            enableNightSkipAcceleration,
+            accelerationSpeed
+        );
     }
 }

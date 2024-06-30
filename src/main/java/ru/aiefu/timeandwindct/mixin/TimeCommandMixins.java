@@ -13,7 +13,7 @@ import ru.aiefu.timeandwindct.TimeAndWindCT;
 public class  TimeCommandMixins {
     @Inject(method = "setTime", at =@At("HEAD"), cancellable = true)
     private static void disableTimeSetTAW(CommandSourceStack source, int time, CallbackInfoReturnable<Integer> cir){
-        if(TimeAndWindCT.CONFIG.syncWithSystemTime){
+        if(TimeAndWindCT.modConfig.syncWithSystemTime){
             source.sendSuccess(() -> Component.literal("Time set command is disabled while synchronization with system time is enabled"), false);
             cir.setReturnValue(0);
         }
@@ -21,7 +21,7 @@ public class  TimeCommandMixins {
 
     @Inject(method = "addTime", at =@At("HEAD"), cancellable = true)
     private static void disableTimeAddTAW(CommandSourceStack source, int time, CallbackInfoReturnable<Integer> cir){
-        if(TimeAndWindCT.CONFIG.syncWithSystemTime){
+        if(TimeAndWindCT.modConfig.syncWithSystemTime){
             source.sendSuccess(() -> Component.literal("Time add command is disabled while synchronization with system time is enabled"), false);
             cir.setReturnValue(0);
         }

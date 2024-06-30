@@ -36,7 +36,7 @@ public abstract class IntegratedServerMixins extends MinecraftServer {
 
     @Inject(method = "tickServer", at =@At("TAIL"))
     private void recalculateTime(BooleanSupplier p_71217_1_, CallbackInfo ci){
-        if(TimeAndWindCT.CONFIG.syncWithSystemTime) {
+        if(TimeAndWindCT.modConfig.syncWithSystemTime) {
             if (this.paused) {
                 this.shouldUpdate = true;
             } else if (shouldUpdate) {

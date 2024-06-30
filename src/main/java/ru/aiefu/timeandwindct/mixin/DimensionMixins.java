@@ -14,17 +14,17 @@ import java.util.OptionalLong;
 
 @Mixin(DimensionType.class)
 public class DimensionMixins {
-    @Shadow @Final private OptionalLong fixedTime;
+    @Shadow
+    @Final
+    private OptionalLong fixedTime;
 
     @Unique
-    private final double factor = 1.0D / 24000D;
+    private static final double TW_FACTOR = 1.0D / 24000D;
 
-    @Inject(method = "timeOfDay", at =@At("HEAD"), cancellable = true)
-    private void patchSkyAngleTAW(long time, CallbackInfoReturnable<Float> cir){
-        if(TimeAndWindCT.CONFIG.patchSkyAngle && fixedTime.isEmpty()) {
-            double d = time % 24000L * factor - 0.25D;
-            if (d < 0)
-                ++d;
+    @Inject(method = "timeOfDay", at = @At("HEAD"), cancellable = true)
+    private void patchSkyAngleTAW(long time, CallbackInfoReturnable<Float> cir) {
+        if (TimeAndWindCT.modConfig.patchSkyAngle && fixedTime.isEmpty()) {
+            double d = Math.max(1D, time % 24000L * TW_FACTOR - 0.25D);
             cir.setReturnValue((float) d);
         }
     }

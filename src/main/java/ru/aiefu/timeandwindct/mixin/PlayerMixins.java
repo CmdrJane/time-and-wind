@@ -33,7 +33,7 @@ public abstract class PlayerMixins extends LivingEntity {
 
     @Redirect(method = "tick", at =@At(value = "INVOKE", target = "net/minecraft/world/entity/player/Player.stopSleepInBed(ZZ)V"))
     private void disableDayCheck(Player playerEntity, boolean bl, boolean updateSleepingPlayers){
-        if(!TimeAndWindCT.CONFIG.syncWithSystemTime){
+        if(!TimeAndWindCT.modConfig.syncWithSystemTime){
             this.stopSleepInBed(false, true);
         }
     }
@@ -45,7 +45,7 @@ public abstract class PlayerMixins extends LivingEntity {
 
     @Inject(method = "tick", at =@At("TAIL"))
     private void onPlayerTick(CallbackInfo ci){
-        if(TimeAndWindCT.CONFIG.syncWithSystemTime && this.isSleepingLongEnough()){
+        if(TimeAndWindCT.modConfig.syncWithSystemTime && this.isSleepingLongEnough()){
             ++restTimer;
             if(restTimer > 60){
                 this.heal(1.0F);

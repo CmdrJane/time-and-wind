@@ -2,7 +2,7 @@
   "required": true,
   "minVersion": "0.8",
   "package": "ru.aiefu.timeandwindct.mixin",
-  "compatibilityLevel": "JAVA_17",
+  "compatibilityLevel": "JAVA_21",
   "mixins": [
     "DimensionMixins",
     "PlayerManagerMixins",

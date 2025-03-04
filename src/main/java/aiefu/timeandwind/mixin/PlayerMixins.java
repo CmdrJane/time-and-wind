@@ -1,5 +1,7 @@
-package ru.aiefu.timeandwindct.mixin;
+package aiefu.timeandwind.mixin;
 
+import aiefu.timeandwind.ITimeOperations;
+import aiefu.timeandwind.TimeAndWind;
 import com.mojang.datafixers.util.Either;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Unit;
@@ -15,7 +17,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import ru.aiefu.timeandwindct.TimeAndWindCT;
 
 @Mixin(Player.class)
 public abstract class PlayerMixins extends LivingEntity {
@@ -33,7 +34,7 @@ public abstract class PlayerMixins extends LivingEntity {
 
     @Redirect(method = "tick", at =@At(value = "INVOKE", target = "net/minecraft/world/entity/player/Player.stopSleepInBed(ZZ)V"))
     private void disableDayCheck(Player playerEntity, boolean bl, boolean updateSleepingPlayers){
-        if(!TimeAndWindCT.CONFIG.syncWithSystemTime){
+        if(!TimeAndWind.config.enableGlobalSystemTime || ((ITimeOperations)this.level()).taw$getTimeTicker().allowSleeping()){
             this.stopSleepInBed(false, true);
         }
     }
@@ -45,7 +46,7 @@ public abstract class PlayerMixins extends LivingEntity {
 
     @Inject(method = "tick", at =@At("TAIL"))
     private void onPlayerTick(CallbackInfo ci){
-        if(TimeAndWindCT.CONFIG.syncWithSystemTime && this.isSleepingLongEnough()){
+        if(TimeAndWind.config.enableGlobalSystemTime && this.isSleepingLongEnough()){
             ++restTimer;
             if(restTimer > 60){
                 this.heal(1.0F);

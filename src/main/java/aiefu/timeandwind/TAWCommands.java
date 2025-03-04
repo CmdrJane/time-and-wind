@@ -1,4 +1,4 @@
-package ru.aiefu.timeandwindct;
+package aiefu.timeandwind;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
@@ -16,8 +16,11 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameRules;
-import ru.aiefu.timeandwindct.config.ModConfig;
-import ru.aiefu.timeandwindct.config.TimeDataStorage;
+import aiefu.timeandwind.config.ModConfig;
+import aiefu.timeandwind.config.TimeDataStorage;
+import ru.aiefu.timeandwindct.ConfigurationManager;
+import ru.aiefu.timeandwindct.NetworkPacketsID;
+import ru.aiefu.timeandwindct.TimeAndWindCT;
 import ru.aiefu.timeandwindct.tickers.DefaultTicker;
 import ru.aiefu.timeandwindct.tickers.SystemTimeTicker;
 import ru.aiefu.timeandwindct.tickers.Ticker;
@@ -140,7 +143,7 @@ public class TAWCommands {
         if(source.hasPermission(4) || source.getServer().isSingleplayerOwner(source.getPlayerOrException().getGameProfile())) {
             source.getServer().getGameRules().getRule(GameRules.RULE_DOINSOMNIA).set(!state, source.getServer());
             ModConfig cfg = TimeAndWindCT.CONFIG.copy();
-            cfg.syncWithSystemTime = state;
+            cfg.enableGlobalSystemTime = state;
             ConfigurationManager.updateModConfig(cfg);
             source.sendSuccess(() -> Component.literal("SysTimeSync state switched to" + state + " now use /taw reload to apply changes"), false);
         } else source.sendFailure(Component.literal("[Time & Wind] Permission level of 4 is required to run this command"));
@@ -150,7 +153,7 @@ public class TAWCommands {
     private static int switchSystemTimePerDim(CommandSourceStack source, boolean state) throws CommandSyntaxException {
         if(source.hasPermission(4) || source.getServer().isSingleplayerOwner(source.getPlayerOrException().getGameProfile())) {
             ModConfig cfg = TimeAndWindCT.CONFIG.copy();
-            cfg.syncWithSystemTime = state;
+            cfg.enableGlobalSystemTime = state;
             ConfigurationManager.updateModConfig(cfg);
             source.sendSuccess(() -> Component.literal("SystemTimePerDimension state switched to" + state + " now use /taw reload to apply changes"), false);
         }
@@ -170,15 +173,15 @@ public class TAWCommands {
             }
             for(ServerLevel serverWorld : source.getServer().getAllLevels()){
                 String id = serverWorld.dimension().location().toString();
-                if(TimeAndWindCT.CONFIG.syncWithSystemTime){
+                if(TimeAndWindCT.CONFIG.enableGlobalSystemTime){
                     if(TimeAndWindCT.CONFIG.systemTimePerDimensions && TimeAndWindCT.sysTimeMap.containsKey(id))
-                    ((ITimeOperations) serverWorld).time_and_wind_custom_ticker$setTimeTicker(new SystemTimeTicker((ITimeOperations) serverWorld, TimeAndWindCT.sysTimeMap.get(id)));
-                    else ((ITimeOperations) serverWorld).time_and_wind_custom_ticker$setTimeTicker(new SystemTimeTicker((ITimeOperations) serverWorld, TimeAndWindCT.systemTimeConfig));
+                    ((ITimeOperations) serverWorld).taw$setTimeTicker(new SystemTimeTicker((ITimeOperations) serverWorld, TimeAndWindCT.sysTimeMap.get(id)));
+                    else ((ITimeOperations) serverWorld).taw$setTimeTicker(new SystemTimeTicker((ITimeOperations) serverWorld, TimeAndWindCT.systemTimeConfig));
                 }
                 else if (TimeAndWindCT.timeDataMap.containsKey(id)) {
                     TimeDataStorage storage = TimeAndWindCT.timeDataMap.get(id);
-                    ((ITimeOperations) serverWorld).time_and_wind_custom_ticker$setTimeTicker(new TimeTicker(storage.dayDuration, storage.nightDuration, serverWorld));
-                } else ((ITimeOperations) serverWorld).time_and_wind_custom_ticker$setTimeTicker(new DefaultTicker());
+                    ((ITimeOperations) serverWorld).taw$setTimeTicker(new TimeTicker(storage.dayDuration, storage.nightDuration, serverWorld));
+                } else ((ITimeOperations) serverWorld).taw$setTimeTicker(new DefaultTicker());
             }
             for(ServerPlayer player : server.getPlayerList().getPlayers()){
                TimeAndWindCT.sendConfigSyncPacket(player);
@@ -245,7 +248,7 @@ public class TAWCommands {
 
     private static int getTimeChecker(CommandSourceStack source) throws CommandSyntaxException {
         if(TimeAndWindCT.debugMode || source.hasPermission(4) || source.getServer().isSingleplayerOwner(source.getPlayerOrException().getGameProfile())) {
-            Ticker t = ((ITimeOperations) source.getLevel()).time_and_wind_custom_ticker$getTimeTicker();
+            Ticker t = ((ITimeOperations) source.getLevel()).taw$getTimeTicker();
             if(t instanceof TimeTicker ticker) {
                 source.sendSuccess(() -> Component.literal("Day: " + ticker.getDayD() + " Night: " + ticker.getNightD()), false);
                 source.sendSuccess(() -> Component.literal("Day Mod: " + ticker.getDayMod() + " Night Mod: " + ticker.getNightMod()), false);

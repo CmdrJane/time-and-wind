@@ -1,4 +1,4 @@
-package ru.aiefu.timeandwindct.config;
+package aiefu.timeandwind.config;
 
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoField;
@@ -26,7 +26,7 @@ public class SystemTimeConfig {
         return parseTimeZone(timeZone);
     }
 
-    private int parseTime(String s){
+    protected int parseTime(String s){
         try {
             long timeMs;
             int i = s.indexOf(":");
@@ -41,7 +41,7 @@ public class SystemTimeConfig {
             return OffsetDateTime.now().get(ChronoField.OFFSET_SECONDS) * 1000;
         }
     }
-    private int parseTimeZone(String timeZone){
+    protected int parseTimeZone(String timeZone){
         if(timeZone.equalsIgnoreCase("local")){
             return OffsetDateTime.now().get(ChronoField.OFFSET_SECONDS) * 1000;
         } else return parseTime(timeZone);

@@ -1,41 +1,34 @@
 {
-  "schemaVersion": 1,
-  "id": "tawct",
-  "version": "${version}",
-
-  "name": "Time & Wind Custom Ticker",
-  "description": "Control duration of day and night with this mod!",
-  "authors": [
-    "Aiefu"
-  ],
-  "contact": {
-    "homepage": "https://www.curseforge.com/minecraft/mc-mods/time-wind",
-    "sources": "https://github.com/CmdrJane/time-and-wind/tree/1.20"
-  },
-
-  "license": "GPL-v3",
-  "icon": "assets/tawct/icon.png",
-
-  "environment": "*",
-  "entrypoints": {
-    "main": [
-      "ru.aiefu.timeandwindct.TimeAndWindCT"
-    ],
-    "client": [
-      "ru.aiefu.timeandwindct.TimeAndWindCTClient"
-    ]
-  },
-  "mixins": [
-    "tawct.mixins.json"
-  ],
-
-  "depends": {
-    "fabricloader": ">=0.14.21",
-    "fabric": ">=0.83.0",
-    "minecraft": ">=1.20",
-    "java": ">=17"
-  },
-  "suggests": {
-    "another-mod": "*"
-  }
+	"schemaVersion": 1,
+	"id": "time-and-wind",
+	"version": "${version}",
+	"name": "Time and Wind",
+	"description": "This is an example description! Tell everyone what your mod is about!",
+	"authors": [
+		"Me!"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/time-and-wind/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"aiefu.timeandwind.TimeAndWind"
+		]
+	},
+	"mixins": [
+		"time-and-wind.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.16.9",
+		"minecraft": "~1.21.1",
+		"java": ">=21",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
 }

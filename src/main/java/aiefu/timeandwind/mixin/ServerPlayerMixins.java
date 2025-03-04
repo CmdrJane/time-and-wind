@@ -1,5 +1,7 @@
-package ru.aiefu.timeandwindct.mixin;
+package aiefu.timeandwind.mixin;
 
+import aiefu.timeandwind.ITimeOperations;
+import aiefu.timeandwind.TimeAndWind;
 import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Either;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -18,7 +20,6 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import ru.aiefu.timeandwindct.TimeAndWindCT;
 
 import java.util.List;
 
@@ -32,7 +33,7 @@ public abstract class ServerPlayerMixins extends Player{
 
     @Inject(method = "startSleepInBed", at = @At(value = "FIELD", target = "net/minecraft/world/entity/player/Player$BedSleepingProblem.NOT_POSSIBLE_NOW:Lnet/minecraft/world/entity/player/Player$BedSleepingProblem;"), cancellable = true)
     private void patchSleep(BlockPos pos, CallbackInfoReturnable<Either<Player.BedSleepingProblem, Unit>> cir){
-        if(TimeAndWindCT.CONFIG.syncWithSystemTime) cir.setReturnValue(patchSleepMechanics(pos));
+        if(TimeAndWind.config.enableGlobalSystemTime || !((ITimeOperations)this.level()).taw$getTimeTicker().allowSleeping()) cir.setReturnValue(patchSleepMechanics(pos));
     }
 
     @Unique

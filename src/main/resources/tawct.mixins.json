@@ -4,16 +4,17 @@
   "package": "ru.aiefu.timeandwindct.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
-    "DimensionMixins",
-    "PlayerManagerMixins",
-    "PlayerMixins",
-    "ServerPlayerMixins",
-    "ServerWorldMixins",
-    "TimeCommandMixins"
+    "aiefu.timeandwind.mixin.DimensionMixins",
+    "aiefu.timeandwind.mixin.PlayerManagerMixins",
+    "aiefu.timeandwind.mixin.PlayerMixins",
+    "aiefu.timeandwind.mixin.ServerPlayerMixins",
+    "aiefu.timeandwind.mixin.ServerWorldMixins",
+    "aiefu.timeandwind.mixin.TimeCommandMixins"
   ],
   "client": [
-    "ClientWorldMixins",
-    "IntegratedServerMixins"
+    "aiefu.timeandwind.mixin.ClientWorldMixins",
+    "aiefu.timeandwind.mixin.IntegratedServerMixins",
+    "aiefu.timeandwind.mixin.MinecraftMixins"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -1,5 +1,6 @@
-package ru.aiefu.timeandwindct.mixin;
+package aiefu.timeandwind.mixin;
 
+import aiefu.timeandwind.TimeAndWind;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -8,7 +9,6 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import ru.aiefu.timeandwindct.TimeAndWindCT;
 
 import java.util.OptionalLong;
 
@@ -21,7 +21,7 @@ public class DimensionMixins {
 
     @Inject(method = "timeOfDay", at =@At("HEAD"), cancellable = true)
     private void patchSkyAngleTAW(long time, CallbackInfoReturnable<Float> cir){
-        if(TimeAndWindCT.CONFIG.patchSkyAngle && fixedTime.isEmpty()) {
+        if(TimeAndWind.config.patchSkyAngle && fixedTime.isEmpty()) {
             double d = time % 24000L * factor - 0.25D;
             if (d < 0)
                 ++d;

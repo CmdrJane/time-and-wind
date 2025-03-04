@@ -1,0 +1,22 @@
+{
+  "required": true,
+  "package": "aiefu.timeandwind.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "DimensionMixins",
+    "MinecraftServerMixins",
+    "PlayerManagerMixins",
+    "PlayerMixins",
+    "ServerPlayerMixins",
+    "ServerWorldMixins",
+    "TimeCommandMixins"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "client": [
+    "ClientWorldMixins",
+    "IntegratedServerMixins",
+    "MinecraftMixins"
+  ]
+}
